@@ -71,6 +71,7 @@ export function useSessions() {
   }
 
   const loadFromJson = async (jsonData: SessionTemplate[] | ScheduledSession[]) => {
+    const today = new Date().toISOString().split('T')[0] ?? ''
     const newSessions = jsonData.map((item) => {
       if ('id' in item && 'date' in item) {
         return item as ScheduledSession
@@ -78,7 +79,7 @@ export function useSessions() {
       return {
         ...item,
         id: uuidv4(),
-        date: new Date().toISOString().split('T')[0],
+        date: today,
       } as ScheduledSession
     })
 

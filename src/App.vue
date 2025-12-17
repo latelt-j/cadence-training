@@ -235,8 +235,8 @@ const toggleTheme = () => {
 document.documentElement.setAttribute('data-theme', isDarkMode.value ? 'dracula' : 'cupcake')
 
 // Handlers
-const handleImport = (data: (SessionTemplate | ScheduledSession)[]) => {
-  loadFromJson(data)
+const handleImport = async (data: (SessionTemplate | ScheduledSession)[]) => {
+  await loadFromJson(data)
   showImportModal.value = false
 }
 
