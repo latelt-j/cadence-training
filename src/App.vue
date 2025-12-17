@@ -245,20 +245,20 @@ const handleAddSession = (date: string) => {
   showAddModal.value = true
 }
 
-const handleAddSessions = (templates: SessionTemplate[]) => {
-  addSessions(templates, addModalDate.value)
+const handleAddSessions = async (templates: SessionTemplate[]) => {
+  await addSessions(templates, addModalDate.value)
 }
 
-const handleUpdateDate = (sessionId: string, newDate: string) => {
-  updateSessionDate(sessionId, newDate)
+const handleUpdateDate = async (sessionId: string, newDate: string) => {
+  await updateSessionDate(sessionId, newDate)
 }
 
 const handleSelectSession = (session: ScheduledSession) => {
   selectedSession.value = session
 }
 
-const handleDeleteSession = (sessionId: string) => {
-  removeSession(sessionId)
+const handleDeleteSession = async (sessionId: string) => {
+  await removeSession(sessionId)
 }
 
 const handleReset = () => {
