@@ -94,13 +94,13 @@ export function useWeather() {
     // Wind direction is where it comes FROM, arrow shows where it goes TO
     const arrows = ['↓', '↙', '←', '↖', '↑', '↗', '→', '↘']
     const index = Math.round(degrees / 45) % 8
-    return arrows[index]
+    return arrows[index] ?? '→'
   }
 
   const getWindLabel = (degrees: number): string => {
     const labels = ['N', 'NE', 'E', 'SE', 'S', 'SO', 'O', 'NO']
     const index = Math.round(degrees / 45) % 8
-    return labels[index]
+    return labels[index] ?? 'N'
   }
 
   // Try to get user location, fallback to Paris

@@ -14,16 +14,12 @@ import WellnessWidget from './components/WellnessWidget.vue'
 
 const {
   sessions,
-  isLoading: sessionsLoading,
-  isSynced,
-  syncError,
   init: initSessions,
   loadFromJson,
   addSession,
   addSessions,
   updateSessionDate,
   removeSession,
-  upsertSessions,
   downloadJson,
   reset,
   weeklyStats,
@@ -39,7 +35,6 @@ const showStravaDisconnectModal = ref(false)
 const {
   isConnected: stravaConnected,
   isLoading: stravaLoading,
-  error: stravaError,
   authorize: stravaAuthorize,
   handleCallback: stravaHandleCallback,
   fetchActivities,
@@ -116,14 +111,6 @@ const handleSpotlightClick = () => {
   }, 600)
 }
 
-// Test animation on last session
-const testNewAnimation = () => {
-  if (sessions.value.length > 0) {
-    const lastSession = sessions.value[sessions.value.length - 1]
-    showSpotlight(lastSession)
-  }
-}
-
 // Delete all from Google Calendar
 const deleteFromGoogle = async () => {
   showGoogleDeleteModal.value = false
@@ -169,12 +156,15 @@ const syncStrava = async () => {
 
     if (existingIndex !== -1) {
       // Remplacer l'activité existante
-      sessions.value[existingIndex] = {
-        ...session,
-        id: sessions.value[existingIndex].id,
-        date,
-      } as typeof sessions.value[0]
-      updated++
+      const existing = sessions.value[existingIndex]
+      if (existing) {
+        sessions.value[existingIndex] = {
+          ...session,
+          id: existing.id,
+          date,
+        } as typeof sessions.value[0]
+        updated++
+      }
     } else {
       // Supprimer les séances prévues pour ce jour
       const plannedOnSameDay = sessions.value.filter(
@@ -188,8 +178,10 @@ const syncStrava = async () => {
       // Nouvelle activité
       addSession(session, date)
       // Get the ID of the newly added session (last one)
-      const newId = sessions.value[sessions.value.length - 1].id
-      newIds.push(newId)
+      const lastSession = sessions.value[sessions.value.length - 1]
+      if (lastSession) {
+        newIds.push(lastSession.id)
+      }
       added++
     }
   })

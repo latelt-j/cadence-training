@@ -80,7 +80,7 @@ const sessionsByDate = computed(() => {
   const map: Record<string, ScheduledSession[]> = {}
   props.sessions.forEach(session => {
     if (!map[session.date]) map[session.date] = []
-    map[session.date].push(session)
+    map[session.date]!.push(session)
   })
   return map
 })

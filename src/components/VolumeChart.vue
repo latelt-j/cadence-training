@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { Bar } from 'vue-chartjs'
 import {
   Chart as ChartJS,
@@ -145,11 +145,11 @@ const chartOptions = computed(() => ({
     },
     tooltip: {
       callbacks: {
-        label: (ctx: { dataset: { label: string }; parsed: { y: number } }) => {
+        label: (ctx: any) => {
           const totalMinutes = Math.round(ctx.parsed.y * 60)
           const hours = Math.floor(totalMinutes / 60)
           const minutes = totalMinutes % 60
-          return `${ctx.dataset.label}: ${hours}h${minutes.toString().padStart(2, '0')}`
+          return `${ctx.dataset.label || ''}: ${hours}h${minutes.toString().padStart(2, '0')}`
         },
       },
     },

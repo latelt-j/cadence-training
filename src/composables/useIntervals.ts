@@ -80,8 +80,8 @@ export function useIntervals() {
   }
 
   const fetchWellnessRange = async (days: number = 42): Promise<WellnessData[]> => {
-    const endDate = new Date().toISOString().split('T')[0]
-    const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    const endDate = new Date().toISOString().split('T')[0] ?? ''
+    const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split('T')[0] ?? ''
 
     return fetchWellness(startDate, endDate)
   }
