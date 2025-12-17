@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(brew install:*)",
+      "Bash(supabase init:*)",
+      "Bash(supabase login:*)",
+      "Bash(npm run build:*)"
+    ]
+  }
+}

@@ -1,0 +1,75 @@
+[
+  {
+    "sport": "cycling",
+    "type": "sweet_spot",
+    "title": "Sweet Spot Builder",
+    "duration_min": 60,
+    "description": "Travail sous le seuil pour bâtir la résistance sans trop de fatigue.",
+    "structure": [
+      { "phase": "warmup", "min": 10, "ftp_pct": [50, 65] },
+      { "phase": "work", "reps": 1, "min": 15, "ftp_pct": [88, 94] },
+      { "phase": "rest", "min": 5, "ftp_pct": [55, 60] },
+      { "phase": "work", "reps": 1, "min": 15, "ftp_pct": [88, 94] },
+      { "phase": "cooldown", "min": 15, "ftp_pct": [50, 60] }
+    ]
+  },
+  {
+    "sport": "cycling",
+    "type": "threshold",
+    "title": "FTP Maintenance",
+    "duration_min": 45,
+    "description": "Maintien du seuil avec un volume réduit pour ne pas impacter la CAP.",
+    "structure": [
+      { "phase": "warmup", "min": 10, "ftp_pct": [50, 70] },
+      { "phase": "work", "reps": 2, "min": 10, "ftp_pct": [95, 100] },
+      { "phase": "rest", "min": 5, "ftp_pct": [50, 55] },
+      { "phase": "cooldown", "min": 10, "ftp_pct": [50, 60] }
+    ]
+  },
+  {
+    "sport": "cycling",
+    "type": "endurance",
+    "title": "Long Ride Z2",
+    "duration_min": 90,
+    "description": "Volume fondamental. Pas de sprints, juste des kilomètres.",
+    "structure": [
+      { "phase": "warmup", "min": 10, "ftp_pct": [50, 60] },
+      { "phase": "work", "reps": 1, "min": 70, "ftp_pct": [65, 75] },
+      { "phase": "cooldown", "min": 10, "ftp_pct": [50, 60] }
+    ]
+  },
+  {
+    "sport": "running",
+    "type": "endurance_z2",
+    "title": "Footing Z2 Standard",
+    "duration_min": 50,
+    "description": "Endurance fondamentale pure. Discussion possible tout le long.",
+    "structure": [
+      { "phase": "warmup", "min": 5, "hr_max_pct": [50, 60] },
+      { "phase": "work", "reps": 1, "min": 40, "hr_max_pct": [65, 75] },
+      { "phase": "cooldown", "min": 5, "hr_max_pct": [50, 60] }
+    ]
+  },
+  {
+    "sport": "running",
+    "type": "hilly_aerobic",
+    "title": "Footing Vallonné",
+    "duration_min": 45,
+    "description": "Renforcement naturel grâce au dénivelé, mais effort contrôlé.",
+    "structure": [
+      { "phase": "warmup", "min": 10, "hr_max_pct": [60, 70] },
+      { "phase": "work", "reps": 1, "min": 30, "hr_max_pct": [70, 80], "terrain": "hilly" },
+      { "phase": "cooldown", "min": 5, "hr_max_pct": [50, 60] }
+    ]
+  },
+  {
+    "sport": "running",
+    "type": "recovery",
+    "title": "Récupération Active",
+    "duration_min": 30,
+    "description": "Footing très lent pour faire circuler le sang. Optionnel.",
+    "structure": [
+      { "phase": "work", "reps": 1, "min": 30, "hr_max_pct": [50, 65] }
+    ]
+  }
+]
