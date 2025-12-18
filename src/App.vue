@@ -180,7 +180,14 @@ const copySessionForCoach = async (s: ScheduledSession) => {
       })
     }
 
-    text += `\n\n---\nMerci d'analyser cette séance et de me donner ton feedback sur la charge, l'intensité et les points d'amélioration.`
+    text += `\n\n---
+**Format de réponse demandé (pour copier dans mon suivi) :**
+Réponds avec ce format concis en 4-5 lignes max :
+
+⚡ **Charge:** [Légère/Modérée/Intense] - [commentaire bref]
+✅ **Points positifs:** [1-2 points]
+⚠️ **À améliorer:** [1-2 points]
+💡 **Conseil:** [1 conseil actionnable pour la prochaine séance]`
 
     await navigator.clipboard.writeText(text)
   } catch (err) {
