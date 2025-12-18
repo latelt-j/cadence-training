@@ -91,64 +91,64 @@ const strengthProgress = computed(() => getSportProgress(props.stats.strength.pl
 
       <div class="grid grid-cols-3 gap-4 mt-4">
         <!-- Cycling Stats -->
-        <div class="stat bg-success/10 rounded-box p-3 relative overflow-hidden h-[120px]">
+        <div class="bg-success/10 rounded-box relative overflow-hidden h-[120px]">
           <!-- Progress background -->
           <div
             class="absolute inset-0 bg-success/20 transition-all duration-500"
             :style="{ width: `${cyclingProgress}%` }"
           ></div>
-          <div class="relative flex flex-col h-full">
-            <div class="stat-figure text-success">
-              <span class="text-2xl">🚴</span>
+          <div class="relative flex flex-col h-full p-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs opacity-70">Vélo</span>
+              <span class="text-lg">🚴</span>
             </div>
-            <div class="stat-title text-xs">Vélo</div>
-            <div class="stat-value text-success text-xl">{{ formatHours(stats.cycling.hours) }}</div>
-            <div class="stat-desc text-xs">
+            <div class="text-success text-2xl font-bold">{{ formatHours(stats.cycling.hours) }}</div>
+            <div class="text-xs opacity-70">
               ~{{ formatKm(stats.cycling.km) }} km • {{ formatElevation(stats.cycling.elevation) }} D+
             </div>
-            <div v-if="stats.cycling.planned + stats.cycling.accomplished > 0" class="text-xs text-success/70 mt-auto">
+            <div v-if="stats.cycling.planned + stats.cycling.accomplished > 0" class="text-xs text-success/70 mt-auto pt-1">
               {{ cyclingProgress }}% accompli
             </div>
           </div>
         </div>
 
         <!-- Running Stats -->
-        <div class="stat bg-warning/10 rounded-box p-3 relative overflow-hidden h-[120px]">
+        <div class="bg-warning/10 rounded-box relative overflow-hidden h-[120px]">
           <!-- Progress background -->
           <div
             class="absolute inset-0 bg-warning/20 transition-all duration-500"
             :style="{ width: `${runningProgress}%` }"
           ></div>
-          <div class="relative flex flex-col h-full">
-            <div class="stat-figure text-warning">
-              <span class="text-2xl">🏃</span>
+          <div class="relative flex flex-col h-full p-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs opacity-70">Course</span>
+              <span class="text-lg">🏃</span>
             </div>
-            <div class="stat-title text-xs">Course</div>
-            <div class="stat-value text-warning text-xl">{{ formatHours(stats.running.hours) }}</div>
-            <div class="stat-desc text-xs">
+            <div class="text-warning text-2xl font-bold">{{ formatHours(stats.running.hours) }}</div>
+            <div class="text-xs opacity-70">
               ~{{ formatKm(stats.running.km) }} km • {{ formatElevation(stats.running.elevation) }} D+
             </div>
-            <div v-if="stats.running.planned + stats.running.accomplished > 0" class="text-xs text-warning/70 mt-auto">
+            <div v-if="stats.running.planned + stats.running.accomplished > 0" class="text-xs text-warning/70 mt-auto pt-1">
               {{ runningProgress }}% accompli
             </div>
           </div>
         </div>
 
         <!-- Strength Stats -->
-        <div class="stat bg-error/10 rounded-box p-3 relative overflow-hidden h-[120px]">
+        <div class="bg-error/10 rounded-box relative overflow-hidden h-[120px]">
           <!-- Progress background -->
           <div
             class="absolute inset-0 bg-error/20 transition-all duration-500"
             :style="{ width: `${strengthProgress}%` }"
           ></div>
-          <div class="relative flex flex-col h-full">
-            <div class="stat-figure text-error">
-              <span class="text-2xl">💪</span>
+          <div class="relative flex flex-col h-full p-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs opacity-70">Renfo</span>
+              <span class="text-lg">💪</span>
             </div>
-            <div class="stat-title text-xs">Renfo</div>
-            <div class="stat-value text-error text-xl">{{ formatHours(stats.strength.hours) }}</div>
-            <div class="stat-desc text-xs">&nbsp;</div>
-            <div v-if="stats.strength.planned + stats.strength.accomplished > 0" class="text-xs text-error/70 mt-auto">
+            <div class="text-error text-2xl font-bold">{{ formatHours(stats.strength.hours) }}</div>
+            <div class="text-xs opacity-70">&nbsp;</div>
+            <div v-if="stats.strength.planned + stats.strength.accomplished > 0" class="text-xs text-error/70 mt-auto pt-1">
               {{ strengthProgress }}% accompli
             </div>
           </div>
