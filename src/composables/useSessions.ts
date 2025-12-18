@@ -44,8 +44,10 @@ export function useSessions() {
   const syncFromSupabase = async () => {
     isLoading.value = true
     syncError.value = null
+    console.log('Syncing from Supabase...')
     try {
       const dbSessions = await fetchSessions()
+      console.log('Fetched sessions from Supabase:', dbSessions)
       sessions.value = dbSessions
       // Update local cache
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dbSessions))
@@ -122,16 +124,19 @@ export function useSessions() {
       date,
     }
 
+    console.log('Adding session:', newSession)
+
     // Optimistic update
     sessions.value.push(newSession)
     saveToCache()
 
     // Sync to Supabase
     try {
-      await dbCreateSession(newSession)
+      console.log('Syncing to Supabase...')
+      const result = await dbCreateSession(newSession)
+      console.log('Supabase result:', result)
     } catch (error) {
       console.error('Error creating session in Supabase:', error)
-      // Revert on error? For now keep local
     }
 
     return newSession
@@ -144,13 +149,17 @@ export function useSessions() {
       date,
     }))
 
+    console.log('Adding sessions:', newSessions)
+
     // Optimistic update
     sessions.value.push(...newSessions)
     saveToCache()
 
     // Sync to Supabase
     try {
-      await dbUpsertSessions(newSessions)
+      console.log('Syncing sessions to Supabase...')
+      const result = await dbUpsertSessions(newSessions)
+      console.log('Supabase upsert result:', result)
     } catch (error) {
       console.error('Error creating sessions in Supabase:', error)
     }
