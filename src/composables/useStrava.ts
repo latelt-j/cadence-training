@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import type { SessionTemplate, Sport } from '../types/session'
+import type { SessionTemplate, Sport, StravaLap } from '../types/session'
 
 const STRAVA_CLIENT_ID = import.meta.env.VITE_STRAVA_CLIENT_ID || '118625'
 const REDIRECT_URI = window.location.origin
@@ -22,6 +22,27 @@ interface StravaActivity {
   moving_time: number // seconds
   distance: number // meters
   total_elevation_gain: number
+  average_heartrate?: number
+  max_heartrate?: number
+  average_watts?: number
+  max_watts?: number
+  average_cadence?: number
+}
+
+interface StravaDetailedActivity extends StravaActivity {
+  laps?: {
+    name: string
+    elapsed_time: number
+    moving_time: number
+    distance: number
+    average_speed: number
+    max_speed: number
+    average_heartrate?: number
+    max_heartrate?: number
+    average_watts?: number
+    average_cadence?: number
+    total_elevation_gain?: number
+  }[]
 }
 
 const tokens = ref<StravaTokens | null>(null)
@@ -175,6 +196,55 @@ export function useStrava() {
     }
   }
 
+  const fetchActivityDetail = async (activityId: number): Promise<StravaDetailedActivity | null> => {
+    try {
+      const accessToken = await getValidToken()
+      if (!accessToken) return null
+
+      const response = await fetch(
+        `https://www.strava.com/api/v3/activities/${activityId}`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      )
+
+      if (!response.ok) return null
+
+      return await response.json()
+    } catch {
+      return null
+    }
+  }
+
+  const fetchActivitiesWithDetails = async (days: number = 7): Promise<StravaDetailedActivity[]> => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      const activities = await fetchActivities(days)
+
+      // Fetch details for each activity (with laps)
+      const detailedActivities: StravaDetailedActivity[] = []
+
+      for (const activity of activities) {
+        const detail = await fetchActivityDetail(activity.id)
+        if (detail) {
+          detailedActivities.push(detail)
+        } else {
+          // Fallback to basic activity if detail fetch fails
+          detailedActivities.push(activity as StravaDetailedActivity)
+        }
+      }
+
+      return detailedActivities
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Erreur inconnue'
+      return []
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const mapStravaToSport = (activity: StravaActivity): Sport | null => {
     const type = activity.sport_type || activity.type
     const cyclingTypes = ['Ride', 'VirtualRide', 'MountainBikeRide', 'GravelRide', 'EBikeRide']
@@ -188,7 +258,7 @@ export function useStrava() {
     return null
   }
 
-  const convertToSessions = (activities: StravaActivity[]): { session: SessionTemplate; date: string }[] => {
+  const convertToSessions = (activities: StravaDetailedActivity[]): { session: SessionTemplate; date: string }[] => {
     return activities
       .map((activity) => {
         const sport = mapStravaToSport(activity)
@@ -197,6 +267,21 @@ export function useStrava() {
         const durationMin = Math.round(activity.moving_time / 60)
         const distanceKm = Math.round(activity.distance / 1000 * 10) / 10
         const date = activity.start_date_local.split('T')[0]
+
+        // Convert Strava laps to our format
+        const laps: StravaLap[] = activity.laps?.map(lap => ({
+          name: lap.name,
+          elapsed_time: lap.elapsed_time,
+          moving_time: lap.moving_time,
+          distance: lap.distance,
+          average_speed: lap.average_speed,
+          max_speed: lap.max_speed,
+          average_heartrate: lap.average_heartrate,
+          max_heartrate: lap.max_heartrate,
+          average_watts: lap.average_watts,
+          average_cadence: lap.average_cadence,
+          total_elevation_gain: lap.total_elevation_gain,
+        })) || []
 
         const session: SessionTemplate = {
           sport,
@@ -207,6 +292,13 @@ export function useStrava() {
           structure: [],
           actual_km: distanceKm,
           actual_elevation: activity.total_elevation_gain ? Math.round(activity.total_elevation_gain) : 0,
+          strava_id: activity.id,
+          laps: laps.length > 0 ? laps : undefined,
+          average_heartrate: activity.average_heartrate,
+          max_heartrate: activity.max_heartrate,
+          average_watts: activity.average_watts,
+          max_watts: activity.max_watts,
+          average_cadence: activity.average_cadence,
         }
 
         return { session, date }
@@ -225,6 +317,7 @@ export function useStrava() {
     authorize,
     handleCallback,
     fetchActivities,
+    fetchActivitiesWithDetails,
     convertToSessions,
     disconnect,
   }

@@ -16,6 +16,14 @@ CREATE TABLE sessions (
   structure JSONB DEFAULT '[]'::jsonb,
   actual_km DECIMAL(10,2),
   actual_elevation INTEGER,
+  -- Strava detailed data
+  strava_id BIGINT UNIQUE,
+  laps JSONB DEFAULT '[]'::jsonb,
+  average_heartrate INTEGER,
+  max_heartrate INTEGER,
+  average_watts INTEGER,
+  max_watts INTEGER,
+  average_cadence INTEGER,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -76,3 +84,15 @@ CREATE TRIGGER oauth_tokens_updated_at
 ALTER TABLE sessions DISABLE ROW LEVEL SECURITY;
 ALTER TABLE user_settings DISABLE ROW LEVEL SECURITY;
 ALTER TABLE oauth_tokens DISABLE ROW LEVEL SECURITY;
+
+-- =============================================
+-- MIGRATION: Add Strava detailed data columns
+-- Run this if you already have the sessions table
+-- =============================================
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS strava_id BIGINT UNIQUE;
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS laps JSONB DEFAULT '[]'::jsonb;
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS average_heartrate INTEGER;
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS max_heartrate INTEGER;
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS average_watts INTEGER;
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS max_watts INTEGER;
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS average_cadence INTEGER;

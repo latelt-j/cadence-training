@@ -30,6 +30,24 @@ const formatDuration = (min: number) => {
   return `${h}h${m.toString().padStart(2, '0')}`
 }
 
+const formatLapDuration = (seconds: number): string => {
+  const min = Math.floor(seconds / 60)
+  const sec = seconds % 60
+  return `${min}'${sec.toString().padStart(2, '0')}"`
+}
+
+const formatSpeed = (metersPerSec: number, sport: string): string => {
+  const kmh = metersPerSec * 3.6
+  if (sport === 'running') {
+    // Convert to pace min/km
+    const paceMinPerKm = 60 / kmh
+    const paceMin = Math.floor(paceMinPerKm)
+    const paceSec = Math.round((paceMinPerKm - paceMin) * 60)
+    return `${paceMin}'${paceSec.toString().padStart(2, '0')}"/km`
+  }
+  return `${kmh.toFixed(1)} km/h`
+}
+
 const generateAnalysisText = (): string => {
   if (!props.session) return ''
 
@@ -64,10 +82,44 @@ const generateAnalysisText = (): string => {
     }
   }
 
+  // Heart rate data
+  if (s.average_heartrate || s.max_heartrate) {
+    text += `\n\n**Fréquence cardiaque:**`
+    if (s.average_heartrate) text += `\n- Moyenne: ${Math.round(s.average_heartrate)} bpm`
+    if (s.max_heartrate) text += `\n- Max: ${Math.round(s.max_heartrate)} bpm`
+  }
+
+  // Power data
+  if (s.average_watts || s.max_watts) {
+    text += `\n\n**Puissance:**`
+    if (s.average_watts) text += `\n- Moyenne: ${Math.round(s.average_watts)} W`
+    if (s.max_watts) text += `\n- Max: ${Math.round(s.max_watts)} W`
+  }
+
+  // Cadence
+  if (s.average_cadence) {
+    text += `\n**Cadence moyenne:** ${Math.round(s.average_cadence)} ${s.sport === 'running' ? 'ppm' : 'rpm'}`
+  }
+
   if (s.description) {
     text += `\n\n**Description:**\n${s.description}`
   }
 
+  // Laps / Intervals from Strava
+  if (s.laps && s.laps.length > 0) {
+    text += `\n\n**Intervalles/Tours (${s.laps.length}):**`
+    s.laps.forEach((lap, i) => {
+      const distKm = (lap.distance / 1000).toFixed(2)
+      let lapText = `\n${i + 1}. ${lap.name} - ${formatLapDuration(lap.moving_time)}, ${distKm} km`
+      lapText += `, ${formatSpeed(lap.average_speed, s.sport)}`
+      if (lap.average_heartrate) lapText += `, ${Math.round(lap.average_heartrate)} bpm`
+      if (lap.average_watts) lapText += `, ${Math.round(lap.average_watts)} W`
+      if (lap.total_elevation_gain) lapText += `, ${Math.round(lap.total_elevation_gain)}m D+`
+      text += lapText
+    })
+  }
+
+  // Structure for planned sessions
   if (s.structure && s.structure.length > 0) {
     text += `\n\n**Structure de la séance:**`
     s.structure.forEach((phase, i) => {
@@ -125,7 +177,62 @@ const handleDelete = () => {
 
         <p class="text-base-content/80">{{ session.description }}</p>
 
-        <div class="collapse collapse-arrow bg-base-200">
+        <!-- Strava stats -->
+        <div v-if="session.average_heartrate || session.average_watts" class="flex flex-wrap gap-2">
+          <div v-if="session.average_heartrate" class="badge badge-error gap-1">
+            <span>❤️</span> {{ Math.round(session.average_heartrate) }} bpm
+          </div>
+          <div v-if="session.max_heartrate" class="badge badge-error badge-outline gap-1">
+            max {{ session.max_heartrate }} bpm
+          </div>
+          <div v-if="session.average_watts" class="badge badge-warning gap-1">
+            <span>⚡</span> {{ Math.round(session.average_watts) }} W
+          </div>
+          <div v-if="session.average_cadence" class="badge badge-info gap-1">
+            {{ Math.round(session.average_cadence) }} {{ session.sport === 'running' ? 'ppm' : 'rpm' }}
+          </div>
+        </div>
+
+        <!-- Laps / Intervals -->
+        <div v-if="session.laps && session.laps.length > 0" class="collapse collapse-arrow bg-base-200">
+          <input type="checkbox" checked />
+          <div class="collapse-title font-medium">Intervalles ({{ session.laps.length }} tours)</div>
+          <div class="collapse-content">
+            <div class="overflow-x-auto">
+              <table class="table table-xs">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Nom</th>
+                    <th>Durée</th>
+                    <th>Dist.</th>
+                    <th>Vitesse</th>
+                    <th v-if="session.laps.some(l => l.average_heartrate)">FC</th>
+                    <th v-if="session.laps.some(l => l.average_watts)">Watts</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(lap, i) in session.laps" :key="i" class="hover">
+                    <td class="font-mono">{{ i + 1 }}</td>
+                    <td class="truncate max-w-24">{{ lap.name }}</td>
+                    <td class="font-mono">{{ formatLapDuration(lap.moving_time) }}</td>
+                    <td class="font-mono">{{ (lap.distance / 1000).toFixed(2) }}</td>
+                    <td class="font-mono">{{ formatSpeed(lap.average_speed, session.sport) }}</td>
+                    <td v-if="session.laps.some(l => l.average_heartrate)" class="font-mono text-error">
+                      {{ lap.average_heartrate ? Math.round(lap.average_heartrate) : '-' }}
+                    </td>
+                    <td v-if="session.laps.some(l => l.average_watts)" class="font-mono text-warning">
+                      {{ lap.average_watts ? Math.round(lap.average_watts) : '-' }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Structure for planned sessions -->
+        <div v-if="session.structure && session.structure.length > 0" class="collapse collapse-arrow bg-base-200">
           <input type="checkbox" />
           <div class="collapse-title font-medium">Structure de la séance</div>
           <div class="collapse-content">

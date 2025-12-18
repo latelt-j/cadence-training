@@ -37,7 +37,7 @@ const {
   isLoading: stravaLoading,
   authorize: stravaAuthorize,
   handleCallback: stravaHandleCallback,
-  fetchActivities,
+  fetchActivitiesWithDetails,
   convertToSessions,
   disconnect: stravaDisconnect,
 } = useStrava()
@@ -140,7 +140,7 @@ onMounted(async () => {
 
 // Strava sync
 const syncStrava = async () => {
-  const activities = await fetchActivities(30) // 30 derniers jours
+  const activities = await fetchActivitiesWithDetails(30) // 30 derniers jours
   const sessionsToAdd = convertToSessions(activities)
 
   let added = 0

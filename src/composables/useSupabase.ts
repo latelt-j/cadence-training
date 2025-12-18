@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { ref } from 'vue'
-import type { ScheduledSession, StructurePhase } from '../types/session'
+import type { ScheduledSession, StructurePhase, StravaLap } from '../types/session'
 
 // Database types
 interface DbSession {
@@ -14,6 +14,14 @@ interface DbSession {
   structure: StructurePhase[]
   actual_km: number | null
   actual_elevation: number | null
+  // Strava detailed data
+  strava_id: number | null
+  laps: StravaLap[] | null
+  average_heartrate: number | null
+  max_heartrate: number | null
+  average_watts: number | null
+  max_watts: number | null
+  average_cadence: number | null
   created_at: string
   updated_at: string
 }
@@ -270,6 +278,13 @@ export function useSupabase() {
     structure: db.structure || [],
     ...(db.actual_km !== null && { actual_km: db.actual_km }),
     ...(db.actual_elevation !== null && { actual_elevation: db.actual_elevation }),
+    ...(db.strava_id !== null && { strava_id: db.strava_id }),
+    ...(db.laps && db.laps.length > 0 && { laps: db.laps }),
+    ...(db.average_heartrate !== null && { average_heartrate: db.average_heartrate }),
+    ...(db.max_heartrate !== null && { max_heartrate: db.max_heartrate }),
+    ...(db.average_watts !== null && { average_watts: db.average_watts }),
+    ...(db.max_watts !== null && { max_watts: db.max_watts }),
+    ...(db.average_cadence !== null && { average_cadence: db.average_cadence }),
   })
 
   const sessionToDb = (session: ScheduledSession): Omit<DbSession, 'created_at' | 'updated_at'> => ({
@@ -283,6 +298,13 @@ export function useSupabase() {
     structure: session.structure || [],
     actual_km: session.actual_km ?? null,
     actual_elevation: session.actual_elevation ?? null,
+    strava_id: session.strava_id ?? null,
+    laps: session.laps ?? null,
+    average_heartrate: session.average_heartrate ?? null,
+    max_heartrate: session.max_heartrate ?? null,
+    average_watts: session.average_watts ?? null,
+    max_watts: session.max_watts ?? null,
+    average_cadence: session.average_cadence ?? null,
   })
 
   return {

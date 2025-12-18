@@ -9,6 +9,21 @@ export interface StructurePhase {
   terrain?: string
 }
 
+// Strava lap data
+export interface StravaLap {
+  name: string
+  elapsed_time: number // seconds
+  moving_time: number // seconds
+  distance: number // meters
+  average_speed: number // m/s
+  max_speed: number // m/s
+  average_heartrate?: number
+  max_heartrate?: number
+  average_watts?: number
+  average_cadence?: number
+  total_elevation_gain?: number
+}
+
 export interface SessionTemplate {
   sport: Sport
   type: string
@@ -19,6 +34,14 @@ export interface SessionTemplate {
   // Données réelles (optionnel, ex: depuis Strava)
   actual_km?: number
   actual_elevation?: number
+  // Strava detailed data
+  strava_id?: number
+  laps?: StravaLap[]
+  average_heartrate?: number
+  max_heartrate?: number
+  average_watts?: number
+  max_watts?: number
+  average_cadence?: number
 }
 
 export interface ScheduledSession extends SessionTemplate {
