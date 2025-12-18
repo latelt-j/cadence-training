@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import type { ScheduledSession } from '../types/session'
 import { SPORT_CONFIG } from '../types/session'
 
@@ -10,6 +11,8 @@ const emit = defineEmits<{
   close: []
   delete: [sessionId: string]
 }>()
+
+const copied = ref(false)
 
 const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString('fr-FR', {
@@ -25,6 +28,74 @@ const formatDuration = (min: number) => {
   if (h === 0) return `${m} min`
   if (m === 0) return `${h}h`
   return `${h}h${m.toString().padStart(2, '0')}`
+}
+
+const generateAnalysisText = (): string => {
+  if (!props.session) return ''
+
+  const s = props.session
+  const sportName = s.sport === 'cycling' ? 'Vélo' : s.sport === 'running' ? 'Course à pied' : 'Renforcement'
+
+  let text = `## Séance d'entraînement à analyser
+
+**Sport:** ${sportName}
+**Titre:** ${s.title}
+**Date:** ${formatDate(s.date)}
+**Durée:** ${formatDuration(s.duration_min)}`
+
+  if (s.actual_km) {
+    text += `\n**Distance:** ${s.actual_km} km`
+  }
+
+  if (s.actual_elevation) {
+    text += `\n**Dénivelé:** ${s.actual_elevation} m D+`
+  }
+
+  // Calculate average speed for cycling/running
+  if (s.actual_km && s.duration_min > 0) {
+    const hours = s.duration_min / 60
+    const avgSpeed = (s.actual_km / hours).toFixed(1)
+    if (s.sport === 'cycling') {
+      text += `\n**Vitesse moyenne:** ${avgSpeed} km/h`
+    } else if (s.sport === 'running') {
+      const paceMin = Math.floor(60 / parseFloat(avgSpeed))
+      const paceSec = Math.round((60 / parseFloat(avgSpeed) - paceMin) * 60)
+      text += `\n**Allure moyenne:** ${paceMin}'${paceSec.toString().padStart(2, '0')}" /km`
+    }
+  }
+
+  if (s.description) {
+    text += `\n\n**Description:**\n${s.description}`
+  }
+
+  if (s.structure && s.structure.length > 0) {
+    text += `\n\n**Structure de la séance:**`
+    s.structure.forEach((phase, i) => {
+      let phaseText = `\n${i + 1}. ${phase.phase} - ${phase.min} min`
+      if (phase.reps && phase.reps > 1) {
+        phaseText += ` (x${phase.reps})`
+      }
+      if (phase.ftp_pct) {
+        phaseText += ` @ ${phase.ftp_pct[0]}-${phase.ftp_pct[1]}% FTP`
+      } else if (phase.hr_max_pct) {
+        phaseText += ` @ ${phase.hr_max_pct[0]}-${phase.hr_max_pct[1]}% FCmax`
+      }
+      text += phaseText
+    })
+  }
+
+  text += `\n\n---\nMerci d'analyser cette séance et de me donner ton feedback sur la charge, l'intensité et les points d'amélioration.`
+
+  return text
+}
+
+const copyForAnalysis = async () => {
+  const text = generateAnalysisText()
+  await navigator.clipboard.writeText(text)
+  copied.value = true
+  setTimeout(() => {
+    copied.value = false
+  }, 2000)
 }
 
 const handleDelete = () => {
@@ -86,7 +157,14 @@ const handleDelete = () => {
         </div>
       </div>
 
-      <div class="modal-action">
+      <div class="modal-action flex-wrap gap-2">
+        <button
+          class="btn btn-outline"
+          :class="copied ? 'btn-success' : 'btn-primary'"
+          @click="copyForAnalysis"
+        >
+          {{ copied ? '✓ Copié !' : '📋 Copier pour coach' }}
+        </button>
         <button class="btn btn-error btn-outline" @click="handleDelete">
           🗑️ Supprimer
         </button>
