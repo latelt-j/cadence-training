@@ -216,12 +216,17 @@ export function useStrava() {
     }
   }
 
-  const fetchActivitiesWithDetails = async (days: number = 7): Promise<StravaDetailedActivity[]> => {
+  // Fetch details for specific activities (or all if not specified)
+  const fetchActivitiesWithDetails = async (
+    days: number = 7,
+    activitiesToFetch?: StravaActivity[]
+  ): Promise<StravaDetailedActivity[]> => {
     isLoading.value = true
     error.value = null
 
     try {
-      const activities = await fetchActivities(days)
+      // Use provided activities or fetch all
+      const activities = activitiesToFetch ?? await fetchActivities(days)
 
       // Fetch details for each activity (with laps)
       const detailedActivities: StravaDetailedActivity[] = []
@@ -317,6 +322,7 @@ export function useStrava() {
     authorize,
     handleCallback,
     fetchActivities,
+    fetchActivityDetail,
     fetchActivitiesWithDetails,
     convertToSessions,
     disconnect,

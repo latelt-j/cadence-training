@@ -37,6 +37,7 @@ const {
   isLoading: stravaLoading,
   authorize: stravaAuthorize,
   handleCallback: stravaHandleCallback,
+  fetchActivities,
   fetchActivitiesWithDetails,
   convertToSessions,
   disconnect: stravaDisconnect,
@@ -59,17 +60,21 @@ const showGoogleDeleteModal = ref(false)
 // Track new sessions for animation
 const newSessionIds = ref<Set<string>>(new Set())
 const spotlightSession = ref<ScheduledSession | null>(null)
-const spotlightCardRef = ref<HTMLElement | null>(null)
-const spotlightCopied = ref(false)
+const toastMessage = ref<string | null>(null)
 
 // Show spotlight for new session
 const showSpotlight = (session: ScheduledSession) => {
   spotlightSession.value = session
-  spotlightCopied.value = false
   newSessionIds.value = new Set([session.id])
 }
 
-const closeSpotlight = () => {
+const closeSpotlight = async () => {
+  // Copy session data before closing
+  if (spotlightSession.value) {
+    await copySessionForCoach(spotlightSession.value)
+    showToast('Séance copiée ! Envoie-la à ton coach 🏋️')
+  }
+
   spotlightSession.value = null
   // Keep the calendar glow for a bit longer
   setTimeout(() => {
@@ -77,27 +82,11 @@ const closeSpotlight = () => {
   }, 3000)
 }
 
-// 3D hover effect
-const handleSpotlightMouseMove = (e: MouseEvent) => {
-  const card = spotlightCardRef.value
-  if (!card) return
-
-  const rect = card.getBoundingClientRect()
-  const x = e.clientX - rect.left
-  const y = e.clientY - rect.top
-  const centerX = rect.width / 2
-  const centerY = rect.height / 2
-
-  const rotateX = ((y - centerY) / centerY) * -15
-  const rotateY = ((x - centerX) / centerX) * 15
-
-  card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`
-}
-
-const handleSpotlightMouseLeave = () => {
-  const card = spotlightCardRef.value
-  if (!card) return
-  card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)'
+const showToast = (message: string) => {
+  toastMessage.value = message
+  setTimeout(() => {
+    toastMessage.value = null
+  }, 3000)
 }
 
 // Copy spotlight session for coach analysis
@@ -134,14 +123,8 @@ const formatSpeed = (metersPerSec: number, sport: string): string => {
   return `${kmh.toFixed(1)} km/h`
 }
 
-const copySpotlightForAnalysis = async () => {
-  if (!spotlightSession.value) {
-    console.error('No spotlight session')
-    return
-  }
-
+const copySessionForCoach = async (s: ScheduledSession) => {
   try {
-    const s = spotlightSession.value
     const sportName = s.sport === 'cycling' ? 'Vélo' : s.sport === 'running' ? 'Course à pied' : 'Renforcement'
 
     let text = `## Séance d'entraînement à analyser
@@ -200,10 +183,8 @@ const copySpotlightForAnalysis = async () => {
     text += `\n\n---\nMerci d'analyser cette séance et de me donner ton feedback sur la charge, l'intensité et les points d'amélioration.`
 
     await navigator.clipboard.writeText(text)
-    spotlightCopied.value = true
   } catch (err) {
     console.error('Copy failed:', err)
-    alert('Erreur lors de la copie')
   }
 }
 
@@ -238,53 +219,55 @@ onMounted(async () => {
   }
 })
 
-// Strava sync
+// Strava sync - only fetch details for NEW activities
 const syncStrava = async () => {
-  const activities = await fetchActivitiesWithDetails(30) // 30 derniers jours
-  const sessionsToAdd = convertToSessions(activities)
+  // First, get basic activity list (1 API call)
+  const basicActivities = await fetchActivities(30)
+
+  // Filter to only new activities (not already in sessions)
+  const existingKeys = new Set(
+    sessions.value
+      .filter(s => s.type === 'strava')
+      .map(s => `${s.title}-${s.date}`)
+  )
+
+  const newActivities = basicActivities.filter(activity => {
+    const date = activity.start_date_local.split('T')[0]
+    const key = `${activity.name}-${date}`
+    return !existingKeys.has(key)
+  })
+
+  // Only fetch detailed data for new activities (no unnecessary API calls)
+  if (newActivities.length === 0) {
+    alert('Aucune nouvelle activité')
+    return
+  }
+
+  const detailedActivities = await fetchActivitiesWithDetails(30, newActivities)
+  const sessionsToAdd = convertToSessions(detailedActivities)
 
   let added = 0
-  let updated = 0
   let removedPlanned = 0
   const newIds: string[] = []
 
-  sessionsToAdd.forEach(({ session, date }) => {
-    const key = `${session.title}-${date}`
-    const existingIndex = sessions.value.findIndex(
-      s => `${s.title}-${s.date}` === key
+  for (const { session, date } of sessionsToAdd) {
+    // Supprimer les séances prévues pour ce jour
+    const plannedOnSameDay = sessions.value.filter(
+      s => s.date === date && s.type !== 'strava'
     )
-
-    if (existingIndex !== -1) {
-      // Remplacer l'activité existante
-      const existing = sessions.value[existingIndex]
-      if (existing) {
-        sessions.value[existingIndex] = {
-          ...session,
-          id: existing.id,
-          date,
-        } as typeof sessions.value[0]
-        updated++
-      }
-    } else {
-      // Supprimer les séances prévues pour ce jour
-      const plannedOnSameDay = sessions.value.filter(
-        s => s.date === date && s.type !== 'strava'
-      )
-      plannedOnSameDay.forEach(planned => {
-        removeSession(planned.id)
-        removedPlanned++
-      })
-
-      // Nouvelle activité
-      addSession(session, date)
-      // Get the ID of the newly added session (last one)
-      const lastSession = sessions.value[sessions.value.length - 1]
-      if (lastSession) {
-        newIds.push(lastSession.id)
-      }
-      added++
+    for (const planned of plannedOnSameDay) {
+      await removeSession(planned.id)
+      removedPlanned++
     }
-  })
+
+    // Nouvelle activité
+    await addSession(session, date)
+    const lastSession = sessions.value[sessions.value.length - 1]
+    if (lastSession) {
+      newIds.push(lastSession.id)
+    }
+    added++
+  }
 
   // Trigger spotlight for new sessions
   if (newIds.length > 0) {
@@ -296,13 +279,10 @@ const syncStrava = async () => {
 
   const messages = []
   if (added > 0) messages.push(`${added} ajoutée(s)`)
-  if (updated > 0) messages.push(`${updated} mise(s) à jour`)
   if (removedPlanned > 0) messages.push(`${removedPlanned} prévue(s) supprimée(s)`)
 
   if (messages.length > 0) {
     alert(`Strava : ${messages.join(', ')}`)
-  } else {
-    alert('Aucune nouvelle activité')
   }
 }
 
@@ -570,21 +550,11 @@ const handleReset = () => {
           @click="closeSpotlight"
         >
           <div
-            ref="spotlightCardRef"
             class="spotlight-card"
-            @click.stop
-            @mousemove="handleSpotlightMouseMove"
-            @mouseleave="handleSpotlightMouseLeave"
+            @click="closeSpotlight"
           >
             <div class="spotlight-bg"></div>
             <div class="spotlight-content">
-              <!-- Close button -->
-              <button
-                class="absolute top-3 right-3 btn btn-sm btn-circle btn-ghost text-white/70 hover:text-white"
-                @click="closeSpotlight"
-              >
-                ✕
-              </button>
               <div class="spotlight-emoji">
                 {{ spotlightSession.sport === 'cycling' ? '🚴' : spotlightSession.sport === 'running' ? '🏃' : '💪' }}
               </div>
@@ -601,16 +571,21 @@ const handleReset = () => {
                 <span v-if="spotlightSession.average_watts">⚡ {{ Math.round(spotlightSession.average_watts) }} W</span>
               </div>
               <div class="spotlight-badge">Nouvelle activité !</div>
-              <!-- Copy button -->
-              <button
-                class="mt-4 btn btn-sm"
-                :class="spotlightCopied ? 'btn-success' : 'btn-primary'"
-                @click.stop.prevent="copySpotlightForAnalysis"
-              >
-                {{ spotlightCopied ? '✓ Copié !' : '📋 Copier pour coach' }}
-              </button>
             </div>
           </div>
+        </div>
+      </Transition>
+    </Teleport>
+
+    <!-- Toast notification -->
+    <Teleport to="body">
+      <Transition name="toast">
+        <div
+          v-if="toastMessage"
+          class="fixed bottom-6 right-6 z-[10000] bg-success text-success-content px-4 py-3 rounded-xl shadow-lg flex items-center gap-2"
+        >
+          <span class="text-lg">✓</span>
+          <span>{{ toastMessage }}</span>
         </div>
       </Transition>
     </Teleport>
