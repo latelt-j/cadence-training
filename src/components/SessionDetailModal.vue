@@ -189,18 +189,20 @@ const generateAnalysisText = (): string => {
 **Format de réponse demandé (en Markdown pour copier dans mon suivi) :**
 Réponds avec ce format concis, en utilisant des titres Markdown (###) pour aérer :
 
-### ⚡  Charge
+## Bilan de la séance
+
+### ⚡ Charge
 [Légère/Modérée/Intense] - [commentaire bref]
 
-### ✅  Points positifs
+### ✅ Points positifs
 - [point 1]
 - [point 2]
 
-### ⚠️  À améliorer
+### ⚠️ À améliorer
 - [point 1]
 - [point 2]
 
-### 💡  Conseil
+### 💡 Conseil
 [1 conseil actionnable pour la prochaine séance]`
 
   return text
