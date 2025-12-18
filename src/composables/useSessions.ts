@@ -290,9 +290,9 @@ export function useSessions() {
     })
 
     const stats: WeeklyStats = {
-      cycling: { hours: 0, km: 0, elevation: 0 },
-      running: { hours: 0, km: 0, elevation: 0 },
-      strength: { hours: 0 },
+      cycling: { hours: 0, km: 0, elevation: 0, planned: 0, accomplished: 0 },
+      running: { hours: 0, km: 0, elevation: 0, planned: 0, accomplished: 0 },
+      strength: { hours: 0, planned: 0, accomplished: 0 },
       total: { hours: 0, sessions: weekSessions.length },
       planned: { hours: 0, sessions: 0 },
       accomplished: { hours: 0, sessions: 0 },
@@ -307,17 +307,32 @@ export function useSessions() {
         stats.cycling.hours += hours
         stats.cycling.km += session.actual_km ?? hours * ESTIMATES.cycling.avgSpeedKmh
         stats.cycling.elevation += session.actual_elevation ?? 0
+        if (isAccomplished) {
+          stats.cycling.accomplished += hours
+        } else {
+          stats.cycling.planned += hours
+        }
       } else if (sport === 'running') {
         stats.running.hours += hours
         stats.running.km += session.actual_km ?? hours * ESTIMATES.running.avgSpeedKmh
         stats.running.elevation += session.actual_elevation ?? 0
+        if (isAccomplished) {
+          stats.running.accomplished += hours
+        } else {
+          stats.running.planned += hours
+        }
       } else if (sport === 'strength') {
         stats.strength.hours += hours
+        if (isAccomplished) {
+          stats.strength.accomplished += hours
+        } else {
+          stats.strength.planned += hours
+        }
       }
 
       stats.total.hours += hours
 
-      // Track planned vs accomplished
+      // Track planned vs accomplished (global)
       if (isAccomplished) {
         stats.accomplished.hours += hours
         stats.accomplished.sessions++

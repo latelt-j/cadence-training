@@ -40,6 +40,17 @@ const batteryTextColor = computed(() => {
   if (progressPercent.value >= 50) return 'text-warning'
   return 'text-error'
 })
+
+// Per-sport progress
+const getSportProgress = (planned: number, accomplished: number) => {
+  const total = planned + accomplished
+  if (total === 0) return 0
+  return Math.min(100, Math.round((accomplished / total) * 100))
+}
+
+const cyclingProgress = computed(() => getSportProgress(props.stats.cycling.planned, props.stats.cycling.accomplished))
+const runningProgress = computed(() => getSportProgress(props.stats.running.planned, props.stats.running.accomplished))
+const strengthProgress = computed(() => getSportProgress(props.stats.strength.planned, props.stats.strength.accomplished))
 </script>
 
 <template>
@@ -80,37 +91,67 @@ const batteryTextColor = computed(() => {
 
       <div class="grid grid-cols-3 gap-4 mt-4">
         <!-- Cycling Stats -->
-        <div class="stat bg-success/10 rounded-box p-4">
-          <div class="stat-figure text-success">
-            <span class="text-3xl">🚴</span>
-          </div>
-          <div class="stat-title">Vélo</div>
-          <div class="stat-value text-success text-2xl">{{ formatHours(stats.cycling.hours) }}</div>
-          <div class="stat-desc">
-            ~{{ formatKm(stats.cycling.km) }} km • {{ formatElevation(stats.cycling.elevation) }} D+
+        <div class="stat bg-success/10 rounded-box p-4 relative overflow-hidden">
+          <!-- Progress background -->
+          <div
+            class="absolute inset-0 bg-success/20 transition-all duration-500"
+            :style="{ width: `${cyclingProgress}%` }"
+          ></div>
+          <div class="relative">
+            <div class="stat-figure text-success">
+              <span class="text-3xl">🚴</span>
+            </div>
+            <div class="stat-title">Vélo</div>
+            <div class="stat-value text-success text-2xl">{{ formatHours(stats.cycling.hours) }}</div>
+            <div class="stat-desc">
+              ~{{ formatKm(stats.cycling.km) }} km • {{ formatElevation(stats.cycling.elevation) }} D+
+            </div>
+            <div v-if="stats.cycling.planned + stats.cycling.accomplished > 0" class="text-xs text-success/70 mt-1">
+              {{ cyclingProgress }}% accompli
+            </div>
           </div>
         </div>
 
         <!-- Running Stats -->
-        <div class="stat bg-warning/10 rounded-box p-4">
-          <div class="stat-figure text-warning">
-            <span class="text-3xl">🏃</span>
-          </div>
-          <div class="stat-title">Course</div>
-          <div class="stat-value text-warning text-2xl">{{ formatHours(stats.running.hours) }}</div>
-          <div class="stat-desc">
-            ~{{ formatKm(stats.running.km) }} km • {{ formatElevation(stats.running.elevation) }} D+
+        <div class="stat bg-warning/10 rounded-box p-4 relative overflow-hidden">
+          <!-- Progress background -->
+          <div
+            class="absolute inset-0 bg-warning/20 transition-all duration-500"
+            :style="{ width: `${runningProgress}%` }"
+          ></div>
+          <div class="relative">
+            <div class="stat-figure text-warning">
+              <span class="text-3xl">🏃</span>
+            </div>
+            <div class="stat-title">Course</div>
+            <div class="stat-value text-warning text-2xl">{{ formatHours(stats.running.hours) }}</div>
+            <div class="stat-desc">
+              ~{{ formatKm(stats.running.km) }} km • {{ formatElevation(stats.running.elevation) }} D+
+            </div>
+            <div v-if="stats.running.planned + stats.running.accomplished > 0" class="text-xs text-warning/70 mt-1">
+              {{ runningProgress }}% accompli
+            </div>
           </div>
         </div>
 
         <!-- Strength Stats -->
-        <div class="stat bg-error/10 rounded-box p-4">
-          <div class="stat-figure text-error">
-            <span class="text-3xl">💪</span>
+        <div class="stat bg-error/10 rounded-box p-4 relative overflow-hidden">
+          <!-- Progress background -->
+          <div
+            class="absolute inset-0 bg-error/20 transition-all duration-500"
+            :style="{ width: `${strengthProgress}%` }"
+          ></div>
+          <div class="relative">
+            <div class="stat-figure text-error">
+              <span class="text-3xl">💪</span>
+            </div>
+            <div class="stat-title">Renfo</div>
+            <div class="stat-value text-error text-2xl">{{ formatHours(stats.strength.hours) }}</div>
+            <div class="stat-desc">&nbsp;</div>
+            <div v-if="stats.strength.planned + stats.strength.accomplished > 0" class="text-xs text-error/70 mt-1">
+              {{ strengthProgress }}% accompli
+            </div>
           </div>
-          <div class="stat-title">Renfo</div>
-          <div class="stat-value text-error text-2xl">{{ formatHours(stats.strength.hours) }}</div>
-          <div class="stat-desc">&nbsp;</div>
         </div>
       </div>
 

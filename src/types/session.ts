@@ -56,20 +56,26 @@ export interface WeeklyStats {
     hours: number
     km: number
     elevation: number
+    planned: number
+    accomplished: number
   }
   running: {
     hours: number
     km: number
     elevation: number
+    planned: number
+    accomplished: number
   }
   strength: {
     hours: number
+    planned: number
+    accomplished: number
   }
   total: {
     hours: number
     sessions: number
   }
-  // Planned vs Accomplished
+  // Planned vs Accomplished (global)
   planned: {
     hours: number
     sessions: number
