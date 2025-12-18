@@ -264,6 +264,18 @@ body {
   line-height: 1.6;
 }
 
+.feedback-markdown h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: oklch(var(--bc));
+}
+
+.feedback-markdown h3:first-child {
+  margin-top: 0;
+}
+
 .feedback-markdown p {
   margin-bottom: 0.75rem;
 }
