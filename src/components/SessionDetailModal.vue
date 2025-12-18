@@ -354,7 +354,7 @@ const downloadZwoFile = () => {
         >
           🚴 Zwift
         </button>
-        <button class="btn btn-error btn-outline" @click="handleDelete">
+        <button v-if="session.type !== 'strava'" class="btn btn-error btn-outline" @click="handleDelete">
           🗑️ Supprimer
         </button>
         <button class="btn" @click="emit('close')">Fermer</button>
