@@ -186,9 +186,10 @@ const generateAnalysisText = (): string => {
   }
 
   text += `\n\n---
-**Format de réponse demandé (en Markdown pour copier dans mon suivi) :**
-Réponds avec ce format concis, en utilisant des titres Markdown (###) pour aérer :
+**Format de réponse demandé :**
+Réponds UNIQUEMENT avec le code Markdown brut ci-dessous (pas de rendu, je vais le copier-coller directement). Commence directement par ## sans rien avant :
 
+\`\`\`
 ## Bilan de la séance
 
 ### ⚡ Charge
@@ -203,7 +204,8 @@ Réponds avec ce format concis, en utilisant des titres Markdown (###) pour aér
 - [point 2]
 
 ### 💡 Conseil
-[1 conseil actionnable pour la prochaine séance]`
+[1 conseil actionnable pour la prochaine séance]
+\`\`\``
 
   return text
 }
