@@ -294,11 +294,14 @@ export function useSessions() {
       running: { hours: 0, km: 0, elevation: 0 },
       strength: { hours: 0 },
       total: { hours: 0, sessions: weekSessions.length },
+      planned: { hours: 0, sessions: 0 },
+      accomplished: { hours: 0, sessions: 0 },
     }
 
     weekSessions.forEach((session) => {
       const hours = session.duration_min / 60
       const sport = session.sport as Sport
+      const isAccomplished = session.type === 'strava'
 
       if (sport === 'cycling') {
         stats.cycling.hours += hours
@@ -313,6 +316,15 @@ export function useSessions() {
       }
 
       stats.total.hours += hours
+
+      // Track planned vs accomplished
+      if (isAccomplished) {
+        stats.accomplished.hours += hours
+        stats.accomplished.sessions++
+      } else {
+        stats.planned.hours += hours
+        stats.planned.sessions++
+      }
     })
 
     return stats

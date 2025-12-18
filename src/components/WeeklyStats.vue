@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { WeeklyStats } from '../types/session'
 
-defineProps<{
+const props = defineProps<{
   stats: WeeklyStats
 }>()
 
@@ -20,12 +21,62 @@ const formatKm = (km: number) => {
 const formatElevation = (m: number) => {
   return Math.round(m)
 }
+
+// Battery gauge calculations
+const totalPlanned = computed(() => props.stats.planned.hours + props.stats.accomplished.hours)
+const progressPercent = computed(() => {
+  if (totalPlanned.value === 0) return 0
+  return Math.min(100, Math.round((props.stats.accomplished.hours / totalPlanned.value) * 100))
+})
+
+const batteryColor = computed(() => {
+  if (progressPercent.value >= 80) return 'bg-success'
+  if (progressPercent.value >= 50) return 'bg-warning'
+  return 'bg-error'
+})
+
+const batteryTextColor = computed(() => {
+  if (progressPercent.value >= 80) return 'text-success'
+  if (progressPercent.value >= 50) return 'text-warning'
+  return 'text-error'
+})
 </script>
 
 <template>
   <div class="card bg-base-100 shadow-xl">
     <div class="card-body">
       <h2 class="card-title">📊 Volume de la semaine</h2>
+
+      <!-- Battery Gauge -->
+      <div v-if="totalPlanned > 0" class="mt-2">
+        <div class="flex items-center gap-3">
+          <!-- Battery container -->
+          <div class="flex-1 relative">
+            <div class="h-8 bg-base-300 rounded-lg overflow-hidden border-2 border-base-content/20 relative">
+              <!-- Battery fill -->
+              <div
+                class="h-full transition-all duration-500 ease-out"
+                :class="batteryColor"
+                :style="{ width: `${progressPercent}%` }"
+              ></div>
+              <!-- Battery segments -->
+              <div class="absolute inset-0 flex">
+                <div v-for="i in 4" :key="i" class="flex-1 border-r border-base-content/10 last:border-r-0"></div>
+              </div>
+            </div>
+            <!-- Battery tip -->
+            <div class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-full w-2 h-4 bg-base-content/20 rounded-r-sm"></div>
+          </div>
+          <!-- Percentage -->
+          <div class="text-right min-w-16">
+            <span class="text-2xl font-bold" :class="batteryTextColor">{{ progressPercent }}%</span>
+          </div>
+        </div>
+        <div class="flex justify-between text-xs text-base-content/60 mt-1 px-1">
+          <span>{{ formatHours(stats.accomplished.hours) }} accompli</span>
+          <span>{{ formatHours(totalPlanned) }} prévu</span>
+        </div>
+      </div>
 
       <div class="grid grid-cols-3 gap-4 mt-4">
         <!-- Cycling Stats -->

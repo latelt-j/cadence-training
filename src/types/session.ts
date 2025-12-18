@@ -69,6 +69,15 @@ export interface WeeklyStats {
     hours: number
     sessions: number
   }
+  // Planned vs Accomplished
+  planned: {
+    hours: number
+    sessions: number
+  }
+  accomplished: {
+    hours: number
+    sessions: number
+  }
 }
 
 export const SPORT_CONFIG: Record<Sport, { emoji: string; label: string; color: string }> = {
