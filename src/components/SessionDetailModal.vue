@@ -156,6 +156,80 @@ const handleDelete = () => {
     emit('close')
   }
 }
+
+// Generate Zwift .zwo workout file
+const generateZwoFile = (): string => {
+  if (!props.session || props.session.sport !== 'cycling') return ''
+
+  const s = props.session
+  let workoutElements = ''
+
+  if (s.structure && s.structure.length > 0) {
+    s.structure.forEach((phase) => {
+      const durationSec = phase.min * 60
+      // Convert FTP percentage to decimal (e.g., 75 -> 0.75)
+      const powerLow = phase.ftp_pct ? phase.ftp_pct[0] / 100 : 0.5
+      const powerHigh = phase.ftp_pct ? phase.ftp_pct[1] / 100 : 0.7
+
+      if (phase.phase === 'warmup') {
+        workoutElements += `        <Warmup Duration="${durationSec}" PowerLow="${powerLow.toFixed(2)}" PowerHigh="${powerHigh.toFixed(2)}"/>\n`
+      } else if (phase.phase === 'cooldown') {
+        workoutElements += `        <Cooldown Duration="${durationSec}" PowerLow="${powerHigh.toFixed(2)}" PowerHigh="${powerLow.toFixed(2)}"/>\n`
+      } else if (phase.phase === 'work' || phase.phase === 'rest') {
+        const avgPower = ((powerLow + powerHigh) / 2).toFixed(2)
+        if (phase.reps && phase.reps > 1) {
+          // For intervals, we need work and rest phases
+          // Assuming work phase uses current settings, rest at 50%
+          const isWork = phase.phase === 'work'
+          workoutElements += `        <IntervalsT Repeat="${phase.reps}" OnDuration="${durationSec}" OffDuration="${Math.round(durationSec * 0.5)}" OnPower="${isWork ? avgPower : '0.50'}" OffPower="${isWork ? '0.50' : avgPower}"/>\n`
+        } else {
+          workoutElements += `        <SteadyState Duration="${durationSec}" Power="${avgPower}"/>\n`
+        }
+      }
+    })
+  } else {
+    // No structure - create a simple steady state workout
+    const durationSec = s.duration_min * 60
+    workoutElements = `        <SteadyState Duration="${durationSec}" Power="0.75"/>\n`
+  }
+
+  const zwoContent = `<workout_file>
+    <author>Cadence</author>
+    <name>${escapeXml(s.title)}</name>
+    <description>${escapeXml(s.description || 'Workout exported from Cadence')}</description>
+    <sportType>bike</sportType>
+    <workout>
+${workoutElements}    </workout>
+</workout_file>`
+
+  return zwoContent
+}
+
+const escapeXml = (str: string): string => {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;')
+}
+
+const downloadZwoFile = () => {
+  const content = generateZwoFile()
+  if (!content || !props.session) return
+
+  const blob = new Blob([content], { type: 'application/xml' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  // Clean filename
+  const filename = props.session.title
+    .replace(/[^a-zA-Z0-9àâäéèêëïîôùûüç\s-]/g, '')
+    .replace(/\s+/g, '_')
+  a.download = `${filename}.zwo`
+  a.click()
+  URL.revokeObjectURL(url)
+}
 </script>
 
 <template>
@@ -271,6 +345,14 @@ const handleDelete = () => {
           @click="copyForAnalysis"
         >
           {{ copied ? '✓ Copié !' : '📋 Copier pour coach' }}
+        </button>
+        <!-- Zwift export button - only for cycling sessions -->
+        <button
+          v-if="session.sport === 'cycling' && session.type !== 'strava'"
+          class="btn btn-outline btn-warning"
+          @click="downloadZwoFile"
+        >
+          🚴 Zwift
         </button>
         <button class="btn btn-error btn-outline" @click="handleDelete">
           🗑️ Supprimer
