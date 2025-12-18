@@ -139,7 +139,14 @@ export function useSupabase() {
   const upsertSessions = async (sessions: ScheduledSession[]): Promise<ScheduledSession[]> => {
     if (sessions.length === 0) return []
 
-    const dbSessions = sessions.map(sessionToDb)
+    // Deduplicate by ID (keep last occurrence)
+    const uniqueMap = new Map<string, ScheduledSession>()
+    sessions.forEach(s => uniqueMap.set(s.id, s))
+    const uniqueSessions = Array.from(uniqueMap.values())
+
+    const dbSessions = uniqueSessions.map(sessionToDb)
+
+    console.log('Upserting unique sessions:', dbSessions.length)
 
     const { data, error } = await getClient()
       .from('sessions')
