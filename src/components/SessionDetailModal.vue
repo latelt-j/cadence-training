@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import type { ScheduledSession } from '../types/session'
 import { SPORT_CONFIG } from '../types/session'
 
@@ -10,9 +10,28 @@ const props = defineProps<{
 const emit = defineEmits<{
   close: []
   delete: [sessionId: string]
+  updateFeedback: [sessionId: string, feedback: string]
 }>()
 
 const copied = ref(false)
+const feedbackText = ref('')
+const feedbackSaved = ref(false)
+
+// Sync feedback text when session changes
+watch(() => props.session, (newSession) => {
+  feedbackText.value = newSession?.coach_feedback || ''
+  feedbackSaved.value = false
+}, { immediate: true })
+
+const saveFeedback = () => {
+  if (props.session) {
+    emit('updateFeedback', props.session.id, feedbackText.value)
+    feedbackSaved.value = true
+    setTimeout(() => {
+      feedbackSaved.value = false
+    }, 2000)
+  }
+}
 
 const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString('fr-FR', {
@@ -342,6 +361,27 @@ const downloadZwoFile = () => {
               </table>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- Coach Feedback -->
+      <div class="mt-4">
+        <label class="label">
+          <span class="label-text font-medium">💬 Feedback Coach</span>
+        </label>
+        <textarea
+          v-model="feedbackText"
+          class="textarea textarea-bordered w-full h-24"
+          placeholder="Colle ici le retour de ton coach..."
+        ></textarea>
+        <div class="flex justify-end mt-2">
+          <button
+            class="btn btn-sm"
+            :class="feedbackSaved ? 'btn-success' : 'btn-primary'"
+            @click="saveFeedback"
+          >
+            {{ feedbackSaved ? '✓ Sauvegardé !' : '💾 Sauvegarder' }}
+          </button>
         </div>
       </div>
 

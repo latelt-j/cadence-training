@@ -182,6 +182,21 @@ export function useSessions() {
     }
   }
 
+  const updateSessionFeedback = async (sessionId: string, feedback: string) => {
+    const session = sessions.value.find((s) => s.id === sessionId)
+    if (session) {
+      session.coach_feedback = feedback
+      saveToCache()
+
+      // Sync to Supabase
+      try {
+        await dbUpdateSession(session)
+      } catch (error) {
+        console.error('Error updating session feedback in Supabase:', error)
+      }
+    }
+  }
+
   const removeSession = async (sessionId: string) => {
     const index = sessions.value.findIndex((s) => s.id === sessionId)
     if (index !== -1) {
@@ -314,6 +329,7 @@ export function useSessions() {
     addSession,
     addSessions,
     updateSessionDate,
+    updateSessionFeedback,
     removeSession,
     upsertSessions,
     exportToJson,

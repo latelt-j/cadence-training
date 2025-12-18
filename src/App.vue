@@ -19,6 +19,7 @@ const {
   addSession,
   addSessions,
   updateSessionDate,
+  updateSessionFeedback,
   removeSession,
   downloadJson,
   reset,
@@ -348,6 +349,10 @@ const handleDeleteSession = async (sessionId: string) => {
   await removeSession(sessionId)
 }
 
+const handleUpdateFeedback = async (sessionId: string, feedback: string) => {
+  await updateSessionFeedback(sessionId, feedback)
+}
+
 const handleReset = () => {
   if (confirm('Réinitialiser toutes les données ?')) {
     reset()
@@ -487,6 +492,7 @@ const handleReset = () => {
       :session="selectedSession"
       @close="selectedSession = null"
       @delete="handleDeleteSession"
+      @update-feedback="handleUpdateFeedback"
     />
 
     <!-- Import Modal -->

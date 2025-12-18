@@ -24,6 +24,7 @@ CREATE TABLE sessions (
   average_watts INTEGER,
   max_watts INTEGER,
   average_cadence INTEGER,
+  coach_feedback TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -96,3 +97,9 @@ ALTER TABLE oauth_tokens DISABLE ROW LEVEL SECURITY;
 -- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS average_watts INTEGER;
 -- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS max_watts INTEGER;
 -- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS average_cadence INTEGER;
+
+-- =============================================
+-- MIGRATION: Add coach feedback column
+-- Run this if you already have the sessions table
+-- =============================================
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS coach_feedback TEXT;

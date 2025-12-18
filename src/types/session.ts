@@ -42,6 +42,8 @@ export interface SessionTemplate {
   average_watts?: number
   max_watts?: number
   average_cadence?: number
+  // Coach feedback
+  coach_feedback?: string
 }
 
 export interface ScheduledSession extends SessionTemplate {

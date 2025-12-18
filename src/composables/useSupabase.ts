@@ -22,6 +22,7 @@ interface DbSession {
   average_watts: number | null
   max_watts: number | null
   average_cadence: number | null
+  coach_feedback: string | null
   created_at: string
   updated_at: string
 }
@@ -285,6 +286,7 @@ export function useSupabase() {
     ...(db.average_watts !== null && { average_watts: db.average_watts }),
     ...(db.max_watts !== null && { max_watts: db.max_watts }),
     ...(db.average_cadence !== null && { average_cadence: db.average_cadence }),
+    ...(db.coach_feedback && { coach_feedback: db.coach_feedback }),
   })
 
   const sessionToDb = (session: ScheduledSession): Omit<DbSession, 'created_at' | 'updated_at'> => ({
@@ -305,6 +307,7 @@ export function useSupabase() {
     average_watts: session.average_watts ? Math.round(session.average_watts) : null,
     max_watts: session.max_watts ? Math.round(session.max_watts) : null,
     average_cadence: session.average_cadence ? Math.round(session.average_cadence) : null,
+    coach_feedback: session.coach_feedback ?? null,
   })
 
   return {
