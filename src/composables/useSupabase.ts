@@ -300,11 +300,11 @@ export function useSupabase() {
     actual_elevation: session.actual_elevation ?? null,
     strava_id: session.strava_id ?? null,
     laps: session.laps ?? null,
-    average_heartrate: session.average_heartrate ?? null,
-    max_heartrate: session.max_heartrate ?? null,
-    average_watts: session.average_watts ?? null,
-    max_watts: session.max_watts ?? null,
-    average_cadence: session.average_cadence ?? null,
+    average_heartrate: session.average_heartrate ? Math.round(session.average_heartrate) : null,
+    max_heartrate: session.max_heartrate ? Math.round(session.max_heartrate) : null,
+    average_watts: session.average_watts ? Math.round(session.average_watts) : null,
+    max_watts: session.max_watts ? Math.round(session.max_watts) : null,
+    average_cadence: session.average_cadence ? Math.round(session.average_cadence) : null,
   })
 
   return {
