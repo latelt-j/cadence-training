@@ -227,7 +227,11 @@ onMounted(async () => {
     if (state === 'google') {
       await googleHandleCallback(code)
     } else {
-      await stravaHandleCallback(code)
+      const success = await stravaHandleCallback(code)
+      // Auto-sync after successful Strava connection
+      if (success) {
+        await syncStrava()
+      }
     }
     // Clean URL
     window.history.replaceState({}, document.title, window.location.pathname)
