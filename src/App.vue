@@ -60,10 +60,12 @@ const showGoogleDeleteModal = ref(false)
 const newSessionIds = ref<Set<string>>(new Set())
 const spotlightSession = ref<ScheduledSession | null>(null)
 const spotlightCardRef = ref<HTMLElement | null>(null)
+const spotlightCopied = ref(false)
 
 // Show spotlight for new session
 const showSpotlight = (session: ScheduledSession) => {
   spotlightSession.value = session
+  spotlightCopied.value = false
   newSessionIds.value = new Set([session.id])
 }
 
@@ -98,17 +100,103 @@ const handleSpotlightMouseLeave = () => {
   card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)'
 }
 
-const handleSpotlightClick = () => {
-  const card = spotlightCardRef.value
-  if (!card) return
+// Copy spotlight session for coach analysis
+const formatDateForCopy = (dateStr: string) => {
+  return new Date(dateStr).toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+  })
+}
 
-  // Add celebration effect
-  card.classList.add('spotlight-celebrate')
+const formatDurationForCopy = (min: number) => {
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  if (h === 0) return `${m} min`
+  if (m === 0) return `${h}h`
+  return `${h}h${m.toString().padStart(2, '0')}`
+}
 
-  // Close after animation
-  setTimeout(() => {
-    closeSpotlight()
-  }, 600)
+const formatLapDuration = (seconds: number): string => {
+  const min = Math.floor(seconds / 60)
+  const sec = seconds % 60
+  return `${min}'${sec.toString().padStart(2, '0')}"`
+}
+
+const formatSpeed = (metersPerSec: number, sport: string): string => {
+  const kmh = metersPerSec * 3.6
+  if (sport === 'running') {
+    const paceMinPerKm = 60 / kmh
+    const paceMin = Math.floor(paceMinPerKm)
+    const paceSec = Math.round((paceMinPerKm - paceMin) * 60)
+    return `${paceMin}'${paceSec.toString().padStart(2, '0')}"/km`
+  }
+  return `${kmh.toFixed(1)} km/h`
+}
+
+const copySpotlightForAnalysis = async () => {
+  if (!spotlightSession.value) return
+
+  const s = spotlightSession.value
+  const sportName = s.sport === 'cycling' ? 'Vélo' : s.sport === 'running' ? 'Course à pied' : 'Renforcement'
+
+  let text = `## Séance d'entraînement à analyser
+
+**Sport:** ${sportName}
+**Titre:** ${s.title}
+**Date:** ${formatDateForCopy(s.date)}
+**Durée:** ${formatDurationForCopy(s.duration_min)}`
+
+  if (s.actual_km) text += `\n**Distance:** ${s.actual_km} km`
+  if (s.actual_elevation) text += `\n**Dénivelé:** ${s.actual_elevation} m D+`
+
+  if (s.actual_km && s.duration_min > 0) {
+    const hours = s.duration_min / 60
+    const avgSpeed = (s.actual_km / hours).toFixed(1)
+    if (s.sport === 'cycling') {
+      text += `\n**Vitesse moyenne:** ${avgSpeed} km/h`
+    } else if (s.sport === 'running') {
+      const paceMin = Math.floor(60 / parseFloat(avgSpeed))
+      const paceSec = Math.round((60 / parseFloat(avgSpeed) - paceMin) * 60)
+      text += `\n**Allure moyenne:** ${paceMin}'${paceSec.toString().padStart(2, '0')}" /km`
+    }
+  }
+
+  if (s.average_heartrate || s.max_heartrate) {
+    text += `\n\n**Fréquence cardiaque:**`
+    if (s.average_heartrate) text += `\n- Moyenne: ${Math.round(s.average_heartrate)} bpm`
+    if (s.max_heartrate) text += `\n- Max: ${Math.round(s.max_heartrate)} bpm`
+  }
+
+  if (s.average_watts || s.max_watts) {
+    text += `\n\n**Puissance:**`
+    if (s.average_watts) text += `\n- Moyenne: ${Math.round(s.average_watts)} W`
+    if (s.max_watts) text += `\n- Max: ${Math.round(s.max_watts)} W`
+  }
+
+  if (s.average_cadence) {
+    text += `\n**Cadence moyenne:** ${Math.round(s.average_cadence)} ${s.sport === 'running' ? 'ppm' : 'rpm'}`
+  }
+
+  if (s.description) text += `\n\n**Description:**\n${s.description}`
+
+  if (s.laps && s.laps.length > 0) {
+    text += `\n\n**Intervalles/Tours (${s.laps.length}):**`
+    s.laps.forEach((lap, i) => {
+      const distKm = (lap.distance / 1000).toFixed(2)
+      let lapText = `\n${i + 1}. ${lap.name} - ${formatLapDuration(lap.moving_time)}, ${distKm} km`
+      lapText += `, ${formatSpeed(lap.average_speed, s.sport)}`
+      if (lap.average_heartrate) lapText += `, ${Math.round(lap.average_heartrate)} bpm`
+      if (lap.average_watts) lapText += `, ${Math.round(lap.average_watts)} W`
+      if (lap.total_elevation_gain) lapText += `, ${Math.round(lap.total_elevation_gain)}m D+`
+      text += lapText
+    })
+  }
+
+  text += `\n\n---\nMerci d'analyser cette séance et de me donner ton feedback sur la charge, l'intensité et les points d'amélioration.`
+
+  await navigator.clipboard.writeText(text)
+  spotlightCopied.value = true
 }
 
 // Delete all from Google Calendar
@@ -472,12 +560,19 @@ const handleReset = () => {
           <div
             ref="spotlightCardRef"
             class="spotlight-card"
-            @click.stop="handleSpotlightClick"
+            @click.stop
             @mousemove="handleSpotlightMouseMove"
             @mouseleave="handleSpotlightMouseLeave"
           >
             <div class="spotlight-bg"></div>
             <div class="spotlight-content">
+              <!-- Close button -->
+              <button
+                class="absolute top-3 right-3 btn btn-sm btn-circle btn-ghost text-white/70 hover:text-white"
+                @click="closeSpotlight"
+              >
+                ✕
+              </button>
               <div class="spotlight-emoji">
                 {{ spotlightSession.sport === 'cycling' ? '🚴' : spotlightSession.sport === 'running' ? '🏃' : '💪' }}
               </div>
@@ -488,7 +583,20 @@ const handleReset = () => {
                 <span v-if="spotlightSession.actual_km">{{ spotlightSession.actual_km }} km</span>
                 <span v-if="spotlightSession.actual_elevation">{{ spotlightSession.actual_elevation }}m D+</span>
               </div>
+              <!-- Extra stats if available -->
+              <div v-if="spotlightSession.average_heartrate || spotlightSession.average_watts" class="spotlight-stats mt-1">
+                <span v-if="spotlightSession.average_heartrate">❤️ {{ Math.round(spotlightSession.average_heartrate) }} bpm</span>
+                <span v-if="spotlightSession.average_watts">⚡ {{ Math.round(spotlightSession.average_watts) }} W</span>
+              </div>
               <div class="spotlight-badge">Nouvelle activité !</div>
+              <!-- Copy button -->
+              <button
+                class="mt-4 btn btn-sm"
+                :class="spotlightCopied ? 'btn-success' : 'btn-primary'"
+                @click="copySpotlightForAnalysis"
+              >
+                {{ spotlightCopied ? '✓ Copié !' : '📋 Copier pour coach' }}
+              </button>
             </div>
           </div>
         </div>
