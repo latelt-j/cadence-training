@@ -135,68 +135,76 @@ const formatSpeed = (metersPerSec: number, sport: string): string => {
 }
 
 const copySpotlightForAnalysis = async () => {
-  if (!spotlightSession.value) return
+  if (!spotlightSession.value) {
+    console.error('No spotlight session')
+    return
+  }
 
-  const s = spotlightSession.value
-  const sportName = s.sport === 'cycling' ? 'Vélo' : s.sport === 'running' ? 'Course à pied' : 'Renforcement'
+  try {
+    const s = spotlightSession.value
+    const sportName = s.sport === 'cycling' ? 'Vélo' : s.sport === 'running' ? 'Course à pied' : 'Renforcement'
 
-  let text = `## Séance d'entraînement à analyser
+    let text = `## Séance d'entraînement à analyser
 
 **Sport:** ${sportName}
 **Titre:** ${s.title}
 **Date:** ${formatDateForCopy(s.date)}
 **Durée:** ${formatDurationForCopy(s.duration_min)}`
 
-  if (s.actual_km) text += `\n**Distance:** ${s.actual_km} km`
-  if (s.actual_elevation) text += `\n**Dénivelé:** ${s.actual_elevation} m D+`
+    if (s.actual_km) text += `\n**Distance:** ${s.actual_km} km`
+    if (s.actual_elevation) text += `\n**Dénivelé:** ${s.actual_elevation} m D+`
 
-  if (s.actual_km && s.duration_min > 0) {
-    const hours = s.duration_min / 60
-    const avgSpeed = (s.actual_km / hours).toFixed(1)
-    if (s.sport === 'cycling') {
-      text += `\n**Vitesse moyenne:** ${avgSpeed} km/h`
-    } else if (s.sport === 'running') {
-      const paceMin = Math.floor(60 / parseFloat(avgSpeed))
-      const paceSec = Math.round((60 / parseFloat(avgSpeed) - paceMin) * 60)
-      text += `\n**Allure moyenne:** ${paceMin}'${paceSec.toString().padStart(2, '0')}" /km`
+    if (s.actual_km && s.duration_min > 0) {
+      const hours = s.duration_min / 60
+      const avgSpeed = (s.actual_km / hours).toFixed(1)
+      if (s.sport === 'cycling') {
+        text += `\n**Vitesse moyenne:** ${avgSpeed} km/h`
+      } else if (s.sport === 'running') {
+        const paceMin = Math.floor(60 / parseFloat(avgSpeed))
+        const paceSec = Math.round((60 / parseFloat(avgSpeed) - paceMin) * 60)
+        text += `\n**Allure moyenne:** ${paceMin}'${paceSec.toString().padStart(2, '0')}" /km`
+      }
     }
+
+    if (s.average_heartrate || s.max_heartrate) {
+      text += `\n\n**Fréquence cardiaque:**`
+      if (s.average_heartrate) text += `\n- Moyenne: ${Math.round(s.average_heartrate)} bpm`
+      if (s.max_heartrate) text += `\n- Max: ${Math.round(s.max_heartrate)} bpm`
+    }
+
+    if (s.average_watts || s.max_watts) {
+      text += `\n\n**Puissance:**`
+      if (s.average_watts) text += `\n- Moyenne: ${Math.round(s.average_watts)} W`
+      if (s.max_watts) text += `\n- Max: ${Math.round(s.max_watts)} W`
+    }
+
+    if (s.average_cadence) {
+      text += `\n**Cadence moyenne:** ${Math.round(s.average_cadence)} ${s.sport === 'running' ? 'ppm' : 'rpm'}`
+    }
+
+    if (s.description) text += `\n\n**Description:**\n${s.description}`
+
+    if (s.laps && s.laps.length > 0) {
+      text += `\n\n**Intervalles/Tours (${s.laps.length}):**`
+      s.laps.forEach((lap, i) => {
+        const distKm = (lap.distance / 1000).toFixed(2)
+        let lapText = `\n${i + 1}. ${lap.name} - ${formatLapDuration(lap.moving_time)}, ${distKm} km`
+        lapText += `, ${formatSpeed(lap.average_speed, s.sport)}`
+        if (lap.average_heartrate) lapText += `, ${Math.round(lap.average_heartrate)} bpm`
+        if (lap.average_watts) lapText += `, ${Math.round(lap.average_watts)} W`
+        if (lap.total_elevation_gain) lapText += `, ${Math.round(lap.total_elevation_gain)}m D+`
+        text += lapText
+      })
+    }
+
+    text += `\n\n---\nMerci d'analyser cette séance et de me donner ton feedback sur la charge, l'intensité et les points d'amélioration.`
+
+    await navigator.clipboard.writeText(text)
+    spotlightCopied.value = true
+  } catch (err) {
+    console.error('Copy failed:', err)
+    alert('Erreur lors de la copie')
   }
-
-  if (s.average_heartrate || s.max_heartrate) {
-    text += `\n\n**Fréquence cardiaque:**`
-    if (s.average_heartrate) text += `\n- Moyenne: ${Math.round(s.average_heartrate)} bpm`
-    if (s.max_heartrate) text += `\n- Max: ${Math.round(s.max_heartrate)} bpm`
-  }
-
-  if (s.average_watts || s.max_watts) {
-    text += `\n\n**Puissance:**`
-    if (s.average_watts) text += `\n- Moyenne: ${Math.round(s.average_watts)} W`
-    if (s.max_watts) text += `\n- Max: ${Math.round(s.max_watts)} W`
-  }
-
-  if (s.average_cadence) {
-    text += `\n**Cadence moyenne:** ${Math.round(s.average_cadence)} ${s.sport === 'running' ? 'ppm' : 'rpm'}`
-  }
-
-  if (s.description) text += `\n\n**Description:**\n${s.description}`
-
-  if (s.laps && s.laps.length > 0) {
-    text += `\n\n**Intervalles/Tours (${s.laps.length}):**`
-    s.laps.forEach((lap, i) => {
-      const distKm = (lap.distance / 1000).toFixed(2)
-      let lapText = `\n${i + 1}. ${lap.name} - ${formatLapDuration(lap.moving_time)}, ${distKm} km`
-      lapText += `, ${formatSpeed(lap.average_speed, s.sport)}`
-      if (lap.average_heartrate) lapText += `, ${Math.round(lap.average_heartrate)} bpm`
-      if (lap.average_watts) lapText += `, ${Math.round(lap.average_watts)} W`
-      if (lap.total_elevation_gain) lapText += `, ${Math.round(lap.total_elevation_gain)}m D+`
-      text += lapText
-    })
-  }
-
-  text += `\n\n---\nMerci d'analyser cette séance et de me donner ton feedback sur la charge, l'intensité et les points d'amélioration.`
-
-  await navigator.clipboard.writeText(text)
-  spotlightCopied.value = true
 }
 
 // Delete all from Google Calendar
@@ -593,7 +601,7 @@ const handleReset = () => {
               <button
                 class="mt-4 btn btn-sm"
                 :class="spotlightCopied ? 'btn-success' : 'btn-primary'"
-                @click="copySpotlightForAnalysis"
+                @click.stop.prevent="copySpotlightForAnalysis"
               >
                 {{ spotlightCopied ? '✓ Copié !' : '📋 Copier pour coach' }}
               </button>
