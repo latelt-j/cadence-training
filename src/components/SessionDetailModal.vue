@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
+import { marked } from 'marked'
 import type { ScheduledSession } from '../types/session'
 import { SPORT_CONFIG } from '../types/session'
+
+// Configure marked for inline rendering (no <p> tags)
+marked.setOptions({
+  breaks: true,
+  gfm: true,
+})
 
 const props = defineProps<{
   session: ScheduledSession | null
@@ -29,6 +36,12 @@ watch(() => props.session, (newSession) => {
 
 // Check if feedback exists
 const hasFeedback = computed(() => !!feedbackText.value.trim())
+
+// Render markdown feedback
+const renderedFeedback = computed(() => {
+  if (!feedbackText.value.trim()) return ''
+  return marked(feedbackText.value)
+})
 
 const saveFeedback = () => {
   if (props.session) {
@@ -173,8 +186,8 @@ const generateAnalysisText = (): string => {
   }
 
   text += `\n\n---
-**Format de réponse demandé (pour copier dans mon suivi) :**
-Réponds avec ce format concis en 4-5 lignes max :
+**Format de réponse demandé (en Markdown pour copier dans mon suivi) :**
+Réponds avec ce format concis en 4-5 lignes max, en utilisant le Markdown :
 
 ⚡ **Charge:** [Légère/Modérée/Intense] - [commentaire bref]
 ✅ **Points positifs:** [1-2 points]
@@ -440,11 +453,12 @@ const downloadZwoFile = () => {
 
         <div class="divider">Feedback</div>
 
-        <!-- Read mode: Display feedback nicely -->
+        <!-- Read mode: Display feedback nicely with markdown -->
         <div v-if="hasFeedback && !isEditingFeedback" class="space-y-3">
-          <div class="bg-base-200 rounded-lg p-4 whitespace-pre-wrap text-sm leading-relaxed feedback-display">
-            {{ feedbackText }}
-          </div>
+          <div
+            class="bg-base-200 rounded-lg p-4 text-sm feedback-markdown"
+            v-html="renderedFeedback"
+          ></div>
           <div class="flex justify-end">
             <button class="btn btn-sm btn-ghost" @click="startEditFeedback">
               ✏️ Modifier

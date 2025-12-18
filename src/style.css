@@ -258,3 +258,45 @@ body {
   opacity: 0;
   transform: translateY(20px);
 }
+
+/* Markdown feedback styling */
+.feedback-markdown {
+  line-height: 1.6;
+}
+
+.feedback-markdown p {
+  margin-bottom: 0.75rem;
+}
+
+.feedback-markdown p:last-child {
+  margin-bottom: 0;
+}
+
+.feedback-markdown strong {
+  font-weight: 600;
+  color: oklch(var(--bc));
+}
+
+.feedback-markdown ul,
+.feedback-markdown ol {
+  margin-left: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.feedback-markdown li {
+  margin-bottom: 0.25rem;
+}
+
+.feedback-markdown code {
+  background: oklch(var(--b3));
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.feedback-markdown blockquote {
+  border-left: 3px solid oklch(var(--p));
+  padding-left: 1rem;
+  margin-left: 0;
+  opacity: 0.85;
+}
