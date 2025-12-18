@@ -5,6 +5,7 @@ const STRAVA_CLIENT_ID = import.meta.env.VITE_STRAVA_CLIENT_ID || '118625'
 const REDIRECT_URI = window.location.origin
 const STORAGE_KEY = 'strava-tokens'
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 interface StravaTokens {
   access_token: string
@@ -60,7 +61,10 @@ export function useStrava() {
       // Use Edge Function instead of direct API call
       const response = await fetch(`${SUPABASE_URL}/functions/v1/strava-auth`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
         body: JSON.stringify({
           code,
           redirect_uri: REDIRECT_URI,
@@ -95,7 +99,10 @@ export function useStrava() {
       // Use Edge Function instead of direct API call
       const response = await fetch(`${SUPABASE_URL}/functions/v1/strava-refresh`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
         body: JSON.stringify({
           refresh_token: tokens.value.refresh_token,
         }),

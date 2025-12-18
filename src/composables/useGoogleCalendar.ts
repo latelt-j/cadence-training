@@ -6,6 +6,7 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
 const REDIRECT_URI = window.location.origin
 const STORAGE_KEY = 'google-calendar-tokens'
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 interface GoogleTokens {
   access_token: string
@@ -58,7 +59,10 @@ export function useGoogleCalendar() {
       // Use Edge Function instead of direct API call
       const response = await fetch(`${SUPABASE_URL}/functions/v1/google-auth`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
         body: JSON.stringify({
           code,
           redirect_uri: REDIRECT_URI,
@@ -94,7 +98,10 @@ export function useGoogleCalendar() {
       // Use Edge Function instead of direct API call
       const response = await fetch(`${SUPABASE_URL}/functions/v1/google-auth`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        },
         body: JSON.stringify({
           refresh_token: tokens.value.refresh_token,
           grant_type: 'refresh_token',
