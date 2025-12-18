@@ -91,7 +91,7 @@ const strengthProgress = computed(() => getSportProgress(props.stats.strength.pl
 
       <div class="grid grid-cols-3 gap-4 mt-4">
         <!-- Cycling Stats -->
-        <div class="stat bg-success/10 rounded-box p-4 relative overflow-hidden h-[140px]">
+        <div class="stat bg-success/10 rounded-box p-4 relative overflow-hidden h-[140px] pb-6">
           <!-- Progress background -->
           <div
             class="absolute inset-0 bg-success/20 transition-all duration-500"
@@ -113,7 +113,7 @@ const strengthProgress = computed(() => getSportProgress(props.stats.strength.pl
         </div>
 
         <!-- Running Stats -->
-        <div class="stat bg-warning/10 rounded-box p-4 relative overflow-hidden h-[140px]">
+        <div class="stat bg-warning/10 rounded-box p-4 relative overflow-hidden h-[140px] pb-6">
           <!-- Progress background -->
           <div
             class="absolute inset-0 bg-warning/20 transition-all duration-500"
@@ -135,7 +135,7 @@ const strengthProgress = computed(() => getSportProgress(props.stats.strength.pl
         </div>
 
         <!-- Strength Stats -->
-        <div class="stat bg-error/10 rounded-box p-4 relative overflow-hidden h-[140px]">
+        <div class="stat bg-error/10 rounded-box p-4 relative overflow-hidden h-[140px] pb-6">
           <!-- Progress background -->
           <div
             class="absolute inset-0 bg-error/20 transition-all duration-500"
