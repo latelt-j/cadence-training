@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import type { ScheduledSession } from '../types/session'
 import { SPORT_CONFIG } from '../types/session'
 
@@ -16,21 +16,38 @@ const emit = defineEmits<{
 const copied = ref(false)
 const feedbackText = ref('')
 const feedbackSaved = ref(false)
+const isEditingFeedback = ref(false)
+const currentPage = ref<'details' | 'coach'>('details')
 
 // Sync feedback text when session changes
 watch(() => props.session, (newSession) => {
   feedbackText.value = newSession?.coach_feedback || ''
   feedbackSaved.value = false
+  isEditingFeedback.value = false
+  currentPage.value = 'details'
 }, { immediate: true })
+
+// Check if feedback exists
+const hasFeedback = computed(() => !!feedbackText.value.trim())
 
 const saveFeedback = () => {
   if (props.session) {
     emit('updateFeedback', props.session.id, feedbackText.value)
     feedbackSaved.value = true
+    isEditingFeedback.value = false
     setTimeout(() => {
       feedbackSaved.value = false
     }, 2000)
   }
+}
+
+const startEditFeedback = () => {
+  isEditingFeedback.value = true
+}
+
+const cancelEditFeedback = () => {
+  feedbackText.value = props.session?.coach_feedback || ''
+  isEditingFeedback.value = false
 }
 
 const formatDate = (dateStr: string) => {
@@ -260,16 +277,38 @@ const downloadZwoFile = () => {
 
 <template>
   <dialog class="modal" :class="{ 'modal-open': !!session }">
-    <div class="modal-box" v-if="session">
+    <div class="modal-box max-w-2xl" v-if="session">
+      <!-- Header -->
       <div class="flex items-center gap-3 mb-4">
         <span class="text-4xl">{{ SPORT_CONFIG[session.sport].emoji }}</span>
-        <div>
+        <div class="flex-1">
           <h3 class="font-bold text-lg">{{ session.title }}</h3>
           <p class="text-sm text-base-content/70">{{ formatDate(session.date) }}</p>
         </div>
+        <button class="btn btn-sm btn-circle btn-ghost" @click="emit('close')">✕</button>
       </div>
 
-      <div class="space-y-4">
+      <!-- Tabs -->
+      <div class="tabs tabs-boxed mb-4">
+        <button
+          class="tab"
+          :class="{ 'tab-active': currentPage === 'details' }"
+          @click="currentPage = 'details'"
+        >
+          📊 Détails
+        </button>
+        <button
+          class="tab"
+          :class="{ 'tab-active': currentPage === 'coach' }"
+          @click="currentPage = 'coach'"
+        >
+          💬 Coach
+          <span v-if="hasFeedback" class="ml-1 badge badge-xs badge-success">✓</span>
+        </button>
+      </div>
+
+      <!-- Page: Details -->
+      <div v-show="currentPage === 'details'" class="space-y-4">
         <div class="flex gap-2">
           <div class="badge badge-outline">{{ session.type }}</div>
           <div class="badge badge-primary">{{ formatDuration(session.duration_min) }}</div>
@@ -362,49 +401,83 @@ const downloadZwoFile = () => {
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Coach Feedback -->
-      <div class="mt-4">
-        <label class="label">
-          <span class="label-text font-medium">💬 Feedback Coach</span>
-        </label>
-        <textarea
-          v-model="feedbackText"
-          class="textarea textarea-bordered w-full h-24"
-          placeholder="Colle ici le retour de ton coach..."
-        ></textarea>
-        <div class="flex justify-end mt-2">
+        <!-- Actions for Details page -->
+        <div class="flex flex-wrap gap-2 pt-4 border-t border-base-300">
           <button
-            class="btn btn-sm"
-            :class="feedbackSaved ? 'btn-success' : 'btn-primary'"
-            @click="saveFeedback"
+            class="btn btn-sm btn-outline"
+            :class="copied ? 'btn-success' : 'btn-primary'"
+            @click="copyForAnalysis"
           >
-            {{ feedbackSaved ? '✓ Sauvegardé !' : '💾 Sauvegarder' }}
+            {{ copied ? '✓ Copié !' : '📋 Copier pour coach' }}
+          </button>
+          <button
+            v-if="session.sport === 'cycling' && session.type !== 'strava'"
+            class="btn btn-sm btn-outline btn-warning"
+            @click="downloadZwoFile"
+          >
+            🚴 Zwift
+          </button>
+          <button v-if="session.type !== 'strava'" class="btn btn-sm btn-error btn-outline" @click="handleDelete">
+            🗑️ Supprimer
           </button>
         </div>
       </div>
 
-      <div class="modal-action flex-wrap gap-2">
-        <button
-          class="btn btn-outline"
-          :class="copied ? 'btn-success' : 'btn-primary'"
-          @click="copyForAnalysis"
-        >
-          {{ copied ? '✓ Copié !' : '📋 Copier pour coach' }}
-        </button>
-        <!-- Zwift export button - only for cycling sessions -->
-        <button
-          v-if="session.sport === 'cycling' && session.type !== 'strava'"
-          class="btn btn-outline btn-warning"
-          @click="downloadZwoFile"
-        >
-          🚴 Zwift
-        </button>
-        <button v-if="session.type !== 'strava'" class="btn btn-error btn-outline" @click="handleDelete">
-          🗑️ Supprimer
-        </button>
-        <button class="btn" @click="emit('close')">Fermer</button>
+      <!-- Page: Coach -->
+      <div v-show="currentPage === 'coach'" class="space-y-4">
+        <!-- Copy button -->
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-base-content/70">Copie les données pour les envoyer à ton coach</span>
+          <button
+            class="btn btn-sm btn-outline"
+            :class="copied ? 'btn-success' : 'btn-primary'"
+            @click="copyForAnalysis"
+          >
+            {{ copied ? '✓ Copié !' : '📋 Copier' }}
+          </button>
+        </div>
+
+        <div class="divider">Feedback</div>
+
+        <!-- Read mode: Display feedback nicely -->
+        <div v-if="hasFeedback && !isEditingFeedback" class="space-y-3">
+          <div class="bg-base-200 rounded-lg p-4 whitespace-pre-wrap text-sm leading-relaxed feedback-display">
+            {{ feedbackText }}
+          </div>
+          <div class="flex justify-end">
+            <button class="btn btn-sm btn-ghost" @click="startEditFeedback">
+              ✏️ Modifier
+            </button>
+          </div>
+        </div>
+
+        <!-- Edit mode: Textarea -->
+        <div v-else class="space-y-3">
+          <textarea
+            v-model="feedbackText"
+            class="textarea textarea-bordered w-full h-32"
+            placeholder="Colle ici le retour de ton coach...
+
+Exemple:
+⚡ Charge: Modérée - bonne séance d'endurance
+✅ Points positifs: Régularité, bonne gestion de l'effort
+⚠️ À améliorer: Cadence un peu basse
+💡 Conseil: Travaille la vélocité sur le prochain entraînement"
+          ></textarea>
+          <div class="flex justify-end gap-2">
+            <button v-if="hasFeedback" class="btn btn-sm btn-ghost" @click="cancelEditFeedback">
+              Annuler
+            </button>
+            <button
+              class="btn btn-sm"
+              :class="feedbackSaved ? 'btn-success' : 'btn-primary'"
+              @click="saveFeedback"
+            >
+              {{ feedbackSaved ? '✓ Sauvegardé !' : '💾 Sauvegarder' }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop" @click="emit('close')">
