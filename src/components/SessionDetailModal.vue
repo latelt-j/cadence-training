@@ -303,9 +303,9 @@ const downloadZwoFile = () => {
 
 <template>
   <dialog class="modal" :class="{ 'modal-open': !!session }">
-    <div class="modal-box max-w-2xl" v-if="session">
+    <div class="modal-box max-w-2xl h-[32rem] flex flex-col" v-if="session">
       <!-- Header -->
-      <div class="flex items-center gap-3 mb-4">
+      <div class="flex items-center gap-3 mb-4 flex-shrink-0">
         <span class="text-4xl">{{ SPORT_CONFIG[session.sport].emoji }}</span>
         <div class="flex-1">
           <h3 class="font-bold text-lg">{{ session.title }}</h3>
@@ -315,7 +315,7 @@ const downloadZwoFile = () => {
       </div>
 
       <!-- Tabs -->
-      <div class="tabs tabs-boxed mb-4">
+      <div class="tabs tabs-boxed mb-4 flex-shrink-0">
         <button
           class="tab"
           :class="{ 'tab-active': currentPage === 'details' }"
@@ -334,7 +334,7 @@ const downloadZwoFile = () => {
       </div>
 
       <!-- Page: Details -->
-      <div v-show="currentPage === 'details'" class="space-y-4">
+      <div v-show="currentPage === 'details'" class="space-y-4 flex-1 overflow-y-auto">
         <div class="flex gap-2">
           <div class="badge badge-outline">{{ session.type }}</div>
           <div class="badge badge-primary">{{ formatDuration(session.duration_min) }}</div>
@@ -451,7 +451,7 @@ const downloadZwoFile = () => {
       </div>
 
       <!-- Page: Coach -->
-      <div v-show="currentPage === 'coach'" class="space-y-4">
+      <div v-show="currentPage === 'coach'" class="space-y-4 flex-1 overflow-y-auto">
         <!-- Copy button -->
         <div class="flex justify-between items-center">
           <span class="text-sm text-base-content/70">Copie les données pour les envoyer à ton coach</span>
