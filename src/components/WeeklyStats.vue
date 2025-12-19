@@ -145,18 +145,6 @@ const strengthProgress = computed(() => getSportProgress(props.stats.strength.pl
         </div>
       </div>
 
-      <!-- Total -->
-      <div class="divider"></div>
-      <div class="flex justify-center gap-8">
-        <div class="text-center">
-          <div class="text-3xl font-bold text-primary">{{ formatHours(stats.total.hours) }}</div>
-          <div class="text-sm text-base-content/70">Total</div>
-        </div>
-        <div class="text-center">
-          <div class="text-3xl font-bold text-secondary">{{ stats.total.sessions }}</div>
-          <div class="text-sm text-base-content/70">Séances</div>
-        </div>
-      </div>
     </div>
   </div>
 </template>
