@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, computed, ref } from 'vue'
+import VueApexCharts from 'vue3-apexcharts'
 import { useIntervals } from '../composables/useIntervals'
 
 const {
@@ -112,36 +113,103 @@ const chartData = computed(() => {
   return data
 })
 
-// SVG path for line chart
-const generatePath = (values: number[], width: number, height: number, padding: number = 4) => {
-  if (values.length < 2) return ''
+// ApexCharts configuration
+const chartSeries = computed(() => [
+  {
+    name: 'TSB (Forme)',
+    data: chartData.value.map(d => ({ x: d.date, y: d.tsb })),
+  },
+  {
+    name: 'Fitness (CTL)',
+    data: chartData.value.map(d => ({ x: d.date, y: d.ctl })),
+  },
+  {
+    name: 'Fatigue (ATL)',
+    data: chartData.value.map(d => ({ x: d.date, y: d.atl })),
+  },
+])
 
-  const min = Math.min(...values, -30)
-  const max = Math.max(...values, 30)
-  const range = max - min || 1
-
-  const points = values.map((v, i) => {
-    const x = padding + (i / (values.length - 1)) * (width - padding * 2)
-    const y = padding + ((max - v) / range) * (height - padding * 2)
-    return `${x},${y}`
-  })
-
-  return `M ${points.join(' L ')}`
-}
-
-const tsbPath = computed(() => generatePath(chartData.value.map(d => d.tsb), 320, 120))
-const ctlPath = computed(() => generatePath(chartData.value.map(d => d.ctl), 320, 120))
-const atlPath = computed(() => generatePath(chartData.value.map(d => d.atl), 320, 120))
-
-// Zero line position
-const zeroLineY = computed(() => {
-  const values = chartData.value.map(d => d.tsb)
-  if (values.length < 2) return 60
-  const min = Math.min(...values, -30)
-  const max = Math.max(...values, 30)
-  const range = max - min || 1
-  return 4 + ((max - 0) / range) * 112
-})
+const chartOptions = computed(() => ({
+  chart: {
+    type: 'line',
+    height: 180,
+    toolbar: { show: false },
+    zoom: { enabled: false },
+    background: 'transparent',
+    fontFamily: 'inherit',
+    animations: {
+      enabled: true,
+      easing: 'easeinout',
+      speed: 500,
+    },
+  },
+  colors: ['#22c55e', '#38bdf8', '#fbbf24'],
+  stroke: {
+    width: [3, 2, 2],
+    curve: 'smooth',
+    dashArray: [0, 0, 0],
+  },
+  fill: {
+    type: 'gradient',
+    gradient: {
+      shade: 'dark',
+      type: 'vertical',
+      shadeIntensity: 0,
+      opacityFrom: 0.3,
+      opacityTo: 0,
+      stops: [0, 100],
+    },
+  },
+  grid: {
+    borderColor: 'rgba(255,255,255,0.1)',
+    strokeDashArray: 4,
+    xaxis: { lines: { show: false } },
+    yaxis: { lines: { show: true } },
+  },
+  xaxis: {
+    type: 'datetime',
+    labels: {
+      style: { colors: 'rgba(255,255,255,0.5)', fontSize: '10px' },
+      datetimeFormatter: { day: 'dd MMM' },
+    },
+    axisBorder: { show: false },
+    axisTicks: { show: false },
+  },
+  yaxis: {
+    labels: {
+      style: { colors: 'rgba(255,255,255,0.5)', fontSize: '10px' },
+      formatter: (val: number) => Math.round(val).toString(),
+    },
+  },
+  annotations: {
+    yaxis: [{
+      y: 0,
+      strokeDashArray: 4,
+      borderColor: 'rgba(255,255,255,0.3)',
+    }],
+  },
+  legend: {
+    show: true,
+    position: 'bottom',
+    horizontalAlign: 'center',
+    fontSize: '11px',
+    labels: { colors: 'rgba(255,255,255,0.6)' },
+    markers: { width: 8, height: 8, radius: 2 },
+    itemMargin: { horizontal: 8 },
+  },
+  tooltip: {
+    theme: 'dark',
+    shared: true,
+    intersect: false,
+    x: {
+      format: 'dd MMM yyyy',
+    },
+    y: {
+      formatter: (val: number) => val !== null ? Math.round(val).toString() : '-',
+    },
+  },
+  dataLabels: { enabled: false },
+}))
 </script>
 
 <template>
@@ -231,51 +299,13 @@ const zeroLineY = computed(() => {
             </div>
           </div>
 
-          <div v-if="chartData.length > 1" class="bg-base-200/50 rounded-xl overflow-hidden pt-5">
-            <svg viewBox="0 0 320 120" class="w-full h-32">
-              <!-- Zero line -->
-              <line
-                x1="4" :y1="zeroLineY"
-                x2="316" :y2="zeroLineY"
-                stroke="currentColor" stroke-opacity="0.2" stroke-dasharray="4"
-              />
-              <!-- CTL (Fitness) -->
-              <path
-                :d="ctlPath"
-                fill="none"
-                stroke="#38bdf8"
-                stroke-width="1.5"
-                stroke-opacity="0.5"
-              />
-              <!-- ATL (Fatigue) -->
-              <path
-                :d="atlPath"
-                fill="none"
-                stroke="#fbbf24"
-                stroke-width="1.5"
-                stroke-opacity="0.5"
-              />
-              <!-- TSB (Form) -->
-              <path
-                :d="tsbPath"
-                fill="none"
-                stroke="#22c55e"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              />
-            </svg>
-            <div class="flex justify-center gap-4 py-2 text-[10px] text-base-content/50">
-              <span class="flex items-center gap-1">
-                <span class="w-2 h-0.5 bg-green-500 rounded"></span> TSB
-              </span>
-              <span class="flex items-center gap-1">
-                <span class="w-2 h-0.5 bg-sky-400 rounded opacity-50"></span> Fitness
-              </span>
-              <span class="flex items-center gap-1">
-                <span class="w-2 h-0.5 bg-amber-400 rounded opacity-50"></span> Fatigue
-              </span>
-            </div>
+          <div v-if="chartData.length > 1" class="bg-base-200/50 rounded-xl overflow-hidden">
+            <VueApexCharts
+              type="area"
+              height="180"
+              :options="chartOptions"
+              :series="chartSeries"
+            />
           </div>
           <div v-else class="text-center text-xs text-base-content/40 py-4">
             Pas assez de données
