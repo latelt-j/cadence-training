@@ -131,7 +131,7 @@ const chartSeries = computed(() => [
 
 const chartOptions = computed(() => ({
   chart: {
-    type: 'line',
+    type: 'area' as const,
     height: 180,
     toolbar: { show: false },
     zoom: { enabled: false },
@@ -146,7 +146,7 @@ const chartOptions = computed(() => ({
   colors: ['#22c55e', '#38bdf8', '#fbbf24'],
   stroke: {
     width: [3, 2, 2],
-    curve: 'smooth',
+    curve: 'smooth' as const,
     dashArray: [0, 0, 0],
   },
   fill: {
@@ -167,7 +167,7 @@ const chartOptions = computed(() => ({
     yaxis: { lines: { show: true } },
   },
   xaxis: {
-    type: 'datetime',
+    type: 'datetime' as const,
     labels: {
       style: { colors: 'rgba(255,255,255,0.5)', fontSize: '10px' },
       datetimeFormatter: { day: 'dd MMM' },
@@ -190,11 +190,11 @@ const chartOptions = computed(() => ({
   },
   legend: {
     show: true,
-    position: 'bottom',
-    horizontalAlign: 'center',
+    position: 'bottom' as const,
+    horizontalAlign: 'center' as const,
     fontSize: '11px',
     labels: { colors: 'rgba(255,255,255,0.6)' },
-    markers: { width: 8, height: 8, radius: 2 },
+    markers: { size: 4 },
     itemMargin: { horizontal: 8 },
   },
   tooltip: {
