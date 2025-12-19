@@ -452,19 +452,6 @@ const downloadZwoFile = () => {
 
       <!-- Page: Coach -->
       <div v-show="currentPage === 'coach'" class="space-y-4 flex-1 overflow-y-auto">
-        <!-- Copy button -->
-        <div class="flex justify-end">
-          <button
-            class="btn btn-sm btn-outline"
-            :class="copied ? 'btn-success' : 'btn-primary'"
-            @click="copyForAnalysis"
-          >
-            {{ copied ? '✓ Copié !' : '📋 Copier pour coach' }}
-          </button>
-        </div>
-
-        <div class="divider">Feedback</div>
-
         <!-- Read mode: Display feedback nicely with markdown -->
         <div v-if="hasFeedback && !isEditingFeedback" class="space-y-3">
           <div
