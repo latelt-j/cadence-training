@@ -100,7 +100,7 @@ const strengthProgress = computed(() => getSportProgress(props.stats.strength.pl
           <div class="relative flex flex-col h-full p-3">
             <div class="flex items-center justify-between">
               <span class="text-xs opacity-70">Vélo</span>
-              <span class="text-lg">🚴</span>
+              <span class="text-3xl">🚴</span>
             </div>
             <div class="text-success text-2xl font-bold">{{ formatHours(stats.cycling.hours) }}</div>
             <div class="text-xs opacity-70">
@@ -122,7 +122,7 @@ const strengthProgress = computed(() => getSportProgress(props.stats.strength.pl
           <div class="relative flex flex-col h-full p-3">
             <div class="flex items-center justify-between">
               <span class="text-xs opacity-70">Course</span>
-              <span class="text-lg">🏃</span>
+              <span class="text-3xl">🏃</span>
             </div>
             <div class="text-warning text-2xl font-bold">{{ formatHours(stats.running.hours) }}</div>
             <div class="text-xs opacity-70">
@@ -144,7 +144,7 @@ const strengthProgress = computed(() => getSportProgress(props.stats.strength.pl
           <div class="relative flex flex-col h-full p-3">
             <div class="flex items-center justify-between">
               <span class="text-xs opacity-70">Renfo</span>
-              <span class="text-lg">💪</span>
+              <span class="text-3xl">💪</span>
             </div>
             <div class="text-error text-2xl font-bold">{{ formatHours(stats.strength.hours) }}</div>
             <div class="text-xs opacity-70">&nbsp;</div>
