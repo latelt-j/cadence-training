@@ -453,14 +453,13 @@ const downloadZwoFile = () => {
       <!-- Page: Coach -->
       <div v-show="currentPage === 'coach'" class="space-y-4 flex-1 overflow-y-auto">
         <!-- Copy button -->
-        <div class="flex justify-between items-center">
-          <span class="text-sm text-base-content/70">Copie les données pour les envoyer à ton coach</span>
+        <div class="flex justify-end">
           <button
             class="btn btn-sm btn-outline"
             :class="copied ? 'btn-success' : 'btn-primary'"
             @click="copyForAnalysis"
           >
-            {{ copied ? '✓ Copié !' : '📋 Copier' }}
+            {{ copied ? '✓ Copié !' : '📋 Copier pour coach' }}
           </button>
         </div>
 
