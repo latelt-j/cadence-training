@@ -507,7 +507,7 @@ const handleReset = () => {
             <!-- Weekly Recap (Sunday) -->
             <button
               v-if="isSunday"
-              class="btn btn-sm gap-1 bg-transparent border border-pink-500 text-pink-500 hover:bg-pink-500/10"
+              class="btn btn-sm gap-1 bg-transparent border-0 text-pink-500 hover:bg-pink-500/10"
               @click="showWeeklyRecapModal = true"
             >
               📊 Bilan
