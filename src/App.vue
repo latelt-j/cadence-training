@@ -230,7 +230,11 @@ onMounted(async () => {
       trainingPhases.value = settings.training_phases
     }
     if (settings?.training_objectives) {
-      trainingObjectives.value = settings.training_objectives
+      // Add default priority for old objectives without it
+      trainingObjectives.value = settings.training_objectives.map(obj => ({
+        ...obj,
+        priority: obj.priority || 'A'
+      }))
     }
   } catch (e) {
     console.error('Error loading settings:', e)
