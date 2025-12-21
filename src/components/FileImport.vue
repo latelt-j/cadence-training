@@ -19,6 +19,14 @@ const error = ref('')
 const copied = ref(false)
 const replaceExisting = ref(true)
 
+// Format date as YYYY-MM-DD in LOCAL timezone (not UTC!)
+const formatLocalDate = (date: Date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 // Get LAST week dates (Monday to Sunday) - for the weekly review/bilan
 const getWeekDates = () => {
   const today = new Date()
@@ -38,8 +46,8 @@ const getWeekDates = () => {
   lastSunday.setDate(lastMonday.getDate() + 6)
 
   return {
-    start: lastMonday.toISOString().split('T')[0] ?? '',
-    end: lastSunday.toISOString().split('T')[0] ?? '',
+    start: formatLocalDate(lastMonday),
+    end: formatLocalDate(lastSunday),
   }
 }
 
@@ -62,7 +70,7 @@ const getNextWeekDates = () => {
   for (let i = 0; i < 7; i++) {
     const d = new Date(monday)
     d.setDate(monday.getDate() + i)
-    dates.push(d.toISOString().split('T')[0])
+    dates.push(formatLocalDate(d))
   }
   return dates
 }
