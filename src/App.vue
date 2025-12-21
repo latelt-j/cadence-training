@@ -281,10 +281,25 @@ const syncStrava = async () => {
   const sessionsToAdd = convertToSessions(detailedActivities)
 
   let added = 0
+  let replacedPlanned = 0
   const newIds: string[] = []
 
   for (const { session, date } of sessionsToAdd) {
-    await addSession(session, date)
+    // Trouver la séance prévue du MÊME SPORT pour ce jour
+    const plannedSameSport = sessions.value.find(
+      s => s.date === date && s.sport === session.sport && s.type !== 'strava'
+    )
+
+    // Stocker les infos avant suppression pour les rattacher à l'activité Strava
+    let sessionToAdd = { ...session }
+    if (plannedSameSport) {
+      sessionToAdd.planned_title = plannedSameSport.title
+      sessionToAdd.planned_description = plannedSameSport.description
+      await removeSession(plannedSameSport.id)
+      replacedPlanned++
+    }
+
+    await addSession(sessionToAdd, date)
     const lastSession = sessions.value[sessions.value.length - 1]
     if (lastSession) {
       newIds.push(lastSession.id)
@@ -301,7 +316,11 @@ const syncStrava = async () => {
   }
 
   if (added > 0) {
-    alert(`Strava : ${added} activité(s) ajoutée(s)`)
+    const msg = [`${added} activité(s) ajoutée(s)`]
+    if (replacedPlanned > 0) {
+      msg.push(`${replacedPlanned} séance(s) prévue(s) remplacée(s)`)
+    }
+    alert(`Strava : ${msg.join(', ')}`)
   }
 }
 

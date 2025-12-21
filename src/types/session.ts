@@ -66,6 +66,9 @@ export interface SessionTemplate {
   average_cadence?: number
   // Coach feedback
   coach_feedback?: string
+  // Planned session info (when Strava activity replaces a planned session)
+  planned_title?: string
+  planned_description?: string
 }
 
 export interface ScheduledSession extends SessionTemplate {

@@ -25,7 +25,7 @@ const copied = ref(false)
 const feedbackText = ref('')
 const feedbackSaved = ref(false)
 const isEditingFeedback = ref(false)
-const currentPage = ref<'details' | 'coach'>('details')
+const currentPage = ref<'details' | 'planned' | 'coach'>('details')
 
 // Strava session editing
 const isEditingStrava = ref(false)
@@ -46,6 +46,12 @@ watch(() => props.session, (newSession) => {
 
 // Check if feedback exists
 const hasFeedback = computed(() => !!feedbackText.value.trim())
+
+// Check if planned session info exists (for Strava sessions that replaced a planned one)
+const hasPlannedInfo = computed(() => {
+  return props.session?.type === 'strava' &&
+    (props.session.planned_title || props.session.planned_description)
+})
 
 // Render markdown feedback
 const renderedFeedback = computed(() => {
@@ -243,6 +249,14 @@ const startEditStrava = () => {
   isEditingStrava.value = true
 }
 
+const applyPlannedInfo = () => {
+  // Pre-fill with planned session info and start editing
+  editTitle.value = props.session?.planned_title || props.session?.title || ''
+  editDescription.value = props.session?.planned_description || props.session?.description || ''
+  isEditingStrava.value = true
+  currentPage.value = 'details'
+}
+
 const cancelEditStrava = () => {
   editTitle.value = props.session?.title || ''
   editDescription.value = props.session?.description || ''
@@ -374,6 +388,14 @@ const downloadZwoFile = () => {
           @click="currentPage = 'details'"
         >
           📊 Détails
+        </button>
+        <button
+          v-if="hasPlannedInfo"
+          class="tab"
+          :class="{ 'tab-active': currentPage === 'planned' }"
+          @click="currentPage = 'planned'"
+        >
+          📋 Prévu
         </button>
         <button
           class="tab"
@@ -514,6 +536,34 @@ const downloadZwoFile = () => {
             🗑️ Supprimer
           </button>
         </div>
+      </div>
+
+      <!-- Page: Planned (when Strava activity replaced a planned session) -->
+      <div v-show="currentPage === 'planned'" class="space-y-4 flex-1 overflow-y-auto">
+        <div class="bg-base-200 rounded-lg p-4 space-y-3">
+          <div class="text-sm text-base-content/60">Cette activité a remplacé une séance prévue</div>
+
+          <div>
+            <div class="text-xs text-base-content/50 mb-1">Titre prévu</div>
+            <div class="font-semibold">{{ session.planned_title }}</div>
+          </div>
+
+          <div v-if="session.planned_description">
+            <div class="text-xs text-base-content/50 mb-1">Description prévue</div>
+            <div class="text-sm text-base-content/80 whitespace-pre-wrap">{{ session.planned_description }}</div>
+          </div>
+        </div>
+
+        <button
+          class="btn btn-primary w-full"
+          @click="applyPlannedInfo"
+        >
+          ✏️ Appliquer à l'activité
+        </button>
+
+        <p class="text-xs text-center text-base-content/50">
+          Ceci pré-remplira le titre et la description pour modification
+        </p>
       </div>
 
       <!-- Page: Coach -->

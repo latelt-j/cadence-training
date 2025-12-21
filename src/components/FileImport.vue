@@ -254,6 +254,18 @@ Types possibles :
 - Structure : "long_run", "long_ride" (sortie longue), "hills" (côtes), "fartlek" (jeux d'allure), "technique" (éducatifs)
 - Triathlon : "brick" (enchaînement), "test" (tests FTP/VMA)
 - Renfo/Récup : "recovery", "strength", "mobility" (étirements/yoga), "core" (gainage), "plyometrics" (pliométrie)
+
+IMPORTANT pour les séances "strength" : La description doit être DÉTAILLÉE avec les exercices précis.
+Exemple de format pour strength :
+{
+  "sport": "strength",
+  "type": "strength",
+  "title": "Renfo bas du corps",
+  "duration_min": 45,
+  "description": "Circuit 3 tours :\\n- Squats : 3x15\\n- Fentes avant : 3x12 chaque jambe\\n- Step-ups : 3x12 chaque jambe\\n- Pont fessier : 3x20\\n- Chaise : 3x45sec\\n\\nFinir par 5min d'étirements",
+  "date": "2025-01-20",
+  "structure": []
+}
 `
 
   return prompt
@@ -324,8 +336,8 @@ const openFileDialog = () => {
   <div class="space-y-4">
     <!-- Ask coach button -->
     <button
-      class="btn btn-outline w-full"
-      :class="copied ? 'btn-success' : 'btn-secondary'"
+      class="btn w-full text-white font-semibold border-0 shadow-lg"
+      :class="copied ? 'btn-success' : 'bg-pink-500 hover:bg-pink-600 shadow-pink-500/40'"
       @click="copyCoachPrompt"
     >
       {{ copied ? '✓ Copié !' : '🤖 Demander au coach (copier le prompt)' }}
