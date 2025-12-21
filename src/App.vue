@@ -498,7 +498,7 @@ const handleReset = () => {
 
             <!-- Objectives button -->
             <button
-              class="btn btn-sm gap-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 hover:from-amber-600 hover:to-orange-600 shadow-lg shadow-orange-500/30 animate-pulse-subtle"
+              class="btn btn-sm gap-1 bg-gradient-to-r from-orange-600 to-red-500 text-white font-semibold border-0 hover:from-orange-700 hover:to-red-600 shadow-lg shadow-red-500/40 animate-pulse-subtle"
               @click="showObjectivesModal = true"
             >
               🎯 Objectifs
