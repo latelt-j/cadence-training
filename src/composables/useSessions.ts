@@ -95,7 +95,8 @@ export function useSessions() {
     if (replaceExisting) {
       const importDates = new Set(newSessions.map(s => s.date))
       sessions.value = sessions.value.filter(s => {
-        if (importDates.has(s.date) && s.type !== 'strava') {
+        // Keep Strava-synced sessions (they have strava_id)
+        if (importDates.has(s.date) && !s.strava_id) {
           sessionsToDelete.push(s.id)
           return false
         }
@@ -111,7 +112,8 @@ export function useSessions() {
 
       if (existingIndex !== -1) {
         const existing = sessions.value[existingIndex]
-        if (existing && existing.type !== 'strava') {
+        // Don't replace Strava-synced sessions
+        if (existing && !existing.strava_id) {
           sessions.value[existingIndex] = newSession
           sessionsToAdd.push(newSession)
         }

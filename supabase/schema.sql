@@ -103,3 +103,17 @@ ALTER TABLE oauth_tokens DISABLE ROW LEVEL SECURITY;
 -- Run this if you already have the sessions table
 -- =============================================
 -- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS coach_feedback TEXT;
+
+-- =============================================
+-- MIGRATION: Add training phases to user_settings
+-- Run this if you already have the user_settings table
+-- =============================================
+-- ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS training_phases JSONB DEFAULT '[]'::jsonb;
+-- ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS training_objectives JSONB DEFAULT '[]'::jsonb;
+
+-- =============================================
+-- MIGRATION: Add planned session info to sessions
+-- Run this if you already have the sessions table
+-- =============================================
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS planned_title TEXT;
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS planned_description TEXT;
