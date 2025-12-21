@@ -72,7 +72,7 @@ export function useSessions() {
     await syncFromSupabase()
   }
 
-  const loadFromJson = async (jsonData: SessionTemplate[] | ScheduledSession[]) => {
+  const loadFromJson = async (jsonData: SessionTemplate[] | ScheduledSession[], replaceExisting = false) => {
     const today = new Date().toISOString().split('T')[0] ?? ''
     const newSessions = jsonData.map((item) => {
       // Check if it's already a full ScheduledSession
@@ -89,6 +89,19 @@ export function useSessions() {
     })
 
     const sessionsToAdd: ScheduledSession[] = []
+    const sessionsToDelete: string[] = []
+
+    // If replaceExisting, remove all non-strava sessions on the dates we're importing
+    if (replaceExisting) {
+      const importDates = new Set(newSessions.map(s => s.date))
+      sessions.value = sessions.value.filter(s => {
+        if (importDates.has(s.date) && s.type !== 'strava') {
+          sessionsToDelete.push(s.id)
+          return false
+        }
+        return true
+      })
+    }
 
     newSessions.forEach(newSession => {
       const key = `${newSession.title}-${newSession.date}`
@@ -110,7 +123,16 @@ export function useSessions() {
 
     saveToCache()
 
-    // Sync to Supabase
+    // Sync deletions to Supabase
+    for (const id of sessionsToDelete) {
+      try {
+        await dbDeleteSession(id)
+      } catch (error) {
+        console.error('Error deleting session:', error)
+      }
+    }
+
+    // Sync additions to Supabase
     if (sessionsToAdd.length > 0) {
       try {
         await dbUpsertSessions(sessionsToAdd)

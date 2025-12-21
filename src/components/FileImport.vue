@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import type { SessionTemplate, ScheduledSession } from '../types/session'
 
 const emit = defineEmits<{
-  import: [data: (SessionTemplate | ScheduledSession)[]]
+  import: [data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean]
 }>()
 
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -11,6 +11,7 @@ const isDragging = ref(false)
 const jsonText = ref('')
 const error = ref('')
 const copied = ref(false)
+const replaceExisting = ref(false)
 
 const getWeekDates = () => {
   const today = new Date()
@@ -88,7 +89,7 @@ const parseAndEmit = (text: string) => {
 
     const data = JSON.parse(cleanText)
     const sessions = Array.isArray(data) ? data : [data]
-    emit('import', sessions)
+    emit('import', sessions, replaceExisting.value)
     jsonText.value = ''
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'JSON invalide'
@@ -188,6 +189,16 @@ const openFileDialog = () => {
 ]'
         @paste="onPaste"
       ></textarea>
+      <div class="form-control">
+        <label class="label cursor-pointer justify-start gap-2">
+          <input
+            type="checkbox"
+            v-model="replaceExisting"
+            class="checkbox checkbox-sm checkbox-primary"
+          />
+          <span class="label-text">Remplacer les séances existantes sur ces jours</span>
+        </label>
+      </div>
       <button
         class="btn btn-primary btn-sm w-full"
         :disabled="!jsonText.trim()"
