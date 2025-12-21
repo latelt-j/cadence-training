@@ -75,13 +75,16 @@ export function useSessions() {
   const loadFromJson = async (jsonData: SessionTemplate[] | ScheduledSession[]) => {
     const today = new Date().toISOString().split('T')[0] ?? ''
     const newSessions = jsonData.map((item) => {
+      // Check if it's already a full ScheduledSession
       if ('id' in item && 'date' in item) {
         return item as ScheduledSession
       }
+      // Otherwise create a new session, preserving date if provided
+      const itemWithDate = item as SessionTemplate & { date?: string }
       return {
         ...item,
         id: uuidv4(),
-        date: today,
+        date: itemWithDate.date ?? today,
       } as ScheduledSession
     })
 
