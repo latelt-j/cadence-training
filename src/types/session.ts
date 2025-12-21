@@ -14,6 +14,7 @@ export interface TrainingPhase {
 export interface TrainingObjective {
   id: string
   type: 'trail' | 'road_cycling'
+  priority: 'A' | 'B' | 'C' // A = principal, B = secondaire, C = préparation
   name: string
   date: string // YYYY-MM-DD
   distance_km: number

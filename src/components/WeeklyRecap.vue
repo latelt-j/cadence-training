@@ -149,10 +149,12 @@ const generateCoachPrompt = () => {
   // Add objectives
   if (props.trainingObjectives.length > 0) {
     prompt += `\n## Objectifs\n`
+    const priorityLabels = { A: 'Principal', B: 'Secondaire', C: 'Préparation' }
     props.trainingObjectives.forEach(obj => {
       const daysLeft = Math.ceil((new Date(obj.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
       const typeLabel = obj.type === 'trail' ? '🏃 Trail' : '🚴 Vélo route'
-      prompt += `\n**${obj.name}** (${typeLabel}) - J-${daysLeft}\n`
+      const priorityLabel = priorityLabels[obj.priority] || obj.priority
+      prompt += `\n**[${obj.priority}] ${obj.name}** (${typeLabel}, ${priorityLabel}) - J-${daysLeft}\n`
       prompt += `- Date : ${obj.date}\n`
       prompt += `- Distance : ${obj.distance_km} km\n`
       prompt += `- D+ : ${obj.elevation_gain}m`

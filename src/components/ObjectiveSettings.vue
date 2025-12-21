@@ -19,6 +19,12 @@ watch(() => props.objectives, (newObjectives) => {
   localObjectives.value = [...newObjectives]
 }, { deep: true })
 
+const priorityOptions = [
+  { value: 'A', label: 'A - Principal' },
+  { value: 'B', label: 'B - Secondaire' },
+  { value: 'C', label: 'C - Préparation' },
+]
+
 const addObjective = () => {
   const nextMonth = new Date()
   nextMonth.setMonth(nextMonth.getMonth() + 1)
@@ -26,6 +32,7 @@ const addObjective = () => {
   editingObjective.value = {
     id: uuidv4(),
     type: 'trail',
+    priority: 'A',
     name: '',
     date: nextMonth.toISOString().split('T')[0] ?? '',
     distance_km: 0,
@@ -97,6 +104,7 @@ const switchType = (type: 'trail' | 'road_cycling') => {
   editingObjective.value = {
     id: editingObjective.value.id,
     type,
+    priority: 'A',
     name: '',
     date: nextMonth.toISOString().split('T')[0] ?? '',
     distance_km: 0,
@@ -148,6 +156,18 @@ const switchType = (type: 'trail' | 'road_cycling') => {
             class="input input-sm input-bordered w-full"
             placeholder="Ex: UTMB, Étape du Tour..."
           />
+        </div>
+
+        <div>
+          <label class="text-xs text-base-content/70 mb-1 block">Priorité</label>
+          <select
+            v-model="editingObjective.priority"
+            class="select select-sm select-bordered w-full"
+          >
+            <option v-for="opt in priorityOptions" :key="opt.value" :value="opt.value">
+              {{ opt.label }}
+            </option>
+          </select>
         </div>
 
         <div>
@@ -208,6 +228,14 @@ const switchType = (type: 'trail' | 'road_cycling') => {
       >
         <div class="flex-1">
           <div class="flex items-center gap-2">
+            <span
+              class="badge badge-sm font-bold"
+              :class="{
+                'badge-error': obj.priority === 'A',
+                'badge-warning': obj.priority === 'B',
+                'badge-ghost': obj.priority === 'C'
+              }"
+            >{{ obj.priority }}</span>
             <span>{{ obj.type === 'trail' ? '🏃' : '🚴' }}</span>
             <span class="font-medium">{{ obj.name }}</span>
             <span class="badge badge-sm badge-primary">{{ daysUntil(obj.date) }}</span>
