@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { ScheduledSession, TrainingPhase } from '../types/session'
+import type { ScheduledSession, TrainingPhase, TrainingObjective } from '../types/session'
 
 const props = defineProps<{
   sessions: ScheduledSession[]
   trainingPhases: TrainingPhase[]
+  trainingObjectives: TrainingObjective[]
 }>()
 
 const emit = defineEmits<{
@@ -143,6 +144,23 @@ const generateCoachPrompt = () => {
     prompt += `\n(Du ${currentPhase.value.start_date} au ${currentPhase.value.end_date})\n`
   } else {
     prompt += `⚠️ Aucune phase définie\n`
+  }
+
+  // Add objectives
+  if (props.trainingObjectives.length > 0) {
+    prompt += `\n## Objectifs\n`
+    props.trainingObjectives.forEach(obj => {
+      const daysLeft = Math.ceil((new Date(obj.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+      const typeLabel = obj.type === 'trail' ? '🏃 Trail' : '🚴 Vélo route'
+      prompt += `\n**${obj.name}** (${typeLabel}) - J-${daysLeft}\n`
+      prompt += `- Date : ${obj.date}\n`
+      prompt += `- Distance : ${obj.distance_km} km\n`
+      prompt += `- D+ : ${obj.elevation_gain}m`
+      if (obj.type === 'trail' && obj.elevation_loss) {
+        prompt += ` / D- : ${obj.elevation_loss}m`
+      }
+      prompt += '\n'
+    })
   }
 
   prompt += `

@@ -1,6 +1,6 @@
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
 import { ref } from 'vue'
-import type { ScheduledSession, StructurePhase, StravaLap, TrainingPhase } from '../types/session'
+import type { ScheduledSession, StructurePhase, StravaLap, TrainingPhase, TrainingObjective } from '../types/session'
 
 // Database types
 interface DbSession {
@@ -33,6 +33,7 @@ interface DbUserSettings {
   intervals_athlete_id: string | null
   intervals_api_key: string | null
   training_phases: TrainingPhase[] | null
+  training_objectives: TrainingObjective[] | null
   updated_at: string
 }
 

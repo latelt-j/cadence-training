@@ -10,6 +10,17 @@ export interface TrainingPhase {
   goals?: string
 }
 
+// Training objective (race/event)
+export interface TrainingObjective {
+  id: string
+  type: 'trail' | 'road_cycling'
+  name: string
+  date: string // YYYY-MM-DD
+  distance_km: number
+  elevation_gain: number // D+
+  elevation_loss?: number // D- (trail only)
+}
+
 export interface StructurePhase {
   phase: 'warmup' | 'work' | 'rest' | 'cooldown'
   min: number

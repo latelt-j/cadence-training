@@ -4,7 +4,7 @@ import { useSessions } from './composables/useSessions'
 import { useStrava } from './composables/useStrava'
 import { useGoogleCalendar } from './composables/useGoogleCalendar'
 import { useSupabase } from './composables/useSupabase'
-import type { SessionTemplate, ScheduledSession, TrainingPhase } from './types/session'
+import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective } from './types/session'
 import FileImport from './components/FileImport.vue'
 import WeekCalendar from './components/WeekCalendar.vue'
 import AddSessionModal from './components/AddSessionModal.vue'
@@ -14,6 +14,7 @@ import VolumeChart from './components/VolumeChart.vue'
 import WellnessWidget from './components/WellnessWidget.vue'
 import WeeklyRecap from './components/WeeklyRecap.vue'
 import TrainingPhasesSettings from './components/TrainingPhasesSettings.vue'
+import ObjectiveSettings from './components/ObjectiveSettings.vue'
 
 const {
   sessions,
@@ -61,10 +62,12 @@ const {
 const showGoogleDisconnectModal = ref(false)
 const showGoogleDeleteModal = ref(false)
 
-// Training phases
+// Training phases & objectives
 const { fetchSettings, updateSettings } = useSupabase()
 const trainingPhases = ref<TrainingPhase[]>([])
+const trainingObjectives = ref<TrainingObjective[]>([])
 const showPhasesModal = ref(false)
+const showObjectivesModal = ref(false)
 const showWeeklyRecapModal = ref(false)
 
 // Check if today is Sunday
@@ -220,14 +223,17 @@ onMounted(async () => {
   // Init sessions from Supabase
   await initSessions()
 
-  // Load training phases from settings
+  // Load training phases & objectives from settings
   try {
     const settings = await fetchSettings()
     if (settings?.training_phases) {
       trainingPhases.value = settings.training_phases
     }
+    if (settings?.training_objectives) {
+      trainingObjectives.value = settings.training_objectives
+    }
   } catch (e) {
-    console.error('Error loading training phases:', e)
+    console.error('Error loading settings:', e)
   }
 
   const urlParams = new URLSearchParams(window.location.search)
@@ -376,6 +382,15 @@ const handleSavePhases = async (phases: TrainingPhase[]) => {
   }
 }
 
+const handleSaveObjectives = async (objectives: TrainingObjective[]) => {
+  trainingObjectives.value = objectives
+  try {
+    await updateSettings({ training_objectives: objectives } as any)
+  } catch (e) {
+    console.error('Error saving objectives:', e)
+  }
+}
+
 const handleDeleteSession = async (sessionId: string) => {
   await removeSession(sessionId)
 }
@@ -480,6 +495,14 @@ const handleReset = () => {
                 </li>
               </ul>
             </div>
+
+            <!-- Objectives button -->
+            <button
+              class="btn btn-sm btn-ghost gap-1"
+              @click="showObjectivesModal = true"
+            >
+              🎯
+            </button>
 
             <!-- Weekly Recap (Sunday) -->
             <button
@@ -609,12 +632,27 @@ const handleReset = () => {
       </form>
     </dialog>
 
+    <!-- Objectives Modal -->
+    <dialog class="modal" :class="{ 'modal-open': showObjectivesModal }">
+      <div class="modal-box max-w-lg">
+        <ObjectiveSettings
+          :objectives="trainingObjectives"
+          @save="handleSaveObjectives"
+          @close="showObjectivesModal = false"
+        />
+      </div>
+      <form method="dialog" class="modal-backdrop" @click="showObjectivesModal = false">
+        <button>close</button>
+      </form>
+    </dialog>
+
     <!-- Weekly Recap Modal -->
     <dialog class="modal" :class="{ 'modal-open': showWeeklyRecapModal }">
       <div class="modal-box max-w-lg">
         <WeeklyRecap
           :sessions="sessions"
           :training-phases="trainingPhases"
+          :training-objectives="trainingObjectives"
           @close="showWeeklyRecapModal = false"
           @open-phase-settings="showPhasesModal = true; showWeeklyRecapModal = false"
         />
