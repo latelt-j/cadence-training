@@ -10,6 +10,73 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
 const jsonText = ref('')
 const error = ref('')
+const copied = ref(false)
+
+const getWeekDates = () => {
+  const today = new Date()
+  const day = today.getDay()
+  const diff = today.getDate() - day + (day === 0 ? -6 : 1)
+  const monday = new Date(today)
+  monday.setDate(diff)
+
+  const dates = []
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday)
+    d.setDate(monday.getDate() + i)
+    dates.push(d.toISOString().split('T')[0])
+  }
+  return dates
+}
+
+const copyCoachPrompt = async () => {
+  const weekDates = getWeekDates()
+  const prompt = `Génère-moi un plan d'entraînement pour la semaine du ${weekDates[0]} au ${weekDates[6]}.
+
+Je fais du triathlon (vélo, course à pied, renforcement musculaire).
+
+Réponds UNIQUEMENT avec le code JSON brut (pas de markdown, pas de \`\`\`). Je vais copier-coller directement.
+
+Format attendu :
+[
+  {
+    "sport": "cycling",
+    "type": "endurance",
+    "title": "Sortie Z2",
+    "duration_min": 90,
+    "description": "Sortie tranquille en zone 2",
+    "date": "${weekDates[0]}",
+    "structure": []
+  },
+  {
+    "sport": "running",
+    "type": "interval",
+    "title": "Fractionné 30/30",
+    "duration_min": 45,
+    "description": "10x30s vite / 30s récup",
+    "date": "${weekDates[2]}",
+    "structure": []
+  },
+  {
+    "sport": "strength",
+    "type": "strength",
+    "title": "Renfo core",
+    "duration_min": 30,
+    "description": "Gainage et abdos",
+    "date": "${weekDates[4]}",
+    "structure": []
+  }
+]
+
+Sports possibles : "cycling", "running", "strength"
+Types possibles : "endurance", "interval", "tempo", "recovery", "strength", "race"
+`
+
+  await navigator.clipboard.writeText(prompt)
+  copied.value = true
+  setTimeout(() => {
+    copied.value = false
+  }, 2000)
+}
 
 const parseAndEmit = (text: string) => {
   error.value = ''
@@ -68,6 +135,17 @@ const openFileDialog = () => {
 
 <template>
   <div class="space-y-4">
+    <!-- Ask coach button -->
+    <button
+      class="btn btn-outline w-full"
+      :class="copied ? 'btn-success' : 'btn-secondary'"
+      @click="copyCoachPrompt"
+    >
+      {{ copied ? '✓ Copié !' : '🤖 Demander au coach (copier le prompt)' }}
+    </button>
+
+    <div class="divider text-xs text-base-content/50">OU IMPORTER</div>
+
     <!-- Drop zone -->
     <div
       class="border-2 border-dashed rounded-box p-6 transition-all cursor-pointer"
