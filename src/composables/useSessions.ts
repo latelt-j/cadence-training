@@ -73,9 +73,6 @@ export function useSessions() {
   }
 
   const loadFromJson = async (jsonData: SessionTemplate[] | ScheduledSession[], replaceExisting = false) => {
-    console.log('loadFromJson called with replaceExisting:', replaceExisting)
-    console.log('Current sessions count:', sessions.value.length)
-
     const today = new Date().toISOString().split('T')[0] ?? ''
     const newSessions = jsonData.map((item) => {
       // Check if it's already a full ScheduledSession
@@ -91,26 +88,20 @@ export function useSessions() {
       } as ScheduledSession
     })
 
-    console.log('Import dates:', [...new Set(newSessions.map(s => s.date))])
-
     const sessionsToAdd: ScheduledSession[] = []
     const sessionsToDelete: string[] = []
 
     // If replaceExisting, remove all non-strava sessions on the dates we're importing
     if (replaceExisting) {
       const importDates = new Set(newSessions.map(s => s.date))
-      console.log('Sessions on import dates:', sessions.value.filter(s => importDates.has(s.date)).map(s => ({ title: s.title, date: s.date, strava_id: s.strava_id })))
-
       sessions.value = sessions.value.filter(s => {
         // Keep Strava-synced sessions (they have strava_id)
         if (importDates.has(s.date) && !s.strava_id) {
-          console.log('Will delete:', s.title, s.date)
           sessionsToDelete.push(s.id)
           return false
         }
         return true
       })
-      console.log('Sessions to delete:', sessionsToDelete.length)
     }
 
     newSessions.forEach(newSession => {
