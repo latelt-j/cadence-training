@@ -87,6 +87,23 @@ const daysUntil = (dateStr: string) => {
 }
 
 const isTrail = computed(() => editingObjective.value?.type === 'trail')
+
+const switchType = (type: 'trail' | 'road_cycling') => {
+  if (!editingObjective.value || editingObjective.value.type === type) return
+
+  const nextMonth = new Date()
+  nextMonth.setMonth(nextMonth.getMonth() + 1)
+
+  editingObjective.value = {
+    id: editingObjective.value.id,
+    type,
+    name: '',
+    date: nextMonth.toISOString().split('T')[0] ?? '',
+    distance_km: 0,
+    elevation_gain: 0,
+    elevation_loss: 0,
+  }
+}
 </script>
 
 <template>
@@ -109,14 +126,14 @@ const isTrail = computed(() => editingObjective.value?.type === 'trail')
         <button
           class="btn btn-sm flex-1"
           :class="editingObjective.type === 'trail' ? 'btn-primary' : 'btn-ghost'"
-          @click="editingObjective.type = 'trail'"
+          @click="switchType('trail')"
         >
           🏃 Trail
         </button>
         <button
           class="btn btn-sm flex-1"
           :class="editingObjective.type === 'road_cycling' ? 'btn-primary' : 'btn-ghost'"
-          @click="editingObjective.type = 'road_cycling'"
+          @click="switchType('road_cycling')"
         >
           🚴 Vélo route
         </button>
