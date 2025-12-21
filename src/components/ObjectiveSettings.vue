@@ -231,11 +231,11 @@ const switchType = (type: 'trail' | 'road_cycling') => {
             <span
               class="badge badge-sm font-bold"
               :class="{
-                'badge-error': obj.priority === 'A',
+                'badge-error': (obj.priority || 'A') === 'A',
                 'badge-warning': obj.priority === 'B',
                 'badge-ghost': obj.priority === 'C'
               }"
-            >{{ obj.priority }}</span>
+            >{{ obj.priority || 'A' }}</span>
             <span>{{ obj.type === 'trail' ? '🏃' : '🚴' }}</span>
             <span class="font-medium">{{ obj.name }}</span>
             <span class="badge badge-sm badge-primary">{{ daysUntil(obj.date) }}</span>

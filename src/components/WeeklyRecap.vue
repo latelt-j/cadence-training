@@ -10,7 +10,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   close: []
-  openPhaseSettings: []
 }>()
 
 const copied = ref(false)
@@ -65,6 +64,26 @@ const weekStravaSessions = computed(() => {
 const currentPhase = computed(() => {
   const today = new Date().toISOString().split('T')[0] ?? ''
   return props.trainingPhases.find(p => p.start_date <= today && p.end_date >= today)
+})
+
+// Week number within current phase
+const phaseWeekNumber = computed(() => {
+  if (!currentPhase.value) return null
+  const phaseStart = new Date(currentPhase.value.start_date)
+  const today = new Date()
+  const diffTime = today.getTime() - phaseStart.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  return Math.floor(diffDays / 7) + 1
+})
+
+// Total weeks in current phase
+const phaseTotalWeeks = computed(() => {
+  if (!currentPhase.value) return null
+  const phaseStart = new Date(currentPhase.value.start_date)
+  const phaseEnd = new Date(currentPhase.value.end_date)
+  const diffTime = phaseEnd.getTime() - phaseStart.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  return Math.ceil(diffDays / 7)
 })
 
 // Next week phase
@@ -243,10 +262,7 @@ const copyPrompt = async () => {
   <div class="space-y-4">
     <!-- Phase warning -->
     <div v-if="!currentPhase" class="alert alert-warning">
-      <span>⚠️ Aucune phase d'entraînement définie pour cette semaine !</span>
-      <button class="btn btn-sm btn-ghost" @click="emit('openPhaseSettings')">
-        Configurer
-      </button>
+      <span>⚠️ Aucune phase d'entraînement définie pour cette semaine</span>
     </div>
 
     <!-- Current phase -->
@@ -254,14 +270,16 @@ const copyPrompt = async () => {
       <div class="flex items-center justify-between">
         <div>
           <div class="text-xs text-base-content/60">Phase actuelle</div>
-          <div class="font-bold text-lg">{{ currentPhase.name }}</div>
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-lg">{{ currentPhase.name }}</span>
+            <span v-if="phaseWeekNumber" class="badge badge-primary">
+              Sem. {{ phaseWeekNumber }}/{{ phaseTotalWeeks }}
+            </span>
+          </div>
           <div v-if="currentPhase.description" class="text-sm text-base-content/70">
             {{ currentPhase.description }}
           </div>
         </div>
-        <button class="btn btn-sm btn-ghost" @click="emit('openPhaseSettings')">
-          ✏️
-        </button>
       </div>
     </div>
 

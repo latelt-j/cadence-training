@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, watch } from 'vue'
-import type { ScheduledSession } from '../types/session'
+import type { ScheduledSession, TrainingPhase } from '../types/session'
 import { SPORT_CONFIG } from '../types/session'
 import { useWeather } from '../composables/useWeather'
 
@@ -9,6 +9,7 @@ const { forecast, fetchWithGeolocation, getWeatherForDate, getWeatherEmoji, getW
 const props = defineProps<{
   sessions: ScheduledSession[]
   newSessionIds?: Set<string>
+  trainingPhases?: TrainingPhase[]
 }>()
 
 const emit = defineEmits<{
@@ -83,6 +84,36 @@ const sessionsByDate = computed(() => {
     map[session.date]!.push(session)
   })
   return map
+})
+
+// Current phase for the displayed week
+const currentPhase = computed(() => {
+  if (!props.trainingPhases?.length) return null
+  // Use the middle of the displayed week to determine phase
+  const midWeek = new Date(currentWeekStart.value)
+  midWeek.setDate(midWeek.getDate() + 3)
+  const midWeekStr = formatDate(midWeek)
+  return props.trainingPhases.find(p => p.start_date <= midWeekStr && p.end_date >= midWeekStr)
+})
+
+// Week number within current phase
+const phaseWeekNumber = computed(() => {
+  if (!currentPhase.value) return null
+  const phaseStart = new Date(currentPhase.value.start_date)
+  const weekStart = new Date(currentWeekStart.value)
+  const diffTime = weekStart.getTime() - phaseStart.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  return Math.floor(diffDays / 7) + 1
+})
+
+// Total weeks in current phase
+const phaseTotalWeeks = computed(() => {
+  if (!currentPhase.value) return null
+  const phaseStart = new Date(currentPhase.value.start_date)
+  const phaseEnd = new Date(currentPhase.value.end_date)
+  const diffTime = phaseEnd.getTime() - phaseStart.getTime()
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+  return Math.ceil(diffDays / 7)
 })
 
 // Navigation
@@ -203,7 +234,12 @@ watch(forecast, () => {}, { deep: true })
         <button class="btn btn-sm btn-ghost text-primary font-medium ml-1" @click="goToToday">Aujourd'hui</button>
       </div>
 
-      <h2 class="text-xl font-bold text-primary capitalize">{{ headerTitle }}</h2>
+      <div class="flex items-center gap-3">
+        <h2 class="text-xl font-bold text-primary capitalize">{{ headerTitle }}</h2>
+        <span v-if="currentPhase" class="badge badge-lg badge-primary">
+          {{ currentPhase.name }} · Sem. {{ phaseWeekNumber }}/{{ phaseTotalWeeks }}
+        </span>
+      </div>
 
       <div class="w-32"></div>
     </div>

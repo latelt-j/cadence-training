@@ -533,6 +533,7 @@ const handleReset = () => {
         <WeekCalendar
           :sessions="sessions"
           :new-session-ids="newSessionIds"
+          :training-phases="trainingPhases"
           @update-date="handleUpdateDate"
           @add-session="handleAddSession"
           @select-session="handleSelectSession"
@@ -658,7 +659,6 @@ const handleReset = () => {
           :training-phases="trainingPhases"
           :training-objectives="trainingObjectives"
           @close="showWeeklyRecapModal = false"
-          @open-phase-settings="showPhasesModal = true; showWeeklyRecapModal = false"
         />
       </div>
       <form method="dialog" class="modal-backdrop" @click="showWeeklyRecapModal = false">
