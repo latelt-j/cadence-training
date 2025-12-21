@@ -75,15 +75,15 @@ const getNextWeekDates = () => {
   return dates
 }
 
-const weekDates = getWeekDates()
-// Computed to always get fresh dates
+// Both computed for fresh values
+const weekDates = computed(() => getWeekDates())
 const nextWeekDates = computed(() => getNextWeekDates())
 
 // Filter this week's Strava sessions
 const weekStravaSessions = computed(() => {
   if (!props.sessions) return []
-  const start = weekDates.start
-  const end = weekDates.end
+  const start = weekDates.value.start
+  const end = weekDates.value.end
   return props.sessions.filter(s => {
     return s.date >= start && s.date <= end && s.type === 'strava'
   }).sort((a, b) => a.date.localeCompare(b.date))
@@ -178,7 +178,12 @@ const formatDate = (dateStr: string) => {
 
 // Generate coach prompt
 const generateCoachPrompt = () => {
-  let prompt = `# Bilan de la semaine (${weekDates.start} au ${weekDates.end})
+  const today = new Date()
+  console.log('Today:', formatLocalDate(today), 'Day of week:', today.getDay(), '(0=Sun, 1=Mon)')
+  console.log('Bilan week:', weekDates.value)
+  console.log('Plan week:', nextWeekDates.value)
+
+  let prompt = `# Bilan de la semaine (${weekDates.value.start} au ${weekDates.value.end})
 
 ## Phase actuelle
 `
