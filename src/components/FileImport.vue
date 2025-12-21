@@ -296,10 +296,18 @@ const parseAndEmit = (text: string) => {
     // Remove markdown code blocks if present
     cleanText = cleanText.replace(/^```json?\s*/i, '').replace(/\s*```$/i, '')
 
-    // Try to extract JSON object or array from the text
-    const jsonMatch = cleanText.match(/(\{[\s\S]*\}|\[[\s\S]*\])/)
-    if (jsonMatch && jsonMatch[1]) {
-      cleanText = jsonMatch[1]
+    // Handle duplicated JSON objects (Gemini sometimes returns the same response twice)
+    // Look for }{ pattern (end of object followed by start of another)
+    const duplicateIndex = cleanText.search(/\}\s*\{/)
+    if (duplicateIndex !== -1 && cleanText.startsWith('{')) {
+      // Find the matching closing brace for the first object
+      cleanText = cleanText.substring(0, duplicateIndex + 1)
+    } else {
+      // Try to extract JSON object or array from the text
+      const jsonMatch = cleanText.match(/(\{[\s\S]*\}|\[[\s\S]*\])/)
+      if (jsonMatch && jsonMatch[1]) {
+        cleanText = jsonMatch[1]
+      }
     }
 
     // Handle multiple arrays concatenated
