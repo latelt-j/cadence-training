@@ -292,6 +292,17 @@ const parseAndEmit = (text: string) => {
   error.value = ''
   try {
     let cleanText = text.trim()
+
+    // Remove markdown code blocks if present
+    cleanText = cleanText.replace(/^```json?\s*/i, '').replace(/\s*```$/i, '')
+
+    // Try to extract JSON object or array from the text
+    const jsonMatch = cleanText.match(/(\{[\s\S]*\}|\[[\s\S]*\])/)
+    if (jsonMatch && jsonMatch[1]) {
+      cleanText = jsonMatch[1]
+    }
+
+    // Handle multiple arrays concatenated
     cleanText = cleanText.replace(/\]\s*\[/g, ',')
 
     const data = JSON.parse(cleanText)
