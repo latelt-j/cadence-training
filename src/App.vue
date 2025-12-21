@@ -498,7 +498,7 @@ const handleReset = () => {
 
             <!-- Objectives button -->
             <button
-              class="btn btn-sm gap-1 bg-gradient-to-r from-orange-600 to-red-500 text-white font-semibold border-0 hover:from-orange-700 hover:to-red-600 shadow-lg shadow-red-500/40 animate-pulse-subtle"
+              class="btn btn-sm gap-1 bg-pink-500 text-white font-semibold border-0 hover:bg-pink-600 shadow-lg shadow-pink-500/40 animate-pulse-subtle"
               @click="showObjectivesModal = true"
             >
               🎯 Objectifs
@@ -507,7 +507,7 @@ const handleReset = () => {
             <!-- Weekly Recap (Sunday) -->
             <button
               v-if="isSunday"
-              class="btn btn-sm btn-primary gap-1"
+              class="btn btn-sm gap-1 bg-transparent border border-pink-500 text-pink-500 hover:bg-pink-500/10"
               @click="showWeeklyRecapModal = true"
             >
               📊 Bilan

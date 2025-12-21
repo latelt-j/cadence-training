@@ -330,9 +330,9 @@ body {
 
 @keyframes pulseSubtle {
   0%, 100% {
-    box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.4);
+    box-shadow: 0 4px 14px 0 rgba(236, 72, 153, 0.4);
   }
   50% {
-    box-shadow: 0 4px 24px 0 rgba(239, 68, 68, 0.6), 0 0 40px rgba(239, 68, 68, 0.3);
+    box-shadow: 0 4px 24px 0 rgba(236, 72, 153, 0.6), 0 0 40px rgba(236, 72, 153, 0.3);
   }
 }
