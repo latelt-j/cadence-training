@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useSessions } from './composables/useSessions'
 import { useStrava } from './composables/useStrava'
 import { useGoogleCalendar } from './composables/useGoogleCalendar'
-import type { SessionTemplate, ScheduledSession } from './types/session'
+import { useSupabase } from './composables/useSupabase'
+import type { SessionTemplate, ScheduledSession, TrainingPhase } from './types/session'
 import FileImport from './components/FileImport.vue'
 import WeekCalendar from './components/WeekCalendar.vue'
 import AddSessionModal from './components/AddSessionModal.vue'
@@ -11,6 +12,8 @@ import SessionDetailModal from './components/SessionDetailModal.vue'
 import WeeklyStats from './components/WeeklyStats.vue'
 import VolumeChart from './components/VolumeChart.vue'
 import WellnessWidget from './components/WellnessWidget.vue'
+import WeeklyRecap from './components/WeeklyRecap.vue'
+import TrainingPhasesSettings from './components/TrainingPhasesSettings.vue'
 
 const {
   sessions,
@@ -57,6 +60,15 @@ const {
 // Google modals
 const showGoogleDisconnectModal = ref(false)
 const showGoogleDeleteModal = ref(false)
+
+// Training phases
+const { fetchSettings, updateSettings } = useSupabase()
+const trainingPhases = ref<TrainingPhase[]>([])
+const showPhasesModal = ref(false)
+const showWeeklyRecapModal = ref(false)
+
+// Check if today is Sunday
+const isSunday = computed(() => new Date().getDay() === 0)
 
 // Track new sessions for animation
 const newSessionIds = ref<Set<string>>(new Set())
@@ -208,6 +220,16 @@ onMounted(async () => {
   // Init sessions from Supabase
   await initSessions()
 
+  // Load training phases from settings
+  try {
+    const settings = await fetchSettings()
+    if (settings?.training_phases) {
+      trainingPhases.value = settings.training_phases
+    }
+  } catch (e) {
+    console.error('Error loading training phases:', e)
+  }
+
   const urlParams = new URLSearchParams(window.location.search)
   const code = urlParams.get('code')
   const state = urlParams.get('state')
@@ -345,6 +367,15 @@ const handleSelectSession = (session: ScheduledSession) => {
   selectedSession.value = session
 }
 
+const handleSavePhases = async (phases: TrainingPhase[]) => {
+  trainingPhases.value = phases
+  try {
+    await updateSettings({ training_phases: phases } as any)
+  } catch (e) {
+    console.error('Error saving training phases:', e)
+  }
+}
+
 const handleDeleteSession = async (sessionId: string) => {
   await removeSession(sessionId)
 }
@@ -443,11 +474,21 @@ const handleReset = () => {
               <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-48 p-2 shadow-xl mt-2 border border-base-300">
                 <li><a @click="showImportModal = true" class="rounded-lg">📥 Importer</a></li>
                 <li><a @click="downloadJson" class="rounded-lg">💾 Exporter</a></li>
+                <li><a @click="showPhasesModal = true" class="rounded-lg">📅 Phases</a></li>
                 <li class="border-t border-base-300 mt-1 pt-1">
                   <a class="text-error rounded-lg" @click="handleReset">🗑️ Réinitialiser</a>
                 </li>
               </ul>
             </div>
+
+            <!-- Weekly Recap (Sunday) -->
+            <button
+              v-if="isSunday"
+              class="btn btn-sm btn-primary gap-1"
+              @click="showWeeklyRecapModal = true"
+            >
+              📊 Bilan
+            </button>
 
             <!-- Theme Toggle -->
             <button class="btn btn-sm btn-ghost btn-square" @click="toggleTheme">
@@ -550,6 +591,35 @@ const handleReset = () => {
         </div>
       </div>
       <form method="dialog" class="modal-backdrop" @click="showGoogleDeleteModal = false">
+        <button>close</button>
+      </form>
+    </dialog>
+
+    <!-- Training Phases Modal -->
+    <dialog class="modal" :class="{ 'modal-open': showPhasesModal }">
+      <div class="modal-box max-w-lg">
+        <TrainingPhasesSettings
+          :phases="trainingPhases"
+          @save="handleSavePhases"
+          @close="showPhasesModal = false"
+        />
+      </div>
+      <form method="dialog" class="modal-backdrop" @click="showPhasesModal = false">
+        <button>close</button>
+      </form>
+    </dialog>
+
+    <!-- Weekly Recap Modal -->
+    <dialog class="modal" :class="{ 'modal-open': showWeeklyRecapModal }">
+      <div class="modal-box max-w-lg">
+        <WeeklyRecap
+          :sessions="sessions"
+          :training-phases="trainingPhases"
+          @close="showWeeklyRecapModal = false"
+          @open-phase-settings="showPhasesModal = true; showWeeklyRecapModal = false"
+        />
+      </div>
+      <form method="dialog" class="modal-backdrop" @click="showWeeklyRecapModal = false">
         <button>close</button>
       </form>
     </dialog>

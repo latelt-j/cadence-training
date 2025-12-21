@@ -1,5 +1,15 @@
 export type Sport = 'cycling' | 'running' | 'strength'
 
+// Training periodization phases
+export interface TrainingPhase {
+  id: string
+  name: string // Base, Build, Peak, Taper, Recovery, etc.
+  start_date: string // YYYY-MM-DD
+  end_date: string // YYYY-MM-DD
+  description?: string
+  goals?: string
+}
+
 export interface StructurePhase {
   phase: 'warmup' | 'work' | 'rest' | 'cooldown'
   min: number
