@@ -12,7 +12,6 @@ import SessionDetailModal from './components/SessionDetailModal.vue'
 import WeeklyStats from './components/WeeklyStats.vue'
 import VolumeChart from './components/VolumeChart.vue'
 import WellnessWidget from './components/WellnessWidget.vue'
-import TrainingPhasesSettings from './components/TrainingPhasesSettings.vue'
 import ObjectiveSettings from './components/ObjectiveSettings.vue'
 
 const {
@@ -65,7 +64,6 @@ const showGoogleDeleteModal = ref(false)
 const { fetchSettings, updateSettings } = useSupabase()
 const trainingPhases = ref<TrainingPhase[]>([])
 const trainingObjectives = ref<TrainingObjective[]>([])
-const showPhasesModal = ref(false)
 const showObjectivesModal = ref(false)
 
 // Track new sessions for animation
@@ -372,15 +370,6 @@ const handleSelectSession = (session: ScheduledSession) => {
   selectedSession.value = session
 }
 
-const handleSavePhases = async (phases: TrainingPhase[]) => {
-  trainingPhases.value = phases
-  try {
-    await updateSettings({ training_phases: phases } as any)
-  } catch (e) {
-    console.error('Error saving training phases:', e)
-  }
-}
-
 const handleSaveObjectives = async (objectives: TrainingObjective[]) => {
   trainingObjectives.value = objectives
   try {
@@ -488,7 +477,6 @@ const handleReset = () => {
               <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-48 p-2 shadow-xl mt-2 border border-base-300">
                 <li><a @click="showImportModal = true" class="rounded-lg">📥 Importer</a></li>
                 <li><a @click="downloadJson" class="rounded-lg">💾 Exporter</a></li>
-                <li><a @click="showPhasesModal = true" class="rounded-lg">📅 Phases</a></li>
                 <li class="border-t border-base-300 mt-1 pt-1">
                   <a class="text-error rounded-lg" @click="handleReset">🗑️ Réinitialiser</a>
                 </li>
@@ -610,20 +598,6 @@ const handleReset = () => {
         </div>
       </div>
       <form method="dialog" class="modal-backdrop" @click="showGoogleDeleteModal = false">
-        <button>close</button>
-      </form>
-    </dialog>
-
-    <!-- Training Phases Modal -->
-    <dialog class="modal" :class="{ 'modal-open': showPhasesModal }">
-      <div class="modal-box max-w-lg">
-        <TrainingPhasesSettings
-          :phases="trainingPhases"
-          @save="handleSavePhases"
-          @close="showPhasesModal = false"
-        />
-      </div>
-      <form method="dialog" class="modal-backdrop" @click="showPhasesModal = false">
         <button>close</button>
       </form>
     </dialog>
