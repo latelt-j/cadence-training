@@ -255,14 +255,14 @@ Types possibles :
 - Triathlon : "brick" (enchaînement), "test" (tests FTP/VMA)
 - Renfo/Récup : "recovery", "strength", "mobility" (étirements/yoga), "core" (gainage), "plyometrics" (pliométrie)
 
-IMPORTANT pour les séances "strength" : La description doit être DÉTAILLÉE avec les exercices précis.
+IMPORTANT pour les séances "strength" : La description doit être DÉTAILLÉE et bien formatée.
 Exemple de format pour strength :
 {
   "sport": "strength",
-  "type": "strength",
-  "title": "Renfo bas du corps",
-  "duration_min": 45,
-  "description": "Circuit 3 tours :\\n- Squats : 3x15\\n- Fentes avant : 3x12 chaque jambe\\n- Step-ups : 3x12 chaque jambe\\n- Pont fessier : 3x20\\n- Chaise : 3x45sec\\n\\nFinir par 5min d'étirements",
+  "type": "core",
+  "title": "Gainage - Ceinture abdominale",
+  "duration_min": 30,
+  "description": "Circuit 'Ceinture Abdominale' (3 tours, 1min récup entre tours) :\\n- Planche ventrale (Gainage) : 45 à 60 sec (dos plat)\\n- Planche latérale : 30 sec par côté\\n- Bird-Dog (Quadrupédie bras/jambe opposés) : 10 reps lentes par côté\\n- Dead Bug : 10 reps par côté (contrôle lombaire au sol)\\n- Relevé de bassin (Glute Bridge) : 15 reps avec pause 2 sec en haut",
   "date": "2025-01-20",
   "structure": []
 }
