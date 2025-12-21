@@ -19,20 +19,27 @@ const error = ref('')
 const copied = ref(false)
 const replaceExisting = ref(true)
 
-// Get current week dates (Monday to Sunday)
+// Get LAST week dates (Monday to Sunday) - for the weekly review/bilan
 const getWeekDates = () => {
   const today = new Date()
-  const day = today.getDay()
-  const diff = today.getDate() - day + (day === 0 ? -6 : 1)
-  const monday = new Date(today)
-  monday.setDate(diff)
+  const dayOfWeek = today.getDay() // 0 = Sunday, 1 = Monday
 
-  const sunday = new Date(monday)
-  sunday.setDate(monday.getDate() + 6)
+  // Find last week's Monday
+  const lastMonday = new Date(today)
+  if (dayOfWeek === 0) {
+    // Sunday → last Monday was 6 days ago
+    lastMonday.setDate(today.getDate() - 6)
+  } else {
+    // Mon-Sat → last Monday was (dayOfWeek + 6) days ago
+    lastMonday.setDate(today.getDate() - dayOfWeek - 6)
+  }
+
+  const lastSunday = new Date(lastMonday)
+  lastSunday.setDate(lastMonday.getDate() + 6)
 
   return {
-    start: monday.toISOString().split('T')[0] ?? '',
-    end: sunday.toISOString().split('T')[0] ?? '',
+    start: lastMonday.toISOString().split('T')[0] ?? '',
+    end: lastSunday.toISOString().split('T')[0] ?? '',
   }
 }
 
