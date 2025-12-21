@@ -501,7 +501,7 @@ const handleReset = () => {
               class="btn btn-sm btn-ghost gap-1"
               @click="showObjectivesModal = true"
             >
-              🎯
+              🎯 Objectifs
             </button>
 
             <!-- Weekly Recap (Sunday) -->
