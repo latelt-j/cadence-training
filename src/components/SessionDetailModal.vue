@@ -187,7 +187,7 @@ const generateAnalysisText = (): string => {
 
   text += `\n\n---
 **Format de réponse demandé (en Markdown brut) :**
-Réponds UNIQUEMENT avec le code Markdown brut ci-dessous. Ne formate pas, je vais copier-coller le texte directement. Commence par ## sans rien avant :
+Réponds UNIQUEMENT avec le code Markdown brut ci-dessous. Ne fais aucun rendu visuel, je veux le code source Markdown. Commence par ## sans rien avant :
 
 \`\`\`
 ## Bilan de la séance
