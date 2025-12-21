@@ -265,7 +265,7 @@ body {
 }
 
 .feedback-markdown h2 {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   font-weight: 700;
   margin-bottom: 1rem;
   color: oklch(var(--bc));
@@ -274,11 +274,11 @@ body {
 }
 
 .feedback-markdown h3 {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   margin-top: 1rem;
-  margin-bottom: 0.5rem;
-  color: oklch(var(--bc));
+  margin-bottom: 0.25rem;
+  color: oklch(var(--bc) / 0.9);
 }
 
 .feedback-markdown h2:first-child,
