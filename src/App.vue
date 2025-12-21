@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useSessions } from './composables/useSessions'
 import { useStrava } from './composables/useStrava'
 import { useGoogleCalendar } from './composables/useGoogleCalendar'
@@ -12,7 +12,6 @@ import SessionDetailModal from './components/SessionDetailModal.vue'
 import WeeklyStats from './components/WeeklyStats.vue'
 import VolumeChart from './components/VolumeChart.vue'
 import WellnessWidget from './components/WellnessWidget.vue'
-import WeeklyRecap from './components/WeeklyRecap.vue'
 import TrainingPhasesSettings from './components/TrainingPhasesSettings.vue'
 import ObjectiveSettings from './components/ObjectiveSettings.vue'
 
@@ -68,10 +67,6 @@ const trainingPhases = ref<TrainingPhase[]>([])
 const trainingObjectives = ref<TrainingObjective[]>([])
 const showPhasesModal = ref(false)
 const showObjectivesModal = ref(false)
-const showWeeklyRecapModal = ref(false)
-
-// Check if today is Sunday
-const isSunday = computed(() => new Date().getDay() === 0)
 
 // Track new sessions for animation
 const newSessionIds = ref<Set<string>>(new Set())
@@ -508,15 +503,6 @@ const handleReset = () => {
               🎯 Objectifs
             </button>
 
-            <!-- Weekly Recap (Sunday) -->
-            <button
-              v-if="isSunday"
-              class="btn btn-sm gap-1 bg-transparent border-0 text-pink-500 hover:bg-pink-500/10"
-              @click="showWeeklyRecapModal = true"
-            >
-              📊 Bilan
-            </button>
-
             <!-- Theme Toggle -->
             <button class="btn btn-sm btn-ghost btn-square" @click="toggleTheme">
               <span v-if="isDarkMode">☀️</span>
@@ -568,7 +554,12 @@ const handleReset = () => {
     <dialog class="modal" :class="{ 'modal-open': showImportModal }">
       <div class="modal-box">
         <h3 class="font-bold text-lg mb-4">📥 Importer des séances</h3>
-        <FileImport @import="handleImport" />
+        <FileImport
+          :sessions="sessions"
+          :training-phases="trainingPhases"
+          :training-objectives="trainingObjectives"
+          @import="handleImport"
+        />
         <div class="modal-action">
           <button class="btn btn-ghost" @click="showImportModal = false">Fermer</button>
         </div>
@@ -647,21 +638,6 @@ const handleReset = () => {
         />
       </div>
       <form method="dialog" class="modal-backdrop" @click="showObjectivesModal = false">
-        <button>close</button>
-      </form>
-    </dialog>
-
-    <!-- Weekly Recap Modal -->
-    <dialog class="modal" :class="{ 'modal-open': showWeeklyRecapModal }">
-      <div class="modal-box max-w-lg">
-        <WeeklyRecap
-          :sessions="sessions"
-          :training-phases="trainingPhases"
-          :training-objectives="trainingObjectives"
-          @close="showWeeklyRecapModal = false"
-        />
-      </div>
-      <form method="dialog" class="modal-backdrop" @click="showWeeklyRecapModal = false">
         <button>close</button>
       </form>
     </dialog>
