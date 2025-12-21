@@ -36,25 +36,32 @@ const getWeekDates = () => {
   }
 }
 
-// Get next week dates
+// Get next week dates (Monday to Sunday of the coming week)
 const getNextWeekDates = () => {
   const today = new Date()
-  const day = today.getDay()
-  const diff = today.getDate() - day + (day === 0 ? 1 : 8)
-  const monday = new Date(today)
-  monday.setDate(diff)
+  const dayOfWeek = today.getDay() // 0 = Sunday, 1 = Monday, etc.
+
+  // Calculate days until next Monday
+  // If today is Sunday (0), next Monday is in 1 day
+  // If today is Monday (1), next Monday is in 7 days
+  // If today is Tuesday (2), next Monday is in 6 days, etc.
+  const daysUntilNextMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek)
+
+  const nextMonday = new Date(today)
+  nextMonday.setDate(today.getDate() + daysUntilNextMonday)
 
   const dates = []
   for (let i = 0; i < 7; i++) {
-    const d = new Date(monday)
-    d.setDate(monday.getDate() + i)
+    const d = new Date(nextMonday)
+    d.setDate(nextMonday.getDate() + i)
     dates.push(d.toISOString().split('T')[0])
   }
   return dates
 }
 
 const weekDates = getWeekDates()
-const nextWeekDates = getNextWeekDates()
+// Computed to always get fresh dates
+const nextWeekDates = computed(() => getNextWeekDates())
 
 // Filter this week's Strava sessions
 const weekStravaSessions = computed(() => {
@@ -96,7 +103,7 @@ const phaseTotalWeeks = computed(() => {
 // Next week phase
 const nextWeekPhase = computed(() => {
   if (!props.trainingPhases?.length) return null
-  const nextMonday = nextWeekDates[0]
+  const nextMonday = nextWeekDates.value[0]
   return props.trainingPhases.find(p => p.start_date <= nextMonday! && p.end_date >= nextMonday!)
 })
 
@@ -213,9 +220,19 @@ const generateCoachPrompt = () => {
     prompt += '\n'
   })
 
+  const dates = nextWeekDates.value
   prompt += `
 ---
-## Demande de plan pour la semaine prochaine (${nextWeekDates[0]} au ${nextWeekDates[6]})
+## Demande de plan pour la semaine prochaine (${dates[0]} au ${dates[6]})
+
+**DATES À UTILISER (obligatoire)** :
+- Lundi : ${dates[0]}
+- Mardi : ${dates[1]}
+- Mercredi : ${dates[2]}
+- Jeudi : ${dates[3]}
+- Vendredi : ${dates[4]}
+- Samedi : ${dates[5]}
+- Dimanche : ${dates[6]}
 `
 
   if (nextWeekPhase.value) {
@@ -249,7 +266,7 @@ Format attendu :
       "title": "Sweet spot 2x20min",
       "duration_min": 90,
       "description": "Description de la séance",
-      "date": "${nextWeekDates[0]}",
+      "date": "${dates[0]}",
       "structure": []
     }
   ]
