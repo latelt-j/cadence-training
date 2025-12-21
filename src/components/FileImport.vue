@@ -36,24 +36,25 @@ const getWeekDates = () => {
   }
 }
 
-// Get next week dates (Monday to Sunday of the coming week)
+// Get week dates to plan (Monday to Sunday)
+// If today is Sunday → next week, otherwise → current week
 const getNextWeekDates = () => {
   const today = new Date()
   const dayOfWeek = today.getDay() // 0 = Sunday, 1 = Monday, etc.
 
-  // Calculate days until next Monday
-  // If today is Sunday (0), next Monday is in 1 day
-  // If today is Monday (1), next Monday is in 7 days
-  // If today is Tuesday (2), next Monday is in 6 days, etc.
-  const daysUntilNextMonday = dayOfWeek === 0 ? 1 : (8 - dayOfWeek)
-
-  const nextMonday = new Date(today)
-  nextMonday.setDate(today.getDate() + daysUntilNextMonday)
+  const monday = new Date(today)
+  if (dayOfWeek === 0) {
+    // Sunday → plan for next week (tomorrow is Monday)
+    monday.setDate(today.getDate() + 1)
+  } else {
+    // Monday to Saturday → plan for current week (go back to Monday)
+    monday.setDate(today.getDate() - (dayOfWeek - 1))
+  }
 
   const dates = []
   for (let i = 0; i < 7; i++) {
-    const d = new Date(nextMonday)
-    d.setDate(nextMonday.getDate() + i)
+    const d = new Date(monday)
+    d.setDate(monday.getDate() + i)
     dates.push(d.toISOString().split('T')[0])
   }
   return dates
