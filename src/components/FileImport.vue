@@ -17,7 +17,7 @@ const isDragging = ref(false)
 const jsonText = ref('')
 const error = ref('')
 const copied = ref(false)
-const replaceExisting = ref(false)
+const replaceExisting = ref(true)
 
 // Get current week dates (Monday to Sunday)
 const getWeekDates = () => {
