@@ -255,17 +255,18 @@ Types possibles :
 - Triathlon : "brick" (enchaînement), "test" (tests FTP/VMA)
 - Renfo/Récup : "recovery", "strength", "mobility" (étirements/yoga), "core" (gainage), "plyometrics" (pliométrie)
 
-IMPORTANT pour les séances "strength" : La description doit être DÉTAILLÉE et bien formatée.
-Exemple de format pour strength :
-{
-  "sport": "strength",
-  "type": "core",
-  "title": "Gainage - Ceinture abdominale",
-  "duration_min": 30,
-  "description": "Circuit 'Ceinture Abdominale' (3 tours, 1min récup entre tours) :\\n- Planche ventrale (Gainage) : 45 à 60 sec (dos plat)\\n- Planche latérale : 30 sec par côté\\n- Bird-Dog (Quadrupédie bras/jambe opposés) : 10 reps lentes par côté\\n- Dead Bug : 10 reps par côté (contrôle lombaire au sol)\\n- Relevé de bassin (Glute Bridge) : 15 reps avec pause 2 sec en haut",
-  "date": "2025-01-20",
-  "structure": []
-}
+IMPORTANT : Les descriptions doivent être STRUCTURÉES et DÉTAILLÉES pour chaque sport.
+
+Exemples de descriptions bien formatées :
+
+VÉLO (cycling) :
+"Échauffement : 15min progressif Z1→Z2\\nCorps de séance : 2x20min Sweet Spot (88-94% FTP) avec 5min récup Z1 entre les blocs\\nRetour au calme : 10min Z1"
+
+COURSE (running) :
+"Échauffement : 15min footing + gammes (montées de genoux, talons-fesses, pas chassés)\\nCorps de séance : 8x400m à allure 5km (récup 200m trot)\\nRetour au calme : 10min footing + étirements"
+
+RENFO (strength) :
+"Circuit 'Ceinture Abdominale' (3 tours, 1min récup entre tours) :\\n- Planche ventrale : 45 à 60 sec (dos plat)\\n- Planche latérale : 30 sec par côté\\n- Bird-Dog : 10 reps lentes par côté\\n- Dead Bug : 10 reps par côté\\n- Relevé de bassin : 15 reps avec pause 2 sec en haut"
 `
 
   return prompt
