@@ -222,6 +222,21 @@ export function useSessions() {
     }
   }
 
+  const updateSession = async (sessionId: string, updates: Partial<ScheduledSession>) => {
+    const session = sessions.value.find((s) => s.id === sessionId)
+    if (session) {
+      Object.assign(session, updates)
+      saveToCache()
+
+      // Sync to Supabase
+      try {
+        await dbUpdateSession(session)
+      } catch (error) {
+        console.error('Error updating session in Supabase:', error)
+      }
+    }
+  }
+
   const removeSession = async (sessionId: string) => {
     const index = sessions.value.findIndex((s) => s.id === sessionId)
     if (index !== -1) {
@@ -382,6 +397,7 @@ export function useSessions() {
     addSessions,
     updateSessionDate,
     updateSessionFeedback,
+    updateSession,
     removeSession,
     upsertSessions,
     exportToJson,

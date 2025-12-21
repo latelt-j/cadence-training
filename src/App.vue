@@ -22,6 +22,7 @@ const {
   addSessions,
   updateSessionDate,
   updateSessionFeedback,
+  updateSession,
   removeSession,
   downloadJson,
   reset,
@@ -280,20 +281,9 @@ const syncStrava = async () => {
   const sessionsToAdd = convertToSessions(detailedActivities)
 
   let added = 0
-  let removedPlanned = 0
   const newIds: string[] = []
 
   for (const { session, date } of sessionsToAdd) {
-    // Supprimer les séances prévues pour ce jour
-    const plannedOnSameDay = sessions.value.filter(
-      s => s.date === date && s.type !== 'strava'
-    )
-    for (const planned of plannedOnSameDay) {
-      await removeSession(planned.id)
-      removedPlanned++
-    }
-
-    // Nouvelle activité
     await addSession(session, date)
     const lastSession = sessions.value[sessions.value.length - 1]
     if (lastSession) {
@@ -310,12 +300,8 @@ const syncStrava = async () => {
     }
   }
 
-  const messages = []
-  if (added > 0) messages.push(`${added} ajoutée(s)`)
-  if (removedPlanned > 0) messages.push(`${removedPlanned} prévue(s) supprimée(s)`)
-
-  if (messages.length > 0) {
-    alert(`Strava : ${messages.join(', ')}`)
+  if (added > 0) {
+    alert(`Strava : ${added} activité(s) ajoutée(s)`)
   }
 }
 
@@ -385,6 +371,10 @@ const handleDeleteSession = async (sessionId: string) => {
 
 const handleUpdateFeedback = async (sessionId: string, feedback: string) => {
   await updateSessionFeedback(sessionId, feedback)
+}
+
+const handleUpdateSession = async (sessionId: string, updates: { title: string; description: string }) => {
+  await updateSession(sessionId, updates)
 }
 
 const handleReset = () => {
@@ -536,6 +526,7 @@ const handleReset = () => {
       @close="selectedSession = null"
       @delete="handleDeleteSession"
       @update-feedback="handleUpdateFeedback"
+      @update="handleUpdateSession"
     />
 
     <!-- Import Modal -->

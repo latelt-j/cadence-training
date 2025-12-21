@@ -18,6 +18,7 @@ const emit = defineEmits<{
   close: []
   delete: [sessionId: string]
   updateFeedback: [sessionId: string, feedback: string]
+  update: [sessionId: string, updates: { title: string; description: string }]
 }>()
 
 const copied = ref(false)
@@ -26,12 +27,21 @@ const feedbackSaved = ref(false)
 const isEditingFeedback = ref(false)
 const currentPage = ref<'details' | 'coach'>('details')
 
-// Sync feedback text when session changes
+// Strava session editing
+const isEditingStrava = ref(false)
+const editTitle = ref('')
+const editDescription = ref('')
+
+// Sync state when session changes
 watch(() => props.session, (newSession) => {
   feedbackText.value = newSession?.coach_feedback || ''
   feedbackSaved.value = false
   isEditingFeedback.value = false
   currentPage.value = 'details'
+  // Reset Strava editing
+  isEditingStrava.value = false
+  editTitle.value = newSession?.title || ''
+  editDescription.value = newSession?.description || ''
 }, { immediate: true })
 
 // Check if feedback exists
@@ -226,6 +236,29 @@ const handleDelete = () => {
   }
 }
 
+// Strava editing functions
+const startEditStrava = () => {
+  editTitle.value = props.session?.title || ''
+  editDescription.value = props.session?.description || ''
+  isEditingStrava.value = true
+}
+
+const cancelEditStrava = () => {
+  editTitle.value = props.session?.title || ''
+  editDescription.value = props.session?.description || ''
+  isEditingStrava.value = false
+}
+
+const saveStrava = () => {
+  if (props.session && editTitle.value.trim()) {
+    emit('update', props.session.id, {
+      title: editTitle.value.trim(),
+      description: editDescription.value.trim()
+    })
+    isEditingStrava.value = false
+  }
+}
+
 // Generate Zwift .zwo workout file
 const generateZwoFile = (): string => {
   if (!props.session || props.session.sport !== 'cycling') return ''
@@ -308,7 +341,26 @@ const downloadZwoFile = () => {
       <div class="flex items-center gap-3 mb-4 flex-shrink-0">
         <span class="text-4xl">{{ SPORT_CONFIG[session.sport].emoji }}</span>
         <div class="flex-1">
-          <h3 class="font-bold text-lg">{{ session.title }}</h3>
+          <!-- Edit mode for Strava -->
+          <div v-if="isEditingStrava" class="space-y-2">
+            <input
+              v-model="editTitle"
+              type="text"
+              class="input input-sm input-bordered w-full font-bold"
+              placeholder="Titre de la séance"
+            />
+          </div>
+          <!-- Normal display -->
+          <div v-else class="flex items-center gap-2">
+            <h3 class="font-bold text-lg">{{ session.title }}</h3>
+            <button
+              v-if="session.type === 'strava'"
+              class="btn btn-xs btn-ghost"
+              @click="startEditStrava"
+            >
+              ✏️
+            </button>
+          </div>
           <p class="text-sm text-base-content/70">{{ formatDate(session.date) }}</p>
         </div>
         <button class="btn btn-sm btn-circle btn-ghost" @click="emit('close')">✕</button>
@@ -340,7 +392,21 @@ const downloadZwoFile = () => {
           <div class="badge badge-primary">{{ formatDuration(session.duration_min) }}</div>
         </div>
 
-        <p class="text-base-content/80">{{ session.description }}</p>
+        <!-- Description: editable for Strava -->
+        <div v-if="isEditingStrava" class="space-y-3">
+          <textarea
+            v-model="editDescription"
+            class="textarea textarea-bordered w-full h-24"
+            placeholder="Description de la séance..."
+          ></textarea>
+          <div class="flex justify-end gap-2">
+            <button class="btn btn-sm btn-ghost" @click="cancelEditStrava">Annuler</button>
+            <button class="btn btn-sm btn-primary" @click="saveStrava" :disabled="!editTitle.trim()">
+              💾 Enregistrer
+            </button>
+          </div>
+        </div>
+        <p v-else class="text-base-content/80">{{ session.description }}</p>
 
         <!-- Strava stats -->
         <div v-if="session.average_heartrate || session.average_watts" class="flex flex-wrap gap-2">
