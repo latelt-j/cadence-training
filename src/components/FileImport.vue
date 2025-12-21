@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective } from '../types/session'
+import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective, ImportedPhase } from '../types/session'
 
 const props = defineProps<{
   sessions?: ScheduledSession[]
@@ -9,7 +9,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  import: [data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean]
+  import: [data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean, phase?: ImportedPhase]
 }>()
 
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -235,17 +235,25 @@ En te basant sur le bilan ci-dessus et la phase actuelle, génère-moi un plan d
 Réponds UNIQUEMENT avec le code JSON brut (pas de markdown, pas de \`\`\`). Je vais copier-coller directement.
 
 Format attendu :
-[
-  {
-    "sport": "cycling",
-    "type": "sweet_spot",
-    "title": "Sweet spot 2x20min",
-    "duration_min": 90,
-    "description": "Description de la séance",
-    "date": "${nextWeekDates[0]}",
-    "structure": []
-  }
-]
+{
+  "phase": {
+    "name": "Base",
+    "week": 2,
+    "total_weeks": 4,
+    "description": "Construction de la base aérobie"
+  },
+  "sessions": [
+    {
+      "sport": "cycling",
+      "type": "sweet_spot",
+      "title": "Sweet spot 2x20min",
+      "duration_min": 90,
+      "description": "Description de la séance",
+      "date": "${nextWeekDates[0]}",
+      "structure": []
+    }
+  ]
+}
 
 Sports possibles : "cycling", "running", "strength"
 
@@ -287,8 +295,18 @@ const parseAndEmit = (text: string) => {
     cleanText = cleanText.replace(/\]\s*\[/g, ',')
 
     const data = JSON.parse(cleanText)
-    const sessions = Array.isArray(data) ? data : [data]
-    emit('import', sessions, replaceExisting.value)
+
+    // New format with phase: { phase: {...}, sessions: [...] }
+    if (data && typeof data === 'object' && !Array.isArray(data) && data.sessions) {
+      const phase = data.phase as ImportedPhase | undefined
+      const sessions = Array.isArray(data.sessions) ? data.sessions : [data.sessions]
+      emit('import', sessions, replaceExisting.value, phase)
+    } else {
+      // Old format: array of sessions or single session
+      const sessions = Array.isArray(data) ? data : [data]
+      emit('import', sessions, replaceExisting.value)
+    }
+
     jsonText.value = ''
   } catch (e) {
     error.value = e instanceof Error ? e.message : 'JSON invalide'

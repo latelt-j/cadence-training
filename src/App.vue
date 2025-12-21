@@ -4,7 +4,8 @@ import { useSessions } from './composables/useSessions'
 import { useStrava } from './composables/useStrava'
 import { useGoogleCalendar } from './composables/useGoogleCalendar'
 import { useSupabase } from './composables/useSupabase'
-import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective } from './types/session'
+import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective, ImportedPhase } from './types/session'
+import { v4 as uuidv4 } from 'uuid'
 import FileImport from './components/FileImport.vue'
 import WeekCalendar from './components/WeekCalendar.vue'
 import AddSessionModal from './components/AddSessionModal.vue'
@@ -353,8 +354,42 @@ const toggleTheme = () => {
 document.documentElement.setAttribute('data-theme', isDarkMode.value ? 'dracula' : 'cupcake')
 
 // Handlers
-const handleImport = async (data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean) => {
+const handleImport = async (data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean, phase?: ImportedPhase) => {
   await loadFromJson(data, replaceExisting)
+
+  // If phase info was provided, create/update the training phase
+  if (phase) {
+    // Calculate start_date based on current week and phase week number
+    const today = new Date()
+    const dayOfWeek = today.getDay()
+    const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek
+    const thisMonday = new Date(today)
+    thisMonday.setDate(today.getDate() + mondayOffset)
+
+    // Go back (week - 1) weeks to get phase start
+    const phaseStart = new Date(thisMonday)
+    phaseStart.setDate(thisMonday.getDate() - (phase.week - 1) * 7)
+
+    // Calculate end date
+    const phaseEnd = new Date(phaseStart)
+    phaseEnd.setDate(phaseStart.getDate() + phase.total_weeks * 7 - 1)
+
+    const formatDate = (d: Date) => d.toISOString().split('T')[0] ?? ''
+
+    // Create or update the phase
+    const newPhase: TrainingPhase = {
+      id: uuidv4(),
+      name: phase.name,
+      start_date: formatDate(phaseStart),
+      end_date: formatDate(phaseEnd),
+      description: phase.description,
+    }
+
+    // Replace existing phases (simple approach: one phase at a time)
+    trainingPhases.value = [newPhase]
+    await updateSettings({ training_phases: [newPhase] } as any)
+  }
+
   showImportModal.value = false
 }
 

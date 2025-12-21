@@ -10,6 +10,14 @@ export interface TrainingPhase {
   goals?: string
 }
 
+// Phase info returned by Gemini coach
+export interface ImportedPhase {
+  name: string
+  week: number
+  total_weeks: number
+  description?: string
+}
+
 // Training objective (race/event)
 export interface TrainingObjective {
   id: string
