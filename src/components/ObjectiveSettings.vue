@@ -122,54 +122,55 @@ const isTrail = computed(() => editingObjective.value?.type === 'trail')
         </button>
       </div>
 
-      <div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 items-center">
-        <label class="text-xs text-base-content/70">Nom</label>
-        <input
-          v-model="editingObjective.name"
-          type="text"
-          class="input input-sm input-bordered"
-          placeholder="Ex: UTMB, Étape du Tour..."
-        />
+      <div class="grid grid-cols-2 gap-3">
+        <div class="col-span-2">
+          <label class="text-xs text-base-content/70 mb-1 block">Nom de l'épreuve</label>
+          <input
+            v-model="editingObjective.name"
+            type="text"
+            class="input input-sm input-bordered w-full"
+            placeholder="Ex: UTMB, Étape du Tour..."
+          />
+        </div>
 
-        <label class="text-xs text-base-content/70">Date</label>
-        <input
-          v-model="editingObjective.date"
-          type="date"
-          class="input input-sm input-bordered"
-        />
+        <div>
+          <label class="text-xs text-base-content/70 mb-1 block">Date</label>
+          <input
+            v-model="editingObjective.date"
+            type="date"
+            class="input input-sm input-bordered w-full"
+          />
+        </div>
 
-        <label class="text-xs text-base-content/70">Distance</label>
-        <div class="flex items-center gap-2">
+        <div>
+          <label class="text-xs text-base-content/70 mb-1 block">Distance (km)</label>
           <input
             v-model.number="editingObjective.distance_km"
             type="number"
-            class="input input-sm input-bordered flex-1"
+            class="input input-sm input-bordered w-full"
             min="0"
             step="0.1"
           />
-          <span class="text-xs text-base-content/50">km</span>
         </div>
 
-        <label class="text-xs text-base-content/70">Dénivelé</label>
-        <div class="grid grid-cols-2 gap-2">
-          <div class="flex items-center gap-1">
-            <input
-              v-model.number="editingObjective.elevation_gain"
-              type="number"
-              class="input input-sm input-bordered flex-1"
-              min="0"
-            />
-            <span class="text-xs text-base-content/50">D+</span>
-          </div>
-          <div v-if="isTrail" class="flex items-center gap-1">
-            <input
-              v-model.number="editingObjective.elevation_loss"
-              type="number"
-              class="input input-sm input-bordered flex-1"
-              min="0"
-            />
-            <span class="text-xs text-base-content/50">D-</span>
-          </div>
+        <div>
+          <label class="text-xs text-base-content/70 mb-1 block">D+ (m)</label>
+          <input
+            v-model.number="editingObjective.elevation_gain"
+            type="number"
+            class="input input-sm input-bordered w-full"
+            min="0"
+          />
+        </div>
+
+        <div v-if="isTrail">
+          <label class="text-xs text-base-content/70 mb-1 block">D- (m)</label>
+          <input
+            v-model.number="editingObjective.elevation_loss"
+            type="number"
+            class="input input-sm input-bordered w-full"
+            min="0"
+          />
         </div>
       </div>
 
