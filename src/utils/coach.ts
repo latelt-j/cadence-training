@@ -130,60 +130,15 @@ export const copySessionForCoach = async (session: ScheduledSession): Promise<vo
 }
 
 export const generateTitleSuggestionPrompt = (s: ScheduledSession): string => {
-  const sportName = s.sport === 'cycling' ? 'Vélo' : s.sport === 'running' ? 'Course à pied' : 'Renforcement'
+  // Réutilise le texte d'analyse mais avec une instruction différente
+  const baseText = generateAnalysisText(s)
+  // Remplace l'instruction finale
+  const withoutInstruction = baseText.split('\n\n---')[0]
 
-  let text = `## Activité à renommer
-
-**Sport:** ${sportName}
-**Date:** ${formatDate(s.date)}
-**Durée:** ${formatDuration(s.duration_min)}`
-
-  if (s.actual_km) {
-    text += `\n**Distance:** ${s.actual_km} km`
-  }
-
-  if (s.actual_elevation) {
-    text += `\n**Dénivelé:** ${s.actual_elevation} m D+`
-  }
-
-  if (s.actual_km && s.duration_min > 0) {
-    const hours = s.duration_min / 60
-    const avgSpeed = (s.actual_km / hours).toFixed(1)
-    if (s.sport === 'cycling') {
-      text += `\n**Vitesse moyenne:** ${avgSpeed} km/h`
-    } else if (s.sport === 'running') {
-      const paceMin = Math.floor(60 / parseFloat(avgSpeed))
-      const paceSec = Math.round((60 / parseFloat(avgSpeed) - paceMin) * 60)
-      text += `\n**Allure moyenne:** ${paceMin}'${paceSec.toString().padStart(2, '0')}" /km`
-    }
-  }
-
-  if (s.average_heartrate) {
-    text += `\n**FC moyenne:** ${Math.round(s.average_heartrate)} bpm`
-  }
-
-  if (s.average_watts) {
-    text += `\n**Puissance moyenne:** ${Math.round(s.average_watts)} W`
-  }
-
-  if (s.laps && s.laps.length > 0) {
-    text += `\n\n**Intervalles (${s.laps.length} tours):**`
-    s.laps.forEach((lap, i) => {
-      const distKm = (lap.distance / 1000).toFixed(2)
-      let lapText = `\n${i + 1}. ${formatLapDuration(lap.moving_time)}, ${distKm} km`
-      lapText += `, ${formatSpeed(lap.average_speed, s.sport)}`
-      if (lap.average_heartrate) lapText += `, ${Math.round(lap.average_heartrate)} bpm`
-      if (lap.average_watts) lapText += `, ${Math.round(lap.average_watts)} W`
-      text += lapText
-    })
-  }
-
-  text += `\n\n---
+  return withoutInstruction + `\n\n---
 **Propose-moi un titre et une description pour cette séance.**
 
-Format de réponse :
-**Titre:** [titre court et descriptif, ex: "Intervalles 5x1km" ou "Sortie longue endurance"]
-**Description:** [2-3 lignes max décrivant le type de séance, l'intensité, et les points clés]`
-
-  return text
+Format :
+**Titre:** [court, ex: "Intervalles 5x1km" ou "Sortie longue Z2"]
+**Description:** [2-3 lignes décrivant le type de séance et l'intensité]`
 }
