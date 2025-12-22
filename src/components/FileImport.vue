@@ -296,18 +296,19 @@ Types possibles :
 - Triathlon : "brick" (enchaînement), "test" (tests FTP/VMA)
 - Renfo/Récup : "recovery", "strength", "mobility" (étirements/yoga), "core" (gainage), "plyometrics" (pliométrie)
 
-IMPORTANT : Les descriptions doivent être STRUCTURÉES, DÉTAILLÉES et avec quelques emojis (sans excès) pour chaque sport.
+IMPORTANT pour les descriptions :
+- Utilise \\n pour les retours à la ligne (PAS de vraies nouvelles lignes)
+- PAS de markdown (pas de ** ou autres)
+- Quelques emojis au début de chaque section (🔥 💪 🧘 🚴 🏃 ⛰️)
+- Structure : Échauffement → Corps de séance → Retour au calme
 
-Exemples de descriptions bien formatées :
+Exemples :
 
-VÉLO (cycling) :
-"🔥 Échauffement : 15min progressif Z1→Z2\\n💪 Corps de séance : 2x20min Sweet Spot (88-94% FTP) avec 5min récup Z1 entre les blocs\\n🧘 Retour au calme : 10min Z1"
+VÉLO : "🔥 Échauffement : 15min progressif Z1→Z2\\n🚴 Corps de séance : 2x20min Sweet Spot (88-94% FTP) avec 5min récup Z1\\n🧘 Retour au calme : 10min Z1"
 
-COURSE (running) :
-"🔥 Échauffement : 15min footing + gammes (montées de genoux, talons-fesses, pas chassés)\\n💪 Corps de séance : 8x400m à allure 5km (récup 200m trot)\\n🧘 Retour au calme : 10min footing + étirements"
+COURSE : "🔥 Échauffement : 15min footing + gammes\\n🏃 Corps de séance : 8x400m allure 5km (récup 200m trot)\\n🧘 Retour au calme : 10min footing + étirements"
 
-RENFO (strength) :
-"💪 Circuit 'Ceinture Abdominale' (3 tours, 1min récup entre tours) :\\n- Planche ventrale : 45 à 60 sec (dos plat)\\n- Planche latérale : 30 sec par côté\\n- Bird-Dog : 10 reps lentes par côté\\n- Dead Bug : 10 reps par côté\\n- Relevé de bassin : 15 reps avec pause 2 sec en haut"
+RENFO : "💪 Circuit 3 tours (1min récup entre tours) :\\n- Planche ventrale : 45-60 sec\\n- Planche latérale : 30 sec/côté\\n- Bird-Dog : 10 reps/côté\\n- Dead Bug : 10 reps/côté"
 `
 
   return prompt
