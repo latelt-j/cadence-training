@@ -3,7 +3,7 @@ import { ref, watch, computed } from 'vue'
 import { marked } from 'marked'
 import type { ScheduledSession } from '../types/session'
 import { SPORT_CONFIG } from '../types/session'
-import { generateAnalysisText } from '../utils/coach'
+import { generateAnalysisText, generateTitleSuggestionPrompt } from '../utils/coach'
 
 // Configure marked for inline rendering (no <p> tags)
 marked.setOptions({
@@ -32,6 +32,17 @@ const currentPage = ref<'details' | 'planned' | 'coach'>('details')
 const isEditingStrava = ref(false)
 const editTitle = ref('')
 const editDescription = ref('')
+const suggestionCopied = ref(false)
+
+const copyTitleSuggestion = async () => {
+  if (!props.session) return
+  const text = generateTitleSuggestionPrompt(props.session)
+  await navigator.clipboard.writeText(text)
+  suggestionCopied.value = true
+  setTimeout(() => {
+    suggestionCopied.value = false
+  }, 2000)
+}
 
 // Sync state when session changes
 watch(() => props.session, (newSession) => {
@@ -43,6 +54,7 @@ watch(() => props.session, (newSession) => {
   isEditingStrava.value = false
   editTitle.value = newSession?.title || ''
   editDescription.value = newSession?.description || ''
+  suggestionCopied.value = false
 }, { immediate: true })
 
 // Check if feedback exists
@@ -253,11 +265,20 @@ const downloadZwoFile = () => {
             class="textarea textarea-bordered w-full h-24"
             placeholder="Description de la séance..."
           ></textarea>
-          <div class="flex justify-end gap-2">
-            <button class="btn btn-sm btn-ghost" @click="cancelEditStrava">Annuler</button>
-            <button class="btn btn-sm btn-primary" @click="saveStrava" :disabled="!editTitle.trim()">
-              💾 Enregistrer
+          <div class="flex justify-between items-center">
+            <button
+              class="btn btn-sm btn-outline"
+              :class="suggestionCopied ? 'btn-success' : ''"
+              @click="copyTitleSuggestion"
+            >
+              {{ suggestionCopied ? '✓ Copié !' : '🤖 Suggérer titre' }}
             </button>
+            <div class="flex gap-2">
+              <button class="btn btn-sm btn-ghost" @click="cancelEditStrava">Annuler</button>
+              <button class="btn btn-sm btn-primary" @click="saveStrava" :disabled="!editTitle.trim()">
+                💾 Enregistrer
+              </button>
+            </div>
           </div>
         </div>
         <p v-else class="text-base-content/80 whitespace-pre-line">{{ session.description }}</p>
