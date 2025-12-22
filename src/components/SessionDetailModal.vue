@@ -428,7 +428,7 @@ const downloadZwoFile = () => {
             </button>
           </div>
         </div>
-        <p v-else class="text-base-content/80">{{ session.description }}</p>
+        <p v-else class="text-base-content/80 whitespace-pre-line">{{ session.description }}</p>
 
         <!-- Strava stats -->
         <div v-if="session.average_heartrate || session.average_watts" class="flex flex-wrap gap-2">
