@@ -294,7 +294,9 @@ Format attendu :
   ]
 }
 
-Sports possibles : "cycling", "running", "strength"
+⚠️ SPORTS VALIDES (UNIQUEMENT ces 3, aucun autre !) : "cycling", "running", "strength"
+- NE PAS inventer de nouveau sport (pas de "recovery", "yoga", "swimming", etc.)
+- Pour une journée de repos, ne pas créer de séance
 
 Types possibles :
 - Intensité : "sweet_spot" (88-94% FTP), "threshold" (seuil Z4), "vo2max" (Z5), "anaerobic" (sprints Z6/Z7)
