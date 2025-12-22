@@ -178,11 +178,6 @@ const formatDate = (dateStr: string) => {
 
 // Generate coach prompt
 const generateCoachPrompt = () => {
-  const today = new Date()
-  console.log('Today:', formatLocalDate(today), 'Day of week:', today.getDay(), '(0=Sun, 1=Mon)')
-  console.log('Bilan week:', weekDates.value)
-  console.log('Plan week:', nextWeekDates.value)
-
   let prompt = `# Bilan de la semaine (${weekDates.value.start} au ${weekDates.value.end})
 
 ## Phase actuelle
