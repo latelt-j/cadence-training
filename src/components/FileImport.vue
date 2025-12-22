@@ -287,9 +287,9 @@ Format attendu :
       "type": "sweet_spot",
       "title": "Sweet spot 2x20min",
       "duration_min": 90,
-      "description": "Description de la séance",
+      "description": "Description",
       "date": "${dates[0]}",
-      "structure": []
+      "zwift_workout": "<workout_file>...</workout_file>"
     }
   ]
 }
@@ -308,7 +308,13 @@ IMPORTANT pour les descriptions :
 - Quelques emojis au début de chaque section (🔥 💪 🧘 🚴 🏃 ⛰️)
 - Structure : Échauffement → Corps de séance → Retour au calme
 
-Exemples :
+IMPORTANT pour zwift_workout (UNIQUEMENT pour les séances cycling) :
+- Génère un fichier .zwo Zwift complet au format XML
+- Le XML doit être sur UNE SEULE LIGNE (pas de retours à la ligne)
+- Utilise les puissances en % FTP (ex: 0.75 = 75% FTP)
+- Exemple : "<workout_file><author>Coach</author><name>Sweet Spot</name><description>2x20min SS</description><sportType>bike</sportType><workout><Warmup Duration=\\"600\\" PowerLow=\\"0.50\\" PowerHigh=\\"0.70\\"/><SteadyState Duration=\\"1200\\" Power=\\"0.90\\"/><SteadyState Duration=\\"300\\" Power=\\"0.55\\"/><SteadyState Duration=\\"1200\\" Power=\\"0.90\\"/><Cooldown Duration=\\"600\\" PowerLow=\\"0.65\\" PowerHigh=\\"0.50\\"/></workout></workout_file>"
+
+Exemples descriptions :
 
 VÉLO : "🔥 Échauffement : 15min progressif Z1→Z2\\n🚴 Corps de séance : 2x20min Sweet Spot (88-94% FTP) avec 5min récup Z1\\n🧘 Retour au calme : 10min Z1"
 

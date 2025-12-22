@@ -77,6 +77,8 @@ export interface SessionTemplate {
   // Planned session info (when Strava activity replaces a planned session)
   planned_title?: string
   planned_description?: string
+  // Zwift workout XML (for cycling sessions)
+  zwift_workout?: string
 }
 
 export interface ScheduledSession extends SessionTemplate {
