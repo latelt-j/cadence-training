@@ -18,6 +18,7 @@ const jsonText = ref('')
 const error = ref('')
 const copied = ref(false)
 const replaceExisting = ref(true)
+const coachDirective = ref('')
 
 // Format date as YYYY-MM-DD in LOCAL timezone (not UTC!)
 const formatLocalDate = (date: Date) => {
@@ -261,6 +262,11 @@ const generateCoachPrompt = () => {
     }
   }
 
+  // Add coach directive if provided
+  if (coachDirective.value.trim()) {
+    prompt += `\n\n⚠️ **Directive spéciale** : ${coachDirective.value.trim()}`
+  }
+
   prompt += `
 
 En te basant sur le bilan ci-dessus et la phase actuelle, génère-moi un plan d'entraînement pour la semaine prochaine.
@@ -406,6 +412,19 @@ const openFileDialog = () => {
 
 <template>
   <div class="space-y-4">
+    <!-- Coach directive (optional) -->
+    <div class="form-control">
+      <label class="label pb-1">
+        <span class="label-text text-xs text-base-content/60">💬 Directive pour le coach (optionnel)</span>
+      </label>
+      <input
+        v-model="coachDirective"
+        type="text"
+        class="input input-bordered input-sm w-full"
+        placeholder="Ex: Je veux 2 séances vélo et 1 séance course max"
+      />
+    </div>
+
     <!-- Ask coach button -->
     <button
       class="btn w-full text-white font-semibold border-0 shadow-lg"
