@@ -4,6 +4,9 @@ import { marked } from 'marked'
 import type { ScheduledSession } from '../types/session'
 import { SPORT_CONFIG } from '../types/session'
 import { generateAnalysisText, generateTitleSuggestionPrompt } from '../utils/coach'
+import { useStrava } from '../composables/useStrava'
+
+const { updateActivity } = useStrava()
 
 // Configure marked for inline rendering (no <p> tags)
 marked.setOptions({
@@ -20,6 +23,7 @@ const emit = defineEmits<{
   delete: [sessionId: string]
   updateFeedback: [sessionId: string, feedback: string]
   update: [sessionId: string, updates: { title: string; description: string }]
+  toast: [message: string, type?: 'success' | 'error']
 }>()
 
 const copied = ref(false)
@@ -33,6 +37,7 @@ const isEditingStrava = ref(false)
 const editTitle = ref('')
 const editDescription = ref('')
 const suggestionCopied = ref(false)
+const isSaving = ref(false)
 
 const copyTitleSuggestion = async () => {
   if (!props.session) return
@@ -164,13 +169,38 @@ const cancelEditStrava = () => {
   isEditingStrava.value = false
 }
 
-const saveStrava = () => {
-  if (props.session && editTitle.value.trim()) {
+const saveStrava = async () => {
+  if (!props.session || !editTitle.value.trim()) return
+
+  isSaving.value = true
+
+  try {
+    // Update on Strava if it's a Strava activity
+    if (props.session.strava_id) {
+      const success = await updateActivity(props.session.strava_id, {
+        name: editTitle.value.trim(),
+        description: editDescription.value.trim(),
+      })
+
+      if (!success) {
+        emit('toast', 'Erreur lors de la mise à jour sur Strava', 'error')
+        isSaving.value = false
+        return
+      }
+    }
+
+    // Update locally
     emit('update', props.session.id, {
       title: editTitle.value.trim(),
-      description: editDescription.value.trim()
+      description: editDescription.value.trim(),
     })
+
     isEditingStrava.value = false
+    emit('toast', 'Activité mise à jour sur Strava ✓', 'success')
+  } catch {
+    emit('toast', 'Erreur lors de la mise à jour', 'error')
+  } finally {
+    isSaving.value = false
   }
 }
 
@@ -274,9 +304,10 @@ const downloadZwoFile = () => {
               {{ suggestionCopied ? '✓ Copié !' : '🤖 Suggérer titre' }}
             </button>
             <div class="flex gap-2">
-              <button class="btn btn-sm btn-ghost" @click="cancelEditStrava">Annuler</button>
-              <button class="btn btn-sm btn-primary" @click="saveStrava" :disabled="!editTitle.trim()">
-                💾 Enregistrer
+              <button class="btn btn-sm btn-ghost" @click="cancelEditStrava" :disabled="isSaving">Annuler</button>
+              <button class="btn btn-sm btn-primary" @click="saveStrava" :disabled="!editTitle.trim() || isSaving">
+                <span v-if="isSaving" class="loading loading-spinner loading-xs"></span>
+                {{ isSaving ? 'Envoi...' : '💾 Enregistrer' }}
               </button>
             </div>
           </div>

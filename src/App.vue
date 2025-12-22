@@ -73,6 +73,7 @@ const showObjectivesModal = ref(false)
 const newSessionIds = ref<Set<string>>(new Set())
 const spotlightSession = ref<ScheduledSession | null>(null)
 const toastMessage = ref<string | null>(null)
+const toastType = ref<'success' | 'error'>('success')
 const spotlightCardRef = ref<HTMLElement | null>(null)
 
 // 3D mouse effect for spotlight card
@@ -114,8 +115,9 @@ const closeSpotlight = async () => {
   }, 3000)
 }
 
-const showToast = (message: string) => {
+const showToast = (message: string, type: 'success' | 'error' = 'success') => {
   toastMessage.value = message
+  toastType.value = type
   setTimeout(() => {
     toastMessage.value = null
   }, 3000)
@@ -496,6 +498,7 @@ const handleReset = () => {
       @delete="handleDeleteSession"
       @update-feedback="handleUpdateFeedback"
       @update="handleUpdateSession"
+      @toast="showToast"
     />
 
     <!-- Import Modal -->
@@ -619,9 +622,10 @@ const handleReset = () => {
       <Transition name="toast">
         <div
           v-if="toastMessage"
-          class="fixed bottom-6 right-6 z-[10000] bg-success text-success-content px-4 py-3 rounded-xl shadow-lg flex items-center gap-2"
+          class="fixed bottom-6 right-6 z-[10000] px-4 py-3 rounded-xl shadow-lg flex items-center gap-2"
+          :class="toastType === 'success' ? 'bg-success text-success-content' : 'bg-error text-error-content'"
         >
-          <span class="text-lg">✓</span>
+          <span class="text-lg">{{ toastType === 'success' ? '✓' : '✕' }}</span>
           <span>{{ toastMessage }}</span>
         </div>
       </Transition>

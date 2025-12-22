@@ -69,7 +69,7 @@ export function useStrava() {
   }
 
   const authorize = () => {
-    const scope = 'activity:read_all'
+    const scope = 'activity:read_all,activity:write'
     const authUrl = `https://www.strava.com/oauth/authorize?client_id=${STRAVA_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=${scope}`
     window.location.href = authUrl
   }
@@ -311,6 +311,43 @@ export function useStrava() {
       .filter((item): item is { session: SessionTemplate; date: string } => item !== null)
   }
 
+  const updateActivity = async (
+    activityId: number,
+    updates: { name?: string; description?: string }
+  ): Promise<boolean> => {
+    try {
+      const accessToken = await getValidToken()
+      if (!accessToken) {
+        throw new Error('Non connecté à Strava')
+      }
+
+      const response = await fetch(
+        `https://www.strava.com/api/v3/activities/${activityId}`,
+        {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updates),
+        }
+      )
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          clearTokens()
+          throw new Error('Session expirée, reconnectez-vous')
+        }
+        throw new Error('Erreur lors de la mise à jour sur Strava')
+      }
+
+      return true
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Erreur inconnue'
+      return false
+    }
+  }
+
   const disconnect = () => {
     clearTokens()
   }
@@ -325,6 +362,7 @@ export function useStrava() {
     fetchActivityDetail,
     fetchActivitiesWithDetails,
     convertToSessions,
+    updateActivity,
     disconnect,
   }
 }
