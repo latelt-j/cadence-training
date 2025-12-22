@@ -234,11 +234,13 @@ watch(forecast, () => {}, { deep: true })
         <button class="btn btn-sm btn-ghost text-primary font-medium ml-1" @click="goToToday">Aujourd'hui</button>
       </div>
 
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2">
         <h2 class="text-xl font-bold text-primary capitalize">{{ headerTitle }}</h2>
-        <span v-if="currentPhase" class="badge badge-lg badge-primary">
-          {{ currentPhase.name }} · Sem. {{ phaseWeekNumber }}/{{ phaseTotalWeeks }}
-        </span>
+        <div v-if="currentPhase" class="tooltip tooltip-bottom" :data-tip="currentPhase.name">
+          <span class="badge badge-sm badge-primary font-medium">
+            S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}
+          </span>
+        </div>
       </div>
 
       <div class="w-32"></div>
