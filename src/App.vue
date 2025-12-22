@@ -72,6 +72,26 @@ const showObjectivesModal = ref(false)
 const newSessionIds = ref<Set<string>>(new Set())
 const spotlightSession = ref<ScheduledSession | null>(null)
 const toastMessage = ref<string | null>(null)
+const spotlightCardRef = ref<HTMLElement | null>(null)
+
+// 3D mouse effect for spotlight card
+const onSpotlightMouseMove = (e: MouseEvent) => {
+  if (!spotlightCardRef.value) return
+  const card = spotlightCardRef.value
+  const rect = card.getBoundingClientRect()
+  const x = e.clientX - rect.left
+  const y = e.clientY - rect.top
+  const centerX = rect.width / 2
+  const centerY = rect.height / 2
+  const rotateX = (y - centerY) / 10
+  const rotateY = (centerX - x) / 10
+  card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`
+}
+
+const onSpotlightMouseLeave = () => {
+  if (!spotlightCardRef.value) return
+  spotlightCardRef.value.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)'
+}
 
 // Show spotlight for new session
 const showSpotlight = (session: ScheduledSession) => {
@@ -670,8 +690,11 @@ const handleReset = () => {
           @click="closeSpotlight"
         >
           <div
+            ref="spotlightCardRef"
             class="spotlight-card"
             @click="closeSpotlight"
+            @mousemove="onSpotlightMouseMove"
+            @mouseleave="onSpotlightMouseLeave"
           >
             <div class="spotlight-bg"></div>
             <div class="spotlight-content">
@@ -679,7 +702,6 @@ const handleReset = () => {
                 {{ spotlightSession.sport === 'cycling' ? '🚴' : spotlightSession.sport === 'running' ? '🏃' : '💪' }}
               </div>
               <h2 class="spotlight-title">{{ spotlightSession.title }}</h2>
-              <p class="spotlight-description">{{ spotlightSession.description }}</p>
               <div class="spotlight-stats">
                 <span>{{ Math.floor(spotlightSession.duration_min / 60) }}h{{ (spotlightSession.duration_min % 60).toString().padStart(2, '0') }}</span>
                 <span v-if="spotlightSession.actual_km">{{ spotlightSession.actual_km }} km</span>
