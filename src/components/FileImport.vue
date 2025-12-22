@@ -300,7 +300,7 @@ Types possibles :
 - Intensité : "sweet_spot" (88-94% FTP), "threshold" (seuil Z4), "vo2max" (Z5), "anaerobic" (sprints Z6/Z7)
 - Structure : "long_run", "long_ride" (sortie longue), "hills" (côtes), "fartlek" (jeux d'allure), "technique" (éducatifs)
 - Triathlon : "brick" (enchaînement), "test" (tests FTP/VMA)
-- Renfo/Récup : "recovery", "strength", "mobility" (étirements/yoga), "core" (gainage), "plyometrics" (pliométrie)
+- Renfo/Récup : "recovery", "strength", "core" (gainage), "plyometrics" (pliométrie)
 
 IMPORTANT pour les descriptions :
 - Utilise \\n pour les retours à la ligne (PAS de vraies nouvelles lignes)
