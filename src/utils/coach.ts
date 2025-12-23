@@ -113,13 +113,24 @@ export const generateAnalysisText = (s: ScheduledSession): string => {
   }
 
   text += `\n\n---
-**Format de réponse demandé (pour copier dans mon suivi) :**
-Réponds avec ce format concis en 4-5 lignes max :
+**Format de réponse demandé (en Markdown brut) :**
+Réponds UNIQUEMENT avec le code Markdown brut ci-dessous. Commence par ## sans rien avant :
 
-⚡ **Charge:** [Légère/Modérée/Intense] - [commentaire bref]
-✅ **Points positifs:** [1-2 points]
-⚠️ **À améliorer:** [1-2 points]
-💡 **Conseil:** [1 conseil actionnable pour la prochaine séance]`
+## Bilan de la séance
+
+### ⚡ Charge
+[Légère/Modérée/Intense] - [commentaire bref]
+
+### ✅ Points positifs
+- [point 1]
+- [point 2]
+
+### ⚠️ À améliorer
+- [point 1]
+- [point 2]
+
+### 💡 Conseil
+[1 conseil actionnable pour la prochaine séance]`
 
   return text
 }
