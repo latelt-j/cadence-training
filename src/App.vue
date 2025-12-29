@@ -76,6 +76,10 @@ const toastMessage = ref<string | null>(null)
 const toastType = ref<'success' | 'error'>('success')
 const spotlightCardRef = ref<HTMLElement | null>(null)
 
+// Spotlight comment modal
+const showSpotlightComment = ref(false)
+const spotlightComment = ref('')
+
 // 3D mouse effect for spotlight card
 const onSpotlightMouseMove = (e: MouseEvent) => {
   if (!spotlightCardRef.value) return
@@ -101,14 +105,23 @@ const showSpotlight = (session: ScheduledSession) => {
   newSessionIds.value = new Set([session.id])
 }
 
-const closeSpotlight = async () => {
-  // Copy session data before closing
+const closeSpotlight = () => {
+  // Afficher la modal de commentaire au lieu de copier directement
+  showSpotlightComment.value = true
+}
+
+const confirmSpotlightCopy = async (withComment: boolean) => {
   if (spotlightSession.value) {
-    await copySessionForCoach(spotlightSession.value)
+    const comment = withComment ? spotlightComment.value : undefined
+    await copySessionForCoach(spotlightSession.value, comment)
     showToast('Séance copiée ! Envoie-la à ton coach 🏋️')
   }
 
+  // Reset tout
+  showSpotlightComment.value = false
+  spotlightComment.value = ''
   spotlightSession.value = null
+
   // Keep the calendar glow for a bit longer
   setTimeout(() => {
     newSessionIds.value = new Set()
@@ -585,12 +598,14 @@ const handleReset = () => {
         <div
           v-if="spotlightSession"
           class="spotlight-overlay"
-          @click="closeSpotlight"
+          @click="!showSpotlightComment && closeSpotlight()"
         >
+          <!-- Session Card (avant le clic) -->
           <div
+            v-if="!showSpotlightComment"
             ref="spotlightCardRef"
             class="spotlight-card"
-            @click="closeSpotlight"
+            @click.stop="closeSpotlight"
             @mousemove="onSpotlightMouseMove"
             @mouseleave="onSpotlightMouseLeave"
           >
@@ -611,6 +626,34 @@ const handleReset = () => {
                 <span v-if="spotlightSession.average_watts">⚡ {{ Math.round(spotlightSession.average_watts) }} W</span>
               </div>
               <div class="spotlight-badge">Nouvelle activité !</div>
+            </div>
+          </div>
+
+          <!-- Comment Modal (après le clic) - Style épique 🎉 -->
+          <div
+            v-else
+            class="spotlight-card"
+            @click.stop
+          >
+            <div class="spotlight-bg"></div>
+            <div class="spotlight-content text-center">
+              <div class="text-6xl mb-4">🎉</div>
+              <h2 class="text-2xl font-bold mb-2">Bien joué !</h2>
+              <p class="text-base-content/70 mb-4">Un commentaire pour ton coach ?</p>
+              <textarea
+                v-model="spotlightComment"
+                class="textarea textarea-bordered w-full h-20 mb-4 bg-base-100/50"
+                placeholder="Super sensations, jambes en feu, objectif atteint..."
+              ></textarea>
+              <div class="flex gap-3 justify-center">
+                <button class="btn btn-ghost" @click="confirmSpotlightCopy(false)">Passer</button>
+                <button
+                  class="btn bg-pink-500 hover:bg-pink-600 text-white border-0 shadow-lg shadow-pink-500/30"
+                  @click="confirmSpotlightCopy(true)"
+                >
+                  📋 Copier pour le coach
+                </button>
+              </div>
             </div>
           </div>
         </div>

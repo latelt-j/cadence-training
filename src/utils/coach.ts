@@ -33,7 +33,7 @@ const formatSpeed = (metersPerSec: number, sport: string): string => {
   return `${kmh.toFixed(1)} km/h`
 }
 
-export const generateAnalysisText = (s: ScheduledSession): string => {
+export const generateAnalysisText = (s: ScheduledSession, comment?: string): string => {
   const sportName = s.sport === 'cycling' ? 'Vélo' : s.sport === 'running' ? 'Course à pied' : 'Renforcement'
 
   let text = `## Séance d'entraînement à analyser
@@ -112,6 +112,11 @@ export const generateAnalysisText = (s: ScheduledSession): string => {
     })
   }
 
+  // Ajouter le commentaire de l'utilisateur s'il existe
+  if (comment?.trim()) {
+    text += `\n\n**💬 Ressenti :** ${comment.trim()}`
+  }
+
   text += `\n\n---
 **Format de réponse demandé (en Markdown brut) :**
 Réponds UNIQUEMENT avec le code Markdown brut ci-dessous. Commence par ## sans rien avant :
@@ -135,8 +140,8 @@ Réponds UNIQUEMENT avec le code Markdown brut ci-dessous. Commence par ## sans 
   return text
 }
 
-export const copySessionForCoach = async (session: ScheduledSession): Promise<void> => {
-  const text = generateAnalysisText(session)
+export const copySessionForCoach = async (session: ScheduledSession, comment?: string): Promise<void> => {
+  const text = generateAnalysisText(session, comment)
   await navigator.clipboard.writeText(text)
 }
 

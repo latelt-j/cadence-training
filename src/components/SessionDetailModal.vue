@@ -32,6 +32,10 @@ const feedbackSaved = ref(false)
 const isEditingFeedback = ref(false)
 const currentPage = ref<'details' | 'planned' | 'coach'>('details')
 
+// Coach comment dropdown
+const coachComment = ref('')
+const dropdownRef = ref<HTMLDetailsElement | null>(null)
+
 // Strava session editing
 const isEditingStrava = ref(false)
 const editTitle = ref('')
@@ -131,11 +135,17 @@ const formatSpeed = (metersPerSec: number, sport: string): string => {
   return `${kmh.toFixed(1)} km/h`
 }
 
-const copyForAnalysis = async () => {
+const copyForAnalysis = async (withComment: boolean = false) => {
   if (!props.session) return
-  const text = generateAnalysisText(props.session)
+  const comment = withComment ? coachComment.value : undefined
+  const text = generateAnalysisText(props.session, comment)
   await navigator.clipboard.writeText(text)
   copied.value = true
+  coachComment.value = ''
+  // Fermer le dropdown
+  if (dropdownRef.value) {
+    dropdownRef.value.open = false
+  }
   setTimeout(() => {
     copied.value = false
   }, 2000)
@@ -402,13 +412,27 @@ const downloadZwoFile = () => {
 
         <!-- Actions for Details page -->
         <div class="flex flex-wrap gap-2 pt-4 border-t border-base-300">
-          <button
-            class="btn btn-sm btn-outline"
-            :class="copied ? 'btn-success' : 'btn-primary'"
-            @click="copyForAnalysis"
-          >
-            {{ copied ? '✓ Copié !' : '📋 Copier pour coach' }}
-          </button>
+          <!-- Dropdown pour copier avec commentaire -->
+          <details ref="dropdownRef" class="dropdown dropdown-top dropdown-end">
+            <summary
+              class="btn btn-sm btn-outline"
+              :class="copied ? 'btn-success' : 'btn-primary'"
+            >
+              {{ copied ? '✓ Copié !' : '📋 Copier pour coach' }}
+            </summary>
+            <div class="dropdown-content bg-base-200 rounded-box p-4 shadow-lg w-72 z-50 mb-2">
+              <p class="text-sm font-medium mb-2">💬 Un commentaire ?</p>
+              <textarea
+                v-model="coachComment"
+                class="textarea textarea-bordered w-full h-20 text-sm"
+                placeholder="Jambes lourdes, super sensations, objectif atteint..."
+              ></textarea>
+              <div class="flex justify-end gap-2 mt-2">
+                <button class="btn btn-sm btn-ghost" @click="copyForAnalysis(false)">Passer</button>
+                <button class="btn btn-sm btn-primary" @click="copyForAnalysis(true)">📋 Copier</button>
+              </div>
+            </div>
+          </details>
           <button
             v-if="session.zwift_workout"
             class="btn btn-sm btn-outline btn-warning"
