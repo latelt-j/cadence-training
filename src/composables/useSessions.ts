@@ -209,7 +209,7 @@ export function useSessions() {
     }
   }
 
-  const updateSessionFeedback = async (sessionId: string, feedback: string) => {
+  const updateSessionFeedback = async (sessionId: string, feedback: string): Promise<boolean> => {
     const session = sessions.value.find((s) => s.id === sessionId)
     if (session) {
       session.coach_feedback = feedback
@@ -218,10 +218,13 @@ export function useSessions() {
       // Sync to Supabase
       try {
         await dbUpdateSession(session)
+        return true
       } catch (error) {
         console.error('Error updating session feedback in Supabase:', error)
+        return false
       }
     }
+    return false
   }
 
   const updateSession = async (sessionId: string, updates: Partial<ScheduledSession>) => {

@@ -353,8 +353,12 @@ const handleDeleteSession = async (sessionId: string) => {
   await removeSession(sessionId)
 }
 
-const handleUpdateFeedback = async (sessionId: string, feedback: string) => {
-  await updateSessionFeedback(sessionId, feedback)
+const handleUpdateFeedback = async (sessionId: string, feedback: string): Promise<boolean> => {
+  const success = await updateSessionFeedback(sessionId, feedback)
+  if (!success) {
+    showToast('Erreur de sauvegarde, réessayez')
+  }
+  return success
 }
 
 const handleUpdateSession = async (sessionId: string, updates: { title: string; description: string }) => {

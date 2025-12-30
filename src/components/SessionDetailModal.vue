@@ -29,6 +29,8 @@ const emit = defineEmits<{
 const copied = ref(false)
 const feedbackText = ref('')
 const feedbackSaved = ref(false)
+const feedbackError = ref(false)
+const isSavingFeedback = ref(false)
 const isEditingFeedback = ref(false)
 const currentPage = ref<'details' | 'planned' | 'coach'>('details')
 
@@ -54,16 +56,25 @@ const copyTitleSuggestion = async () => {
 }
 
 // Sync state when session changes
-watch(() => props.session, (newSession) => {
-  feedbackText.value = newSession?.coach_feedback || ''
-  feedbackSaved.value = false
-  isEditingFeedback.value = false
-  currentPage.value = 'details'
-  // Reset Strava editing
-  isEditingStrava.value = false
+watch(() => props.session, (newSession, oldSession) => {
+  // Ne pas reset si on édite et que c'est la même session (juste une mise à jour)
+  const isSameSession = oldSession && newSession && oldSession.id === newSession.id
+
+  if (!isSameSession || !isEditingFeedback.value) {
+    feedbackText.value = newSession?.coach_feedback || ''
+    isEditingFeedback.value = false
+  }
+
+  if (!isSameSession) {
+    feedbackSaved.value = false
+    currentPage.value = 'details'
+    // Reset Strava editing
+    isEditingStrava.value = false
+    suggestionCopied.value = false
+  }
+
   editTitle.value = newSession?.title || ''
   editDescription.value = newSession?.description || ''
-  suggestionCopied.value = false
 }, { immediate: true })
 
 // Check if feedback exists
@@ -81,14 +92,24 @@ const renderedFeedback = computed(() => {
   return marked(feedbackText.value)
 })
 
-const saveFeedback = () => {
-  if (props.session) {
+const saveFeedback = async () => {
+  if (!props.session) return
+
+  isSavingFeedback.value = true
+  feedbackError.value = false
+
+  try {
     emit('updateFeedback', props.session.id, feedbackText.value)
     feedbackSaved.value = true
     isEditingFeedback.value = false
     setTimeout(() => {
       feedbackSaved.value = false
     }, 2000)
+  } catch {
+    feedbackError.value = true
+    emit('toast', 'Erreur de sauvegarde', 'error')
+  } finally {
+    isSavingFeedback.value = false
   }
 }
 
@@ -503,15 +524,21 @@ Exemple:
 💡 Conseil: Travaille la vélocité sur le prochain entraînement"
           ></textarea>
           <div class="flex justify-end gap-2">
-            <button v-if="hasFeedback" class="btn btn-sm btn-ghost" @click="cancelEditFeedback">
+            <button v-if="hasFeedback" class="btn btn-sm btn-ghost" @click="cancelEditFeedback" :disabled="isSavingFeedback">
               Annuler
             </button>
             <button
               class="btn btn-sm"
-              :class="feedbackSaved ? 'btn-success' : 'btn-primary'"
+              :class="{
+                'btn-success': feedbackSaved,
+                'btn-error': feedbackError,
+                'btn-primary': !feedbackSaved && !feedbackError
+              }"
+              :disabled="isSavingFeedback"
               @click="saveFeedback"
             >
-              {{ feedbackSaved ? '✓ Sauvegardé !' : '💾 Sauvegarder' }}
+              <span v-if="isSavingFeedback" class="loading loading-spinner loading-xs"></span>
+              {{ isSavingFeedback ? 'Sauvegarde...' : feedbackSaved ? '✓ Sauvegardé !' : feedbackError ? '✗ Erreur' : '💾 Sauvegarder' }}
             </button>
           </div>
         </div>
