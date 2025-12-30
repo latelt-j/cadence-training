@@ -252,6 +252,8 @@ export function useStrava() {
 
   const mapStravaToSport = (activity: StravaActivity): Sport | null => {
     const type = activity.sport_type || activity.type
+    console.log('[Strava] Activity:', activity.name, '| Type:', type, '| Sport type:', activity.sport_type, '| Type:', activity.type)
+
     const cyclingTypes = ['Ride', 'VirtualRide', 'MountainBikeRide', 'GravelRide', 'EBikeRide']
     const runningTypes = ['Run', 'TrailRun', 'VirtualRun', 'Treadmill', 'Soccer', 'Football']
     const strengthTypes = ['WeightTraining', 'Workout', 'Crossfit', 'Yoga', 'HIIT']
@@ -262,6 +264,7 @@ export function useStrava() {
     if (strengthTypes.includes(type)) return 'strength'
     if (hikingTypes.includes(type)) return 'hiking'
 
+    console.log('[Strava] Unknown type:', type, '- skipping activity')
     return null
   }
 
