@@ -294,7 +294,7 @@ Format attendu :
   ]
 }
 
-⚠️ SPORTS VALIDES (UNIQUEMENT ces 3, aucun autre !) : "cycling", "running", "strength"
+⚠️ SPORTS VALIDES (UNIQUEMENT ces 4, aucun autre !) : "cycling", "running", "strength", "hiking"
 - NE PAS inventer de nouveau sport (pas de "recovery", "yoga", "swimming", etc.)
 - Pour une journée de repos, ne pas créer de séance
 

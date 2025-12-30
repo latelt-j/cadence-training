@@ -255,10 +255,12 @@ export function useStrava() {
     const cyclingTypes = ['Ride', 'VirtualRide', 'MountainBikeRide', 'GravelRide', 'EBikeRide']
     const runningTypes = ['Run', 'TrailRun', 'VirtualRun', 'Treadmill', 'Soccer', 'Football']
     const strengthTypes = ['WeightTraining', 'Workout', 'Crossfit', 'Yoga', 'HIIT']
+    const hikingTypes = ['Hike', 'Walk', 'RockClimbing']
 
     if (cyclingTypes.includes(type)) return 'cycling'
     if (runningTypes.includes(type)) return 'running'
     if (strengthTypes.includes(type)) return 'strength'
+    if (hikingTypes.includes(type)) return 'hiking'
 
     return null
   }
