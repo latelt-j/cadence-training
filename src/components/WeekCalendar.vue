@@ -274,7 +274,7 @@ watch(forecast, () => {}, { deep: true })
                 {{ day.dayNumber }}
               </div>
             </div>
-            <div v-if="day.weather" class="text-center pl-2 border-l border-base-300/50" :title="day.weather.title">
+            <div v-if="day.weather" class="tooltip tooltip-bottom text-center pl-2 border-l border-base-300/50" :data-tip="day.weather.title">
               <div class="text-lg leading-none">{{ day.weather.emoji }}</div>
               <div class="text-xs font-semibold text-base-content/70">{{ day.weather.temp }}°</div>
               <div class="text-[10px] text-base-content/40">
