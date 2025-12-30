@@ -4,7 +4,7 @@ import type { ScheduledSession, TrainingPhase } from '../types/session'
 import { SPORT_CONFIG } from '../types/session'
 import { useWeather } from '../composables/useWeather'
 
-const { forecast, fetchWithGeolocation, getWeatherForDate, getWeatherEmoji, getWindArrow } = useWeather()
+const { forecast, fetchWithGeolocation, getWeatherForDate, getWeatherEmoji, getWindArrow, locationName } = useWeather()
 
 const props = defineProps<{
   sessions: ScheduledSession[]
@@ -67,7 +67,7 @@ const weekDays = computed(() => {
       weather: weather ? {
         emoji: getWeatherEmoji(weather.weatherCode),
         temp: weather.tempMax,
-        title: `${weather.tempMin}° / ${weather.tempMax}°`,
+        title: `📍 ${locationName.value} • ${weather.tempMin}° / ${weather.tempMax}°`,
         wind: weather.windSpeed,
         windArrow: getWindArrow(weather.windDirection),
       } : null

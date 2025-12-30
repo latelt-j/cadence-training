@@ -13,6 +13,7 @@ interface DayForecast {
 const forecast = ref<DayForecast[]>([])
 const isLoading = ref(false)
 const error = ref<string | null>(null)
+const locationName = ref<string>('Paris')
 
 // Weather codes to emoji mapping (WMO codes)
 const weatherEmoji: Record<number, string> = {
@@ -103,17 +104,35 @@ export function useWeather() {
     return labels[index] ?? 'N'
   }
 
+  // Reverse geocoding to get city name
+  const fetchLocationName = async (lat: number, lon: number) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+      )
+      const data = await response.json()
+      locationName.value = data.address?.city || data.address?.town || data.address?.village || data.address?.municipality || 'Lieu inconnu'
+    } catch {
+      locationName.value = 'Lieu inconnu'
+    }
+  }
+
   // Try to get user location, fallback to Paris
   const fetchWithGeolocation = async () => {
     if ('geolocation' in navigator) {
       return new Promise<void>((resolve) => {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
-            await fetchForecast(position.coords.latitude, position.coords.longitude)
+            const { latitude, longitude } = position.coords
+            await Promise.all([
+              fetchForecast(latitude, longitude),
+              fetchLocationName(latitude, longitude)
+            ])
             resolve()
           },
           async () => {
             // Fallback to Paris if denied
+            locationName.value = 'Paris'
             await fetchForecast()
             resolve()
           },
@@ -121,6 +140,7 @@ export function useWeather() {
         )
       })
     } else {
+      locationName.value = 'Paris'
       await fetchForecast()
     }
   }
@@ -129,6 +149,7 @@ export function useWeather() {
     forecast,
     isLoading,
     error,
+    locationName,
     fetchForecast,
     fetchWithGeolocation,
     getWeatherForDate,
