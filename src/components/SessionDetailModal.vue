@@ -505,49 +505,6 @@ const downloadZwoFile = () => {
           </div>
         </div>
 
-        <!-- Actions for Details page -->
-        <div class="flex flex-wrap gap-2 pt-4 border-t border-base-300">
-          <!-- Dropdown pour copier avec commentaire -->
-          <details ref="dropdownRef" class="dropdown dropdown-bottom">
-            <summary
-              class="btn btn-sm btn-outline"
-              :class="copied ? 'btn-success' : 'btn-primary'"
-            >
-              {{ copied ? '✓ Copié !' : '📋 Copier pour coach' }}
-            </summary>
-            <div class="dropdown-content bg-base-200 rounded-box p-4 shadow-lg w-72 z-[100] mt-2">
-              <p class="text-sm font-medium mb-2">💬 Un commentaire ?</p>
-              <textarea
-                v-model="coachComment"
-                class="textarea textarea-bordered w-full h-20 text-sm"
-                placeholder="Jambes lourdes, super sensations, objectif atteint..."
-              ></textarea>
-              <div class="flex justify-end gap-2 mt-2">
-                <button class="btn btn-sm btn-ghost" @click="copyForAnalysis(false)">Passer</button>
-                <button class="btn btn-sm btn-primary" @click="copyForAnalysis(true)">📋 Copier</button>
-              </div>
-            </div>
-          </details>
-          <button
-            v-if="session.type === 'strava' && session.strava_id"
-            class="btn btn-sm btn-outline btn-info"
-            :disabled="isResyncing"
-            @click="handleResync"
-          >
-            <span v-if="isResyncing" class="loading loading-spinner loading-xs"></span>
-            {{ isResyncing ? 'Sync...' : '🔄 Re-sync' }}
-          </button>
-          <button
-            v-if="session.zwift_workout"
-            class="btn btn-sm btn-outline btn-warning"
-            @click="downloadZwoFile"
-          >
-            🚴 Zwift
-          </button>
-          <button v-if="session.type !== 'strava'" class="btn btn-sm btn-error btn-outline" @click="handleDelete">
-            🗑️ Supprimer
-          </button>
-        </div>
       </div>
 
       <!-- Page: Planned (when Strava activity replaced a planned session) -->
@@ -625,6 +582,50 @@ Exemple:
             </button>
           </div>
         </div>
+      </div>
+
+      <!-- Actions footer (outside scrollable area to fix dropdown z-index) -->
+      <div v-show="currentPage === 'details'" class="flex flex-wrap gap-2 pt-4 border-t border-base-300 flex-shrink-0">
+        <!-- Dropdown pour copier avec commentaire -->
+        <details ref="dropdownRef" class="dropdown dropdown-top dropdown-end">
+          <summary
+            class="btn btn-sm btn-outline"
+            :class="copied ? 'btn-success' : 'btn-primary'"
+          >
+            {{ copied ? '✓ Copié !' : '📋 Copier pour coach' }}
+          </summary>
+          <div class="dropdown-content bg-base-200 rounded-box p-4 shadow-xl w-72 mb-2">
+            <p class="text-sm font-medium mb-2">💬 Un commentaire ?</p>
+            <textarea
+              v-model="coachComment"
+              class="textarea textarea-bordered w-full h-20 text-sm"
+              placeholder="Jambes lourdes, super sensations, objectif atteint..."
+            ></textarea>
+            <div class="flex justify-end gap-2 mt-2">
+              <button class="btn btn-sm btn-ghost" @click="copyForAnalysis(false)">Passer</button>
+              <button class="btn btn-sm btn-primary" @click="copyForAnalysis(true)">📋 Copier</button>
+            </div>
+          </div>
+        </details>
+        <button
+          v-if="session.type === 'strava' && session.strava_id"
+          class="btn btn-sm btn-outline btn-info"
+          :disabled="isResyncing"
+          @click="handleResync"
+        >
+          <span v-if="isResyncing" class="loading loading-spinner loading-xs"></span>
+          {{ isResyncing ? 'Sync...' : '🔄 Re-sync' }}
+        </button>
+        <button
+          v-if="session.zwift_workout"
+          class="btn btn-sm btn-outline btn-warning"
+          @click="downloadZwoFile"
+        >
+          🚴 Zwift
+        </button>
+        <button v-if="session.type !== 'strava'" class="btn btn-sm btn-error btn-outline" @click="handleDelete">
+          🗑️ Supprimer
+        </button>
       </div>
     </div>
     <form method="dialog" class="modal-backdrop" @click="emit('close')">
