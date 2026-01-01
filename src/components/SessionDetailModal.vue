@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { marked } from 'marked'
-import type { ScheduledSession } from '../types/session'
+import type { ScheduledSession, AthleteProfile } from '../types/session'
 import { SPORT_CONFIG } from '../types/session'
 import { generateAnalysisText, generateTitleSuggestionPrompt } from '../utils/coach'
 import { useStrava } from '../composables/useStrava'
@@ -16,6 +16,7 @@ marked.setOptions({
 
 const props = defineProps<{
   session: ScheduledSession | null
+  athleteProfile?: AthleteProfile
 }>()
 
 const emit = defineEmits<{
@@ -174,7 +175,7 @@ const formatSpeed = (metersPerSec: number, sport: string): string => {
 const copyForAnalysis = async (withComment: boolean = false) => {
   if (!props.session) return
   const comment = withComment ? coachComment.value : undefined
-  const text = generateAnalysisText(props.session, comment)
+  const text = generateAnalysisText(props.session, comment, props.athleteProfile)
   await navigator.clipboard.writeText(text)
   copied.value = true
   coachComment.value = ''

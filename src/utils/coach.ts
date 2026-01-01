@@ -192,8 +192,12 @@ Réponds UNIQUEMENT avec le code Markdown brut ci-dessous. Commence par ## sans 
   return text
 }
 
-export const copySessionForCoach = async (session: ScheduledSession, comment?: string): Promise<void> => {
-  const text = generateAnalysisText(session, comment)
+export const copySessionForCoach = async (
+  session: ScheduledSession,
+  comment?: string,
+  athleteProfile?: AthleteProfile
+): Promise<void> => {
+  const text = generateAnalysisText(session, comment, athleteProfile)
   await navigator.clipboard.writeText(text)
 }
 

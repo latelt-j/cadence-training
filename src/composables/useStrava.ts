@@ -321,14 +321,14 @@ export function useStrava() {
 
       const cyclingTypes = ['Ride', 'VirtualRide', 'MountainBikeRide', 'GravelRide', 'EBikeRide']
 
-      // For cycling activities with power data, fetch streams and calculate metrics
+      // For cycling activities, fetch streams and calculate metrics
       const enrichedActivities = await Promise.all(
         detailedActivities.map(async (activity) => {
           const type = activity.sport_type || activity.type
           const isCycling = cyclingTypes.includes(type)
 
-          // Only fetch streams for cycling with power data
-          if (!isCycling || !activity.weighted_average_watts) {
+          // Fetch streams for all cycling activities (not just those with NP)
+          if (!isCycling) {
             return activity
           }
 
@@ -513,9 +513,9 @@ export function useStrava() {
       const type = detail.sport_type || detail.type
       const isCycling = cyclingTypes.includes(type)
 
-      // For cycling with power, fetch streams and calculate metrics
+      // For cycling, fetch streams and calculate metrics
       let enrichedActivity = detail
-      if (isCycling && detail.weighted_average_watts) {
+      if (isCycling) {
         const streams = await fetchActivityStreams(stravaId)
         if (streams) {
           const streamData: StreamData = {

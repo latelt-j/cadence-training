@@ -117,7 +117,7 @@ const closeSpotlight = () => {
 const confirmSpotlightCopy = async (withComment: boolean) => {
   if (spotlightSession.value) {
     const comment = withComment ? spotlightComment.value : undefined
-    await copySessionForCoach(spotlightSession.value, comment)
+    await copySessionForCoach(spotlightSession.value, comment, athleteProfile.value)
     showToast('Séance copiée ! Envoie-la à ton coach 🏋️')
   }
 
@@ -575,6 +575,7 @@ const handleReset = () => {
     <SessionDetailModal
       ref="sessionDetailModalRef"
       :session="selectedSession"
+      :athlete-profile="athleteProfile"
       @close="selectedSession = null"
       @delete="handleDeleteSession"
       @update-feedback="handleUpdateFeedback"
