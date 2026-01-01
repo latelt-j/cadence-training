@@ -194,8 +194,19 @@ export const generateAnalysisText = (
 
 **PARTIE 2 - Suggestions pour Strava (texte simple, PAS de markdown) :**
 
-**Titre:** [titre court et accrocheur, ex: "Sortie endurance Z2" ou "Intervalles 5x5min"]
-**Description:** [2-3 lignes décrivant le type de séance, l'intensité et les sensations]`
+Propose 3 variantes de titre + description :
+
+1. **Sobre** (sans emoji)
+Titre:
+Description:
+
+2. **Équilibré** (1-2 emojis)
+Titre:
+Description:
+
+3. **Expressif** (plusieurs emojis)
+Titre:
+Description:`
 
   return text
 }
