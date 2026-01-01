@@ -170,8 +170,9 @@ export const generateAnalysisText = (
   }
 
   text += `\n\n---
-**Format de réponse demandé (en Markdown brut) :**
-Réponds UNIQUEMENT avec le code Markdown brut ci-dessous. Commence par ## sans rien avant :
+**Format de réponse demandé :**
+
+**PARTIE 1 - Bilan (Markdown brut, commence par ## sans rien avant) :**
 
 ## Bilan de la séance
 
@@ -187,7 +188,14 @@ Réponds UNIQUEMENT avec le code Markdown brut ci-dessous. Commence par ## sans 
 - [point 2]
 
 ### 💡 Conseil
-[1 conseil actionnable pour la prochaine séance]`
+[1 conseil actionnable pour la prochaine séance]
+
+---
+
+**PARTIE 2 - Suggestions pour Strava (texte simple, PAS de markdown) :**
+
+**Titre:** [titre court et accrocheur, ex: "Sortie endurance Z2" ou "Intervalles 5x5min"]
+**Description:** [2-3 lignes décrivant le type de séance, l'intensité et les sensations]`
 
   return text
 }
