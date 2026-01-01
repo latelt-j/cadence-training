@@ -348,16 +348,74 @@ const downloadZwoFile = () => {
         <!-- Strava stats -->
         <div v-if="session.average_heartrate || session.average_watts" class="flex flex-wrap gap-2">
           <div v-if="session.average_heartrate" class="badge badge-error gap-1">
-            <span>❤️</span> {{ Math.round(session.average_heartrate) }} bpm
+            <span>&#10084;&#65039;</span> {{ Math.round(session.average_heartrate) }} bpm
           </div>
           <div v-if="session.max_heartrate" class="badge badge-error badge-outline gap-1">
             max {{ session.max_heartrate }} bpm
           </div>
           <div v-if="session.average_watts" class="badge badge-warning gap-1">
-            <span>⚡</span> {{ Math.round(session.average_watts) }} W
+            <span>&#9889;</span> {{ Math.round(session.average_watts) }} W
           </div>
           <div v-if="session.average_cadence" class="badge badge-info gap-1">
             {{ Math.round(session.average_cadence) }} {{ session.sport === 'running' ? 'ppm' : 'rpm' }}
+          </div>
+        </div>
+
+        <!-- Cycling advanced metrics -->
+        <div
+          v-if="
+            session.sport === 'cycling' &&
+            (session.normalized_power ||
+              session.intensity_factor ||
+              session.variability_index ||
+              session.aerobic_decoupling !== undefined ||
+              session.average_vam ||
+              session.suffer_score ||
+              session.kilojoules)
+          "
+          class="bg-base-200 rounded-lg p-3"
+        >
+          <div class="text-sm font-medium mb-2">Metriques velo</div>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
+            <div v-if="session.normalized_power" class="bg-base-100 rounded p-2">
+              <div class="text-xs text-base-content/60">NP</div>
+              <div class="font-bold text-warning">{{ Math.round(session.normalized_power) }}W</div>
+            </div>
+            <div v-if="session.intensity_factor" class="bg-base-100 rounded p-2">
+              <div class="text-xs text-base-content/60">IF</div>
+              <div class="font-bold" :class="session.intensity_factor > 1 ? 'text-error' : 'text-success'">
+                {{ session.intensity_factor.toFixed(2) }}
+              </div>
+            </div>
+            <div v-if="session.variability_index" class="bg-base-100 rounded p-2">
+              <div class="text-xs text-base-content/60">VI</div>
+              <div class="font-bold">{{ session.variability_index.toFixed(2) }}</div>
+            </div>
+            <div v-if="session.aerobic_decoupling !== undefined" class="bg-base-100 rounded p-2">
+              <div class="text-xs text-base-content/60">Decouplage</div>
+              <div class="font-bold" :class="session.aerobic_decoupling > 5 ? 'text-warning' : 'text-success'">
+                {{ session.aerobic_decoupling.toFixed(1) }}%
+              </div>
+            </div>
+            <div v-if="session.average_vam" class="bg-base-100 rounded p-2">
+              <div class="text-xs text-base-content/60">VAM</div>
+              <div class="font-bold">{{ session.average_vam }} m/h</div>
+            </div>
+            <div v-if="session.suffer_score" class="bg-base-100 rounded p-2">
+              <div class="text-xs text-base-content/60">Effort</div>
+              <div class="font-bold text-error">{{ session.suffer_score }}</div>
+            </div>
+            <div v-if="session.kilojoules" class="bg-base-100 rounded p-2">
+              <div class="text-xs text-base-content/60">Travail</div>
+              <div class="font-bold">{{ Math.round(session.kilojoules) }} kJ</div>
+            </div>
+            <div v-if="session.calories" class="bg-base-100 rounded p-2">
+              <div class="text-xs text-base-content/60">Calories</div>
+              <div class="font-bold">{{ session.calories }} kcal</div>
+            </div>
+          </div>
+          <div v-if="session.device_watts === false" class="text-xs text-warning mt-2 text-center">
+            Puissance estimee (pas de capteur)
           </div>
         </div>
 

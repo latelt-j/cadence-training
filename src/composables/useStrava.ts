@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
-import type { SessionTemplate, Sport, StravaLap } from '../types/session'
+import type { SessionTemplate, Sport, StravaLap, AthleteProfile } from '../types/session'
+import { calculateAllMetrics, type StreamData } from '../utils/cyclingMetrics'
 
 const STRAVA_CLIENT_ID = import.meta.env.VITE_STRAVA_CLIENT_ID || '118625'
 const REDIRECT_URI = window.location.origin
@@ -43,6 +44,36 @@ interface StravaDetailedActivity extends StravaActivity {
     average_cadence?: number
     total_elevation_gain?: number
   }[]
+  // Cycling metrics from Strava API
+  weighted_average_watts?: number // Normalized Power
+  device_watts?: boolean // true if power from device
+  suffer_score?: number // Relative Effort (0-500+)
+  kilojoules?: number // Work done
+  calories?: number // Estimated calories
+  // Calculated metrics (added by fetchActivitiesWithMetrics)
+  intensity_factor?: number
+  variability_index?: number
+  aerobic_decoupling?: number
+  average_vam?: number
+}
+
+// Strava streams types
+interface StravaStream {
+  type: string
+  data: number[]
+  series_type: string
+  original_size: number
+  resolution: string
+}
+
+interface StravaStreamsResponse {
+  heartrate?: StravaStream
+  watts?: StravaStream
+  velocity_smooth?: StravaStream
+  altitude?: StravaStream
+  grade_smooth?: StravaStream
+  time?: StravaStream
+  distance?: StravaStream
 }
 
 const tokens = ref<StravaTokens | null>(null)
@@ -250,6 +281,100 @@ export function useStrava() {
     }
   }
 
+  // Fetch activity streams (second-by-second data)
+  const fetchActivityStreams = async (
+    activityId: number,
+    keys: string[] = ['heartrate', 'watts', 'velocity_smooth', 'altitude', 'grade_smooth', 'time', 'distance']
+  ): Promise<StravaStreamsResponse | null> => {
+    try {
+      const accessToken = await getValidToken()
+      if (!accessToken) return null
+
+      const keysParam = keys.join(',')
+      const response = await fetch(
+        `https://www.strava.com/api/v3/activities/${activityId}/streams?keys=${keysParam}&key_by_type=true`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      )
+
+      if (!response.ok) return null
+      return await response.json()
+    } catch {
+      return null
+    }
+  }
+
+  // Fetch activities with detailed data AND calculated metrics from streams
+  // Only fetches streams for cycling activities with power data
+  const fetchActivitiesWithMetrics = async (
+    days: number = 7,
+    activitiesToFetch?: StravaActivity[],
+    athleteProfile?: AthleteProfile
+  ): Promise<StravaDetailedActivity[]> => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      // First, get detailed activities
+      const detailedActivities = await fetchActivitiesWithDetails(days, activitiesToFetch)
+
+      const cyclingTypes = ['Ride', 'VirtualRide', 'MountainBikeRide', 'GravelRide', 'EBikeRide']
+
+      // For cycling activities with power data, fetch streams and calculate metrics
+      const enrichedActivities = await Promise.all(
+        detailedActivities.map(async (activity) => {
+          const type = activity.sport_type || activity.type
+          const isCycling = cyclingTypes.includes(type)
+
+          // Only fetch streams for cycling with power data
+          if (!isCycling || !activity.weighted_average_watts) {
+            return activity
+          }
+
+          // Fetch streams for this activity
+          const streams = await fetchActivityStreams(activity.id)
+
+          if (streams) {
+            const streamData: StreamData = {
+              heartrate: streams.heartrate?.data,
+              watts: streams.watts?.data,
+              velocity_smooth: streams.velocity_smooth?.data,
+              altitude: streams.altitude?.data,
+              grade_smooth: streams.grade_smooth?.data,
+              time: streams.time?.data,
+              distance: streams.distance?.data,
+            }
+
+            const metrics = calculateAllMetrics(
+              streamData,
+              activity.weighted_average_watts,
+              activity.average_watts,
+              athleteProfile?.ftp
+            )
+
+            return {
+              ...activity,
+              intensity_factor: metrics.intensity_factor,
+              variability_index: metrics.variability_index,
+              aerobic_decoupling: metrics.aerobic_decoupling,
+              average_vam: metrics.average_vam,
+            }
+          }
+
+          return activity
+        })
+      )
+
+      return enrichedActivities
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Erreur inconnue'
+      return []
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   const mapStravaToSport = (activity: StravaActivity): Sport | null => {
     const type = activity.sport_type || activity.type
     console.log('[Strava] Activity:', activity.name, '| Type:', type, '| Sport type:', activity.sport_type, '| Type:', activity.type)
@@ -309,6 +434,17 @@ export function useStrava() {
           average_watts: activity.average_watts,
           max_watts: activity.max_watts,
           average_cadence: activity.average_cadence,
+          // Cycling metrics from Strava API
+          normalized_power: activity.weighted_average_watts,
+          device_watts: activity.device_watts,
+          suffer_score: activity.suffer_score,
+          kilojoules: activity.kilojoules,
+          calories: activity.calories,
+          // Calculated metrics from streams
+          intensity_factor: activity.intensity_factor,
+          variability_index: activity.variability_index,
+          aerobic_decoupling: activity.aerobic_decoupling,
+          average_vam: activity.average_vam,
         }
 
         return { session, date }
@@ -366,6 +502,7 @@ export function useStrava() {
     fetchActivities,
     fetchActivityDetail,
     fetchActivitiesWithDetails,
+    fetchActivitiesWithMetrics,
     convertToSessions,
     updateActivity,
     disconnect,

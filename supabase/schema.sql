@@ -117,3 +117,25 @@ ALTER TABLE oauth_tokens DISABLE ROW LEVEL SECURITY;
 -- =============================================
 -- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS planned_title TEXT;
 -- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS planned_description TEXT;
+
+-- =============================================
+-- MIGRATION: Add cycling metrics to sessions
+-- Run this if you already have the sessions table
+-- =============================================
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS normalized_power INTEGER;
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS device_watts BOOLEAN DEFAULT false;
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS suffer_score INTEGER;
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS kilojoules DECIMAL(10,2);
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS calories INTEGER;
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS intensity_factor DECIMAL(4,2);
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS variability_index DECIMAL(4,2);
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS aerobic_decoupling DECIMAL(5,2);
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS average_vam INTEGER;
+
+-- =============================================
+-- MIGRATION: Add athlete profile to user_settings
+-- Run this if you already have the user_settings table
+-- =============================================
+-- ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS ftp INTEGER;
+-- ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS max_hr INTEGER;
+-- ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS resting_hr INTEGER;

@@ -18,6 +18,13 @@ export interface ImportedPhase {
   description?: string
 }
 
+// Athlete profile for user settings
+export interface AthleteProfile {
+  ftp?: number // Functional Threshold Power (watts)
+  max_hr?: number // Maximum heart rate (bpm)
+  resting_hr?: number // Resting heart rate (bpm)
+}
+
 // Training objective (race/event)
 export interface TrainingObjective {
   id: string
@@ -79,6 +86,17 @@ export interface SessionTemplate {
   planned_description?: string
   // Zwift workout XML (for cycling sessions)
   zwift_workout?: string
+  // Cycling metrics (from Strava API)
+  normalized_power?: number // Weighted average watts (NP)
+  device_watts?: boolean // true if power from real sensor
+  suffer_score?: number // Strava Relative Effort
+  kilojoules?: number // Total work
+  calories?: number // Estimated calories
+  // Calculated cycling metrics (from streams)
+  intensity_factor?: number // NP / FTP
+  variability_index?: number // NP / avg_watts
+  aerobic_decoupling?: number // HR/power drift %
+  average_vam?: number // Vertical ascent meters/hour
 }
 
 export interface ScheduledSession extends SessionTemplate {

@@ -23,6 +23,16 @@ interface DbSession {
   max_watts: number | null
   average_cadence: number | null
   coach_feedback: string | null
+  // Cycling metrics
+  normalized_power: number | null
+  device_watts: boolean | null
+  suffer_score: number | null
+  kilojoules: number | null
+  calories: number | null
+  intensity_factor: number | null
+  variability_index: number | null
+  aerobic_decoupling: number | null
+  average_vam: number | null
   created_at: string
   updated_at: string
 }
@@ -34,6 +44,10 @@ interface DbUserSettings {
   intervals_api_key: string | null
   training_phases: TrainingPhase[] | null
   training_objectives: TrainingObjective[] | null
+  // Athlete profile
+  ftp: number | null
+  max_hr: number | null
+  resting_hr: number | null
   updated_at: string
 }
 
@@ -289,6 +303,16 @@ export function useSupabase() {
     ...(db.max_watts !== null && { max_watts: db.max_watts }),
     ...(db.average_cadence !== null && { average_cadence: db.average_cadence }),
     ...(db.coach_feedback && { coach_feedback: db.coach_feedback }),
+    // Cycling metrics
+    ...(db.normalized_power !== null && { normalized_power: db.normalized_power }),
+    ...(db.device_watts !== null && { device_watts: db.device_watts }),
+    ...(db.suffer_score !== null && { suffer_score: db.suffer_score }),
+    ...(db.kilojoules !== null && { kilojoules: db.kilojoules }),
+    ...(db.calories !== null && { calories: db.calories }),
+    ...(db.intensity_factor !== null && { intensity_factor: db.intensity_factor }),
+    ...(db.variability_index !== null && { variability_index: db.variability_index }),
+    ...(db.aerobic_decoupling !== null && { aerobic_decoupling: db.aerobic_decoupling }),
+    ...(db.average_vam !== null && { average_vam: db.average_vam }),
   })
 
   const sessionToDb = (session: ScheduledSession): Omit<DbSession, 'created_at' | 'updated_at'> => ({
@@ -310,6 +334,16 @@ export function useSupabase() {
     max_watts: session.max_watts ? Math.round(session.max_watts) : null,
     average_cadence: session.average_cadence ? Math.round(session.average_cadence) : null,
     coach_feedback: session.coach_feedback ?? null,
+    // Cycling metrics
+    normalized_power: session.normalized_power ? Math.round(session.normalized_power) : null,
+    device_watts: session.device_watts ?? null,
+    suffer_score: session.suffer_score ? Math.round(session.suffer_score) : null,
+    kilojoules: session.kilojoules ?? null,
+    calories: session.calories ? Math.round(session.calories) : null,
+    intensity_factor: session.intensity_factor ?? null,
+    variability_index: session.variability_index ?? null,
+    aerobic_decoupling: session.aerobic_decoupling ?? null,
+    average_vam: session.average_vam ? Math.round(session.average_vam) : null,
   })
 
   return {

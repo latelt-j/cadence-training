@@ -1,4 +1,4 @@
-import type { ScheduledSession } from '../types/session'
+import type { ScheduledSession, AthleteProfile } from '../types/session'
 
 const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString('fr-FR', {
@@ -33,8 +33,13 @@ const formatSpeed = (metersPerSec: number, sport: string): string => {
   return `${kmh.toFixed(1)} km/h`
 }
 
-export const generateAnalysisText = (s: ScheduledSession, comment?: string): string => {
-  const sportName = s.sport === 'cycling' ? 'Vélo' : s.sport === 'running' ? 'Course à pied' : 'Renforcement'
+export const generateAnalysisText = (
+  s: ScheduledSession,
+  comment?: string,
+  athleteProfile?: AthleteProfile
+): string => {
+  const sportName =
+    s.sport === 'cycling' ? 'Vélo' : s.sport === 'running' ? 'Course à pied' : 'Renforcement'
 
   let text = `## Séance d'entraînement à analyser
 
@@ -69,10 +74,49 @@ export const generateAnalysisText = (s: ScheduledSession, comment?: string): str
     if (s.max_heartrate) text += `\n- Max: ${Math.round(s.max_heartrate)} bpm`
   }
 
-  if (s.average_watts || s.max_watts) {
+  // Enhanced power section with cycling metrics
+  if (s.average_watts || s.max_watts || s.normalized_power) {
     text += `\n\n**Puissance:**`
     if (s.average_watts) text += `\n- Moyenne: ${Math.round(s.average_watts)} W`
+    if (s.normalized_power) text += `\n- Puissance Normalisée (NP): ${Math.round(s.normalized_power)} W`
     if (s.max_watts) text += `\n- Max: ${Math.round(s.max_watts)} W`
+    if (s.device_watts !== undefined) {
+      text += `\n- Source: ${s.device_watts ? 'Capteur de puissance' : 'Estimation'}`
+    }
+  }
+
+  // Cycling advanced metrics
+  if (
+    s.sport === 'cycling' &&
+    (s.intensity_factor || s.variability_index || s.aerobic_decoupling !== undefined || s.average_vam)
+  ) {
+    text += `\n\n**Métriques avancées:**`
+    if (s.intensity_factor) {
+      text += `\n- Intensity Factor (IF): ${s.intensity_factor.toFixed(2)}`
+      if (athleteProfile?.ftp) {
+        text += ` (basé sur FTP ${athleteProfile.ftp}W)`
+      }
+    }
+    if (s.variability_index) {
+      const viComment = s.variability_index > 1.05 ? ' (effort variable)' : ' (effort régulier)'
+      text += `\n- Variability Index (VI): ${s.variability_index.toFixed(2)}${viComment}`
+    }
+    if (s.aerobic_decoupling !== undefined) {
+      const decouplingComment =
+        s.aerobic_decoupling > 5 ? ' (dérive cardiaque élevée)' : ' (bonne endurance aérobie)'
+      text += `\n- Découplage aérobie: ${s.aerobic_decoupling.toFixed(1)}%${decouplingComment}`
+    }
+    if (s.average_vam) {
+      text += `\n- VAM moyen: ${s.average_vam} m/h`
+    }
+  }
+
+  // Effort/Energy metrics
+  if (s.suffer_score || s.kilojoules || s.calories) {
+    text += `\n\n**Effort/Énergie:**`
+    if (s.suffer_score) text += `\n- Effort relatif (Strava): ${s.suffer_score}`
+    if (s.kilojoules) text += `\n- Travail: ${Math.round(s.kilojoules)} kJ`
+    if (s.calories) text += `\n- Calories: ${s.calories} kcal`
   }
 
   if (s.average_cadence) {
@@ -110,6 +154,14 @@ export const generateAnalysisText = (s: ScheduledSession, comment?: string): str
       }
       text += phaseText
     })
+  }
+
+  // Athlete profile context (if available)
+  if (athleteProfile && (athleteProfile.ftp || athleteProfile.max_hr || athleteProfile.resting_hr)) {
+    text += `\n\n**Profil athlète:**`
+    if (athleteProfile.ftp) text += `\n- FTP: ${athleteProfile.ftp} W`
+    if (athleteProfile.max_hr) text += `\n- FC Max: ${athleteProfile.max_hr} bpm`
+    if (athleteProfile.resting_hr) text += `\n- FC Repos: ${athleteProfile.resting_hr} bpm`
   }
 
   // Ajouter le commentaire de l'utilisateur s'il existe

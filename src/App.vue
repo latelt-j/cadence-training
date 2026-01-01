@@ -4,7 +4,7 @@ import { useSessions } from './composables/useSessions'
 import { useStrava } from './composables/useStrava'
 import { useGoogleCalendar } from './composables/useGoogleCalendar'
 import { useSupabase } from './composables/useSupabase'
-import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective, ImportedPhase } from './types/session'
+import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective, ImportedPhase, AthleteProfile } from './types/session'
 import { v4 as uuidv4 } from 'uuid'
 import FileImport from './components/FileImport.vue'
 import WeekCalendar from './components/WeekCalendar.vue'
@@ -14,6 +14,7 @@ import WeeklyStats from './components/WeeklyStats.vue'
 import VolumeChart from './components/VolumeChart.vue'
 import WellnessWidget from './components/WellnessWidget.vue'
 import ObjectiveSettings from './components/ObjectiveSettings.vue'
+import AthleteProfileComponent from './components/AthleteProfile.vue'
 import { copySessionForCoach } from './utils/coach'
 
 const {
@@ -44,7 +45,7 @@ const {
   authorize: stravaAuthorize,
   handleCallback: stravaHandleCallback,
   fetchActivities,
-  fetchActivitiesWithDetails,
+  fetchActivitiesWithMetrics,
   convertToSessions,
   disconnect: stravaDisconnect,
 } = useStrava()
@@ -63,11 +64,13 @@ const {
 const showGoogleDisconnectModal = ref(false)
 const showGoogleDeleteModal = ref(false)
 
-// Training phases & objectives
+// Training phases & objectives & athlete profile
 const { fetchSettings, updateSettings } = useSupabase()
 const trainingPhases = ref<TrainingPhase[]>([])
 const trainingObjectives = ref<TrainingObjective[]>([])
 const showObjectivesModal = ref(false)
+const athleteProfile = ref<AthleteProfile>({})
+const showAthleteProfileModal = ref(false)
 
 // Track new sessions for animation
 const newSessionIds = ref<Set<string>>(new Set())
@@ -148,7 +151,7 @@ onMounted(async () => {
   // Init sessions from Supabase
   await initSessions()
 
-  // Load training phases & objectives from settings
+  // Load training phases & objectives & athlete profile from settings
   try {
     const settings = await fetchSettings()
     if (settings?.training_phases) {
@@ -160,6 +163,14 @@ onMounted(async () => {
         ...obj,
         priority: obj.priority || 'A'
       }))
+    }
+    // Load athlete profile
+    if (settings?.ftp || settings?.max_hr || settings?.resting_hr) {
+      athleteProfile.value = {
+        ftp: settings.ftp ?? undefined,
+        max_hr: settings.max_hr ?? undefined,
+        resting_hr: settings.resting_hr ?? undefined,
+      }
     }
   } catch (e) {
     console.error('Error loading settings:', e)
@@ -208,7 +219,8 @@ const syncStrava = async () => {
     return
   }
 
-  const detailedActivities = await fetchActivitiesWithDetails(30, newActivities)
+  // Fetch detailed activities with cycling metrics (streams + calculations)
+  const detailedActivities = await fetchActivitiesWithMetrics(30, newActivities, athleteProfile.value)
   const sessionsToAdd = convertToSessions(detailedActivities)
 
   let added = 0
@@ -349,6 +361,21 @@ const handleSaveObjectives = async (objectives: TrainingObjective[]) => {
   }
 }
 
+const handleSaveAthleteProfile = async (profile: AthleteProfile) => {
+  athleteProfile.value = profile
+  try {
+    await updateSettings({
+      ftp: profile.ftp ?? null,
+      max_hr: profile.max_hr ?? null,
+      resting_hr: profile.resting_hr ?? null,
+    } as any)
+    showToast('Profil sauvegarde')
+  } catch (e) {
+    console.error('Error saving athlete profile:', e)
+    showToast('Erreur de sauvegarde', 'error')
+  }
+}
+
 const handleDeleteSession = async (sessionId: string) => {
   await removeSession(sessionId)
 }
@@ -467,6 +494,14 @@ const handleReset = () => {
               @click="showObjectivesModal = true"
             >
               🎯 Objectifs
+            </button>
+
+            <!-- Athlete Profile button -->
+            <button
+              class="btn btn-sm gap-1 btn-outline btn-warning"
+              @click="showAthleteProfileModal = true"
+            >
+              &#9889; Profil
             </button>
 
             <!-- Theme Toggle -->
@@ -592,6 +627,20 @@ const handleReset = () => {
         />
       </div>
       <form method="dialog" class="modal-backdrop" @click="showObjectivesModal = false">
+        <button>close</button>
+      </form>
+    </dialog>
+
+    <!-- Athlete Profile Modal -->
+    <dialog class="modal" :class="{ 'modal-open': showAthleteProfileModal }">
+      <div class="modal-box max-w-md">
+        <AthleteProfileComponent
+          :profile="athleteProfile"
+          @save="handleSaveAthleteProfile"
+          @close="showAthleteProfileModal = false"
+        />
+      </div>
+      <form method="dialog" class="modal-backdrop" @click="showAthleteProfileModal = false">
         <button>close</button>
       </form>
     </dialog>
