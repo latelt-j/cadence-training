@@ -47,6 +47,7 @@ const {
   fetchActivities,
   fetchActivitiesWithMetrics,
   convertToSessions,
+  resyncActivity,
   disconnect: stravaDisconnect,
 } = useStrava()
 
@@ -281,6 +282,7 @@ const syncGoogle = async () => {
 const showAddModal = ref(false)
 const addModalDate = ref('')
 const selectedSession = ref<ScheduledSession | null>(null)
+const sessionDetailModalRef = ref<{ onResyncComplete: () => void } | null>(null)
 
 // Theme
 const isDarkMode = ref(localStorage.getItem('theme') === 'dracula')
@@ -390,6 +392,32 @@ const handleUpdateFeedback = async (sessionId: string, feedback: string): Promis
 
 const handleUpdateSession = async (sessionId: string, updates: { title: string; description: string }) => {
   await updateSession(sessionId, updates)
+}
+
+const handleResyncSession = async (sessionId: string, stravaId: number) => {
+  const newData = await resyncActivity(stravaId, athleteProfile.value)
+
+  if (newData) {
+    // Merge new data with existing session (keep id, date, planned info, feedback)
+    const existingSession = sessions.value.find(s => s.id === sessionId)
+    if (existingSession) {
+      await updateSession(sessionId, {
+        ...newData,
+        // Preserve these fields
+        planned_title: existingSession.planned_title,
+        planned_description: existingSession.planned_description,
+        coach_feedback: existingSession.coach_feedback,
+      } as any)
+
+      // Update selectedSession to reflect changes
+      selectedSession.value = sessions.value.find(s => s.id === sessionId) || null
+      showToast('Metriques mises a jour')
+    }
+  } else {
+    showToast('Erreur lors de la synchronisation', 'error')
+  }
+
+  sessionDetailModalRef.value?.onResyncComplete()
 }
 
 const handleReset = () => {
@@ -545,11 +573,13 @@ const handleReset = () => {
     />
 
     <SessionDetailModal
+      ref="sessionDetailModalRef"
       :session="selectedSession"
       @close="selectedSession = null"
       @delete="handleDeleteSession"
       @update-feedback="handleUpdateFeedback"
       @update="handleUpdateSession"
+      @resync="handleResyncSession"
       @toast="showToast"
     />
 

@@ -23,6 +23,7 @@ const emit = defineEmits<{
   delete: [sessionId: string]
   updateFeedback: [sessionId: string, feedback: string]
   update: [sessionId: string, updates: { title: string; description: string }]
+  resync: [sessionId: string, stravaId: number]
   toast: [message: string, type?: 'success' | 'error']
 }>()
 
@@ -44,6 +45,20 @@ const editTitle = ref('')
 const editDescription = ref('')
 const suggestionCopied = ref(false)
 const isSaving = ref(false)
+const isResyncing = ref(false)
+
+const handleResync = () => {
+  if (!props.session?.strava_id) return
+  isResyncing.value = true
+  emit('resync', props.session.id, props.session.strava_id)
+}
+
+// Called by parent when resync is done
+const onResyncComplete = () => {
+  isResyncing.value = false
+}
+
+defineExpose({ onResyncComplete })
 
 const copyTitleSuggestion = async () => {
   if (!props.session) return
@@ -512,6 +527,15 @@ const downloadZwoFile = () => {
               </div>
             </div>
           </details>
+          <button
+            v-if="session.type === 'strava' && session.strava_id"
+            class="btn btn-sm btn-outline btn-info"
+            :disabled="isResyncing"
+            @click="handleResync"
+          >
+            <span v-if="isResyncing" class="loading loading-spinner loading-xs"></span>
+            {{ isResyncing ? 'Sync...' : '🔄 Re-sync' }}
+          </button>
           <button
             v-if="session.zwift_workout"
             class="btn btn-sm btn-outline btn-warning"

@@ -493,6 +493,69 @@ export function useStrava() {
     clearTokens()
   }
 
+  // Re-sync a single activity with full metrics (for existing activities)
+  const resyncActivity = async (
+    stravaId: number,
+    athleteProfile?: AthleteProfile
+  ): Promise<SessionTemplate | null> => {
+    isLoading.value = true
+    error.value = null
+
+    try {
+      // Fetch detailed activity
+      const detail = await fetchActivityDetail(stravaId)
+      if (!detail) {
+        error.value = 'Activité introuvable sur Strava'
+        return null
+      }
+
+      const cyclingTypes = ['Ride', 'VirtualRide', 'MountainBikeRide', 'GravelRide', 'EBikeRide']
+      const type = detail.sport_type || detail.type
+      const isCycling = cyclingTypes.includes(type)
+
+      // For cycling with power, fetch streams and calculate metrics
+      let enrichedActivity = detail
+      if (isCycling && detail.weighted_average_watts) {
+        const streams = await fetchActivityStreams(stravaId)
+        if (streams) {
+          const streamData: StreamData = {
+            heartrate: streams.heartrate?.data,
+            watts: streams.watts?.data,
+            velocity_smooth: streams.velocity_smooth?.data,
+            altitude: streams.altitude?.data,
+            grade_smooth: streams.grade_smooth?.data,
+            time: streams.time?.data,
+            distance: streams.distance?.data,
+          }
+
+          const metrics = calculateAllMetrics(
+            streamData,
+            detail.weighted_average_watts,
+            detail.average_watts,
+            athleteProfile?.ftp
+          )
+
+          enrichedActivity = {
+            ...detail,
+            intensity_factor: metrics.intensity_factor,
+            variability_index: metrics.variability_index,
+            aerobic_decoupling: metrics.aerobic_decoupling,
+            average_vam: metrics.average_vam,
+          }
+        }
+      }
+
+      // Convert to session format
+      const converted = convertToSessions([enrichedActivity])
+      return converted[0]?.session || null
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Erreur inconnue'
+      return null
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     isConnected,
     isLoading,
@@ -505,6 +568,7 @@ export function useStrava() {
     fetchActivitiesWithMetrics,
     convertToSessions,
     updateActivity,
+    resyncActivity,
     disconnect,
   }
 }
