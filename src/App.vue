@@ -592,6 +592,7 @@ const handleReset = () => {
           :sessions="sessions"
           :training-phases="trainingPhases"
           :training-objectives="trainingObjectives"
+          :athlete-profile="athleteProfile"
           @import="handleImport"
         />
         <div class="modal-action">

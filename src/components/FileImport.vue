@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective, ImportedPhase } from '../types/session'
+import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective, ImportedPhase, AthleteProfile } from '../types/session'
 
 const props = defineProps<{
   sessions?: ScheduledSession[]
   trainingPhases?: TrainingPhase[]
   trainingObjectives?: TrainingObjective[]
+  athleteProfile?: AthleteProfile
 }>()
 
 const emit = defineEmits<{
@@ -18,7 +19,13 @@ const jsonText = ref('')
 const error = ref('')
 const copied = ref(false)
 const replaceExisting = ref(true)
-const coachDirective = ref('')
+
+// Nouveaux champs pour le prompt coach
+const fatigue = ref<number>(5)
+const toutRealise = ref<'oui' | 'non' | 'partiel'>('oui')
+const difficulte = ref<'facile' | 'normal' | 'difficile'>('normal')
+const contraintes = ref('')
+const envies = ref('')
 
 // Custom date range for workout request
 const getDefaultPlanDates = () => {
@@ -140,6 +147,7 @@ const weekStats = computed(() => {
     totalKm: 0,
     totalElevation: 0,
     cycling: { hours: 0, km: 0, elevation: 0, count: 0 },
+    mtb: { hours: 0, km: 0, elevation: 0, count: 0 },
     running: { hours: 0, km: 0, elevation: 0, count: 0 },
     strength: { hours: 0, count: 0 },
   }
@@ -153,6 +161,11 @@ const weekStats = computed(() => {
       stats.cycling.km += s.actual_km ?? 0
       stats.cycling.elevation += s.actual_elevation ?? 0
       stats.cycling.count++
+    } else if (s.sport === 'mtb') {
+      stats.mtb.hours += hours
+      stats.mtb.km += s.actual_km ?? 0
+      stats.mtb.elevation += s.actual_elevation ?? 0
+      stats.mtb.count++
     } else if (s.sport === 'running') {
       stats.running.hours += hours
       stats.running.km += s.actual_km ?? 0
@@ -178,105 +191,106 @@ const formatHours = (hours: number) => {
   return `${h}h${m.toString().padStart(2, '0')}`
 }
 
-const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString('fr-FR', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  })
-}
-
-// Generate coach prompt
+// Generate coach prompt with new structured format
 const generateCoachPrompt = () => {
-  let prompt = `# Bilan de la semaine (${bilanWeekDates.value.start} au ${bilanWeekDates.value.end})
-
-## Phase actuelle
-`
-
-  if (currentPhase.value) {
-    prompt += `**${currentPhase.value.name}** - Sem. ${phaseWeekNumber.value}/${phaseTotalWeeks.value}`
-    if (currentPhase.value.description) {
-      prompt += ` - ${currentPhase.value.description}`
-    }
-    if (currentPhase.value.goals) {
-      prompt += `\nObjectifs : ${currentPhase.value.goals}`
-    }
-    prompt += `\n(Du ${currentPhase.value.start_date} au ${currentPhase.value.end_date})\n`
-  } else {
-    prompt += `⚠️ Aucune phase définie\n`
-  }
-
-  // Add objectives
-  if (props.trainingObjectives && props.trainingObjectives.length > 0) {
-    prompt += `\n## Objectifs\n`
-    const priorityLabels: Record<string, string> = { A: 'Principal', B: 'Secondaire', C: 'Préparation' }
-    props.trainingObjectives.forEach(obj => {
-      const daysLeft = Math.ceil((new Date(obj.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
-      const typeLabel = obj.type === 'trail' ? '🏃 Trail' : '🚴 Vélo route'
-      const priorityLabel = priorityLabels[obj.priority] || obj.priority
-      prompt += `\n**[${obj.priority}] ${obj.name}** (${typeLabel}, ${priorityLabel}) - J-${daysLeft}\n`
-      prompt += `- Date : ${obj.date}\n`
-      prompt += `- Distance : ${obj.distance_km} km\n`
-      prompt += `- D+ : ${obj.elevation_gain}m`
-      if (obj.type === 'trail' && obj.elevation_loss) {
-        prompt += ` / D- : ${obj.elevation_loss}m`
-      }
-      prompt += '\n'
-    })
-  }
-
-  prompt += `
-## Séances accomplies cette semaine
-
-**Volume total : ${formatHours(weekStats.value.totalHours)}** (${bilanStravaSessions.value.length} séances)
-- 🚴 Vélo : ${formatHours(weekStats.value.cycling.hours)} (${weekStats.value.cycling.count} séances, ${weekStats.value.cycling.km.toFixed(1)} km, ${Math.round(weekStats.value.cycling.elevation)} D+)
-- 🏃 Course : ${formatHours(weekStats.value.running.hours)} (${weekStats.value.running.count} séances, ${weekStats.value.running.km.toFixed(1)} km, ${Math.round(weekStats.value.running.elevation)} D+)
-- 💪 Renfo : ${formatHours(weekStats.value.strength.hours)} (${weekStats.value.strength.count} séances)
-
-### Détail des séances
-`
-
-  bilanStravaSessions.value.forEach(s => {
-    prompt += `\n**${formatDate(s.date)} - ${s.title}** (${s.sport})\n`
-    prompt += `- Durée : ${formatHours(s.duration_min / 60)}`
-    if (s.actual_km) prompt += `, Distance : ${s.actual_km.toFixed(1)} km`
-    if (s.actual_elevation) prompt += `, D+ : ${Math.round(s.actual_elevation)}m`
-    if (s.average_heartrate) prompt += `, FC moy : ${Math.round(s.average_heartrate)} bpm`
-    if (s.average_watts) prompt += `, Puissance moy : ${Math.round(s.average_watts)} W`
-    prompt += '\n'
-  })
-
   const dates = planDatesRange.value
   const datesListStr = dates.map(d => `- ${getDayName(d)} : ${d}`).join('\n')
 
-  prompt += `
----
-## Demande de plan pour la période du ${planStartDate.value} au ${planEndDate.value}
-
-**DATES À UTILISER (obligatoire)** :
-${datesListStr}
-`
-
   // Find phase for the plan period
   const planPhase = props.trainingPhases?.find(p => p.start_date <= planStartDate.value && p.end_date >= planStartDate.value)
+
+  let prompt = `# [DEMANDE DE PLAN D'ENTRAÎNEMENT]
+
+---
+
+**1. PROFIL ATHLÈTE**
+`
+
+  // Athlete profile
+  if (props.athleteProfile?.ftp) {
+    prompt += `- FTP : ${props.athleteProfile.ftp} W\n`
+  }
+  if (props.athleteProfile?.max_hr || props.athleteProfile?.resting_hr) {
+    prompt += `- FC Max : ${props.athleteProfile.max_hr ?? '?'} bpm / Repos : ${props.athleteProfile.resting_hr ?? '?'} bpm\n`
+  }
+  prompt += `- Fatigue actuelle (0-10) : ${fatigue.value}\n`
+
+  // Objectives
+  prompt += `\n**2. OBJECTIFS**\n`
+  if (props.trainingObjectives && props.trainingObjectives.length > 0) {
+    props.trainingObjectives.forEach(obj => {
+      const daysLeft = Math.ceil((new Date(obj.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
+      const dateFormatted = new Date(obj.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
+      prompt += `- [${obj.priority}] ${obj.name} (${dateFormatted}) : ${obj.distance_km}km / ${obj.elevation_gain} D+ - J-${daysLeft}\n`
+    })
+  } else {
+    prompt += `- Aucun objectif défini\n`
+  }
+
+  // Current phase
+  prompt += `\n**3. PHASE ACTUELLE**\n`
   if (planPhase) {
-    prompt += `\nPhase prévue : **${planPhase.name}**`
-    if (planPhase.description) {
-      prompt += ` - ${planPhase.description}`
+    prompt += `- Phase : ${planPhase.name}`
+    if (planPhase.description) prompt += ` - ${planPhase.description}`
+    prompt += `\n`
+    if (phaseWeekNumber.value && phaseTotalWeeks.value) {
+      prompt += `- Semaine : ${phaseWeekNumber.value}/${phaseTotalWeeks.value}\n`
     }
-    if (planPhase.goals) {
-      prompt += `\nObjectifs de la phase : ${planPhase.goals}`
-    }
+  } else {
+    prompt += `- Phase : Non définie\n`
   }
 
-  // Add coach directive if provided
-  if (coachDirective.value.trim()) {
-    prompt += `\n\n⚠️ **Directive spéciale** : ${coachDirective.value.trim()}`
+  // Bilan last week
+  prompt += `\n**4. BILAN SEMAINE PASSÉE** (${bilanWeekDates.value.start} au ${bilanWeekDates.value.end})\n\n`
+
+  // Volume summary
+  prompt += `Volume total : ${formatHours(weekStats.value.totalHours)} (${bilanStravaSessions.value.length} séances)\n`
+  if (weekStats.value.cycling.count > 0) {
+    prompt += `- 🚴 Vélo : ${formatHours(weekStats.value.cycling.hours)} (${weekStats.value.cycling.count} séances, ${weekStats.value.cycling.km.toFixed(0)}km, ${Math.round(weekStats.value.cycling.elevation)} D+)\n`
+  }
+  if (weekStats.value.mtb.count > 0) {
+    prompt += `- 🚵 VTT : ${formatHours(weekStats.value.mtb.hours)} (${weekStats.value.mtb.count} séances, ${weekStats.value.mtb.km.toFixed(0)}km, ${Math.round(weekStats.value.mtb.elevation)} D+)\n`
+  }
+  if (weekStats.value.running.count > 0) {
+    prompt += `- 🏃 Course : ${formatHours(weekStats.value.running.hours)} (${weekStats.value.running.count} séances, ${weekStats.value.running.km.toFixed(0)}km, ${Math.round(weekStats.value.running.elevation)} D+)\n`
+  }
+  if (weekStats.value.strength.count > 0) {
+    prompt += `- 💪 Renfo : ${formatHours(weekStats.value.strength.hours)} (${weekStats.value.strength.count} séances)\n`
   }
 
+  // Session details
+  if (bilanStravaSessions.value.length > 0) {
+    prompt += `\nDétail :\n`
+    bilanStravaSessions.value.forEach(s => {
+      const sportEmoji = s.sport === 'cycling' ? '🚴' : s.sport === 'mtb' ? '🚵' : s.sport === 'running' ? '🏃' : '💪'
+      const dateShort = new Date(s.date).toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: '2-digit' })
+      let line = `- ${dateShort} : ${s.title} ${sportEmoji} - ${formatHours(s.duration_min / 60)}`
+      if (s.actual_km) line += `, ${s.actual_km.toFixed(0)}km`
+      if (s.actual_elevation) line += `, ${Math.round(s.actual_elevation)} D+`
+      if (s.intensity_factor) line += `, IF ${s.intensity_factor.toFixed(2)}`
+      else if (s.average_heartrate) line += `, FC ${Math.round(s.average_heartrate)}bpm`
+      prompt += line + '\n'
+    })
+  }
+
+  // Ressenti
+  const toutRealiseLabel = toutRealise.value === 'oui' ? 'Oui' : toutRealise.value === 'partiel' ? 'Partiellement' : 'Non'
+  const difficulteLabel = difficulte.value === 'facile' ? 'Facile' : difficulte.value === 'normal' ? 'Normal' : 'Difficile'
+  prompt += `\nRessenti :\n`
+  prompt += `- Tout réalisé : ${toutRealiseLabel}\n`
+  prompt += `- Difficulté : ${difficulteLabel}\n`
+
+  // Request for next week
+  prompt += `\n**5. DEMANDE POUR LA SEMAINE À VENIR** (${planStartDate.value} au ${planEndDate.value})\n\n`
+  prompt += `Dates disponibles :\n${datesListStr}\n`
+  prompt += `\n- Contraintes : ${contraintes.value.trim() || 'Aucune'}\n`
+  prompt += `- Envies : ${envies.value.trim() || 'Aucune'}\n`
+
+  // JSON instructions
   prompt += `
+---
 
-En te basant sur le bilan ci-dessus et la phase actuelle, génère-moi un plan d'entraînement pour la période demandée.
+En te basant sur le contexte ci-dessus, génère-moi un plan d'entraînement.
 
 Réponds UNIQUEMENT avec le code JSON brut (pas de markdown, pas de \`\`\`). Je vais copier-coller directement.
 
@@ -301,36 +315,22 @@ Format attendu :
   ]
 }
 
-⚠️ SPORTS VALIDES (UNIQUEMENT ces 5, aucun autre !) : "cycling", "mtb", "running", "strength", "hiking"
-- NE PAS inventer de nouveau sport (pas de "recovery", "yoga", "swimming", etc.)
+⚠️ SPORTS VALIDES : "cycling", "mtb", "running", "strength", "hiking"
 - Pour une journée de repos, ne pas créer de séance
 
-Types possibles :
-- Intensité : "sweet_spot" (88-94% FTP), "threshold" (seuil Z4), "vo2max" (Z5), "anaerobic" (sprints Z6/Z7)
-- Structure : "long_run", "long_ride" (sortie longue), "hills" (côtes), "fartlek" (jeux d'allure), "technique" (éducatifs)
-- Triathlon : "brick" (enchaînement), "test" (tests FTP/VMA)
-- Renfo/Récup : "recovery", "strength", "core" (gainage), "plyometrics" (pliométrie)
+Types : "sweet_spot", "threshold", "vo2max", "anaerobic", "long_run", "long_ride", "hills", "fartlek", "recovery", "strength", "core"
 
 IMPORTANT pour les descriptions :
-- Utilise \\n pour les retours à la ligne (PAS de vraies nouvelles lignes)
-- PAS de markdown (pas de ** ou autres)
-- Quelques emojis au début de chaque section (🔥 💪 🧘 🚴 🏃 ⛰️)
-- Structure : Échauffement → Corps de séance → Retour au calme
+- Utilise \\n pour les retours à la ligne
+- PAS de markdown
+- Emojis au début : 🔥 💪 🧘 🚴 🏃 ⛰️
+- Structure : Échauffement → Corps → Retour au calme
 
-IMPORTANT pour zwift_workout (UNIQUEMENT pour les séances cycling ou mtb) :
-- Génère un fichier .zwo Zwift complet au format XML
-- Le XML doit être sur UNE SEULE LIGNE (pas de retours à la ligne)
-- UTILISE DES APOSTROPHES (') et PAS de guillemets (") dans le XML pour éviter les conflits JSON
-- Utilise les puissances en % FTP (ex: 0.75 = 75% FTP)
-- Exemple : "<workout_file><author>Coach</author><name>Sweet Spot</name><description>2x20min SS</description><sportType>bike</sportType><workout><Warmup Duration='600' PowerLow='0.50' PowerHigh='0.70'/><SteadyState Duration='1200' Power='0.90'/><SteadyState Duration='300' Power='0.55'/><SteadyState Duration='1200' Power='0.90'/><Cooldown Duration='600' PowerLow='0.65' PowerHigh='0.50'/></workout></workout_file>"
-
-Exemples descriptions :
-
-VÉLO : "🔥 Échauffement : 15min progressif Z1→Z2\\n🚴 Corps de séance : 2x20min Sweet Spot (88-94% FTP) avec 5min récup Z1\\n🧘 Retour au calme : 10min Z1"
-
-COURSE : "🔥 Échauffement : 15min footing + gammes\\n🏃 Corps de séance : 8x400m allure 5km (récup 200m trot)\\n🧘 Retour au calme : 10min footing + étirements"
-
-RENFO : "💪 Circuit 3 tours (1min récup entre tours) :\\n- Planche ventrale : 45-60 sec\\n- Planche latérale : 30 sec/côté\\n- Bird-Dog : 10 reps/côté\\n- Dead Bug : 10 reps/côté"
+IMPORTANT pour zwift_workout (cycling/mtb uniquement) :
+- XML sur UNE SEULE LIGNE
+- APOSTROPHES (') pas guillemets (")
+- Puissances en % FTP (0.75 = 75%)
+- Exemple : "<workout_file><author>Coach</author><name>Sweet Spot</name><description>2x20min SS</description><sportType>bike</sportType><workout><Warmup Duration='600' PowerLow='0.50' PowerHigh='0.70'/><SteadyState Duration='1200' Power='0.90'/><Cooldown Duration='600' PowerLow='0.65' PowerHigh='0.50'/></workout></workout_file>"
 `
 
   return prompt
@@ -449,16 +449,96 @@ const openFileDialog = () => {
       <div class="text-xs text-base-content/50 mt-1">{{ planDatesRange.length }} jours</div>
     </div>
 
-    <!-- Coach directive (optional) -->
+    <!-- Fatigue slider -->
     <div class="form-control">
       <label class="label pb-1">
-        <span class="label-text text-xs text-base-content/60">💬 Directive pour le coach (optionnel)</span>
+        <span class="label-text text-xs text-base-content/60">😰 Fatigue actuelle</span>
+        <span class="label-text-alt font-bold">{{ fatigue }}/10</span>
       </label>
       <input
-        v-model="coachDirective"
+        v-model.number="fatigue"
+        type="range"
+        min="0"
+        max="10"
+        class="range range-sm"
+        :class="{
+          'range-success': fatigue <= 3,
+          'range-warning': fatigue > 3 && fatigue <= 6,
+          'range-error': fatigue > 6
+        }"
+      />
+      <div class="flex justify-between text-xs text-base-content/40 px-1">
+        <span>Frais</span>
+        <span>Fatigué</span>
+      </div>
+    </div>
+
+    <!-- Bilan ressenti -->
+    <div class="form-control">
+      <label class="label pb-1">
+        <span class="label-text text-xs text-base-content/60">📊 Bilan semaine passée</span>
+      </label>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <div class="text-xs text-base-content/50 mb-1">Tout réalisé ?</div>
+          <div class="flex gap-1">
+            <label class="btn btn-xs" :class="toutRealise === 'oui' ? 'btn-success' : 'btn-ghost'">
+              <input type="radio" v-model="toutRealise" value="oui" class="hidden" />
+              Oui
+            </label>
+            <label class="btn btn-xs" :class="toutRealise === 'partiel' ? 'btn-warning' : 'btn-ghost'">
+              <input type="radio" v-model="toutRealise" value="partiel" class="hidden" />
+              Partiel
+            </label>
+            <label class="btn btn-xs" :class="toutRealise === 'non' ? 'btn-error' : 'btn-ghost'">
+              <input type="radio" v-model="toutRealise" value="non" class="hidden" />
+              Non
+            </label>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs text-base-content/50 mb-1">Difficulté ?</div>
+          <div class="flex gap-1">
+            <label class="btn btn-xs" :class="difficulte === 'facile' ? 'btn-success' : 'btn-ghost'">
+              <input type="radio" v-model="difficulte" value="facile" class="hidden" />
+              Facile
+            </label>
+            <label class="btn btn-xs" :class="difficulte === 'normal' ? 'btn-info' : 'btn-ghost'">
+              <input type="radio" v-model="difficulte" value="normal" class="hidden" />
+              Normal
+            </label>
+            <label class="btn btn-xs" :class="difficulte === 'difficile' ? 'btn-error' : 'btn-ghost'">
+              <input type="radio" v-model="difficulte" value="difficile" class="hidden" />
+              Dur
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contraintes -->
+    <div class="form-control">
+      <label class="label pb-1">
+        <span class="label-text text-xs text-base-content/60">📝 Contraintes (optionnel)</span>
+      </label>
+      <input
+        v-model="contraintes"
         type="text"
         class="input input-bordered input-sm w-full"
-        placeholder="Ex: Je veux 2 séances vélo et 1 séance course max"
+        placeholder="Ex: Mardi seulement 45min, pas de vélo jeudi..."
+      />
+    </div>
+
+    <!-- Envies -->
+    <div class="form-control">
+      <label class="label pb-1">
+        <span class="label-text text-xs text-base-content/60">💡 Envies (optionnel)</span>
+      </label>
+      <input
+        v-model="envies"
+        type="text"
+        class="input input-bordered input-sm w-full"
+        placeholder="Ex: Faire du D+ ce week-end, tester des intervalles..."
       />
     </div>
 
