@@ -194,37 +194,31 @@ const getPhaseEmoji = (name: string) => {
     <div v-if="isEditing" class="bg-base-200 rounded-lg p-4 space-y-3">
       <h4 class="font-medium">{{ editingPhase ? '✏️ Modifier la phase' : '➕ Nouvelle phase' }}</h4>
 
-      <div class="form-control">
-        <label class="label py-1">
-          <span class="label-text">Nom *</span>
-        </label>
+      <div>
+        <label class="text-sm text-base-content/70 mb-1 block">Nom *</label>
         <input
           v-model="formData.name"
           type="text"
-          class="input input-bordered input-sm"
+          class="input input-bordered input-sm w-full"
           placeholder="Ex: Base, Build, Peak..."
         />
       </div>
 
       <div class="grid grid-cols-2 gap-2">
-        <div class="form-control">
-          <label class="label py-1">
-            <span class="label-text">Début *</span>
-          </label>
+        <div>
+          <label class="text-sm text-base-content/70 mb-1 block">Début *</label>
           <input
             v-model="formData.start_date"
             type="date"
-            class="input input-bordered input-sm"
+            class="input input-bordered input-sm w-full"
           />
         </div>
-        <div class="form-control">
-          <label class="label py-1">
-            <span class="label-text">Fin *</span>
-          </label>
+        <div>
+          <label class="text-sm text-base-content/70 mb-1 block">Fin *</label>
           <input
             v-model="formData.end_date"
             type="date"
-            class="input input-bordered input-sm"
+            class="input input-bordered input-sm w-full"
           />
         </div>
       </div>
@@ -233,37 +227,31 @@ const getPhaseEmoji = (name: string) => {
         → Durée : <span class="font-bold">{{ durationWeeks }} semaine{{ durationWeeks > 1 ? 's' : '' }}</span>
       </div>
 
-      <div class="form-control">
-        <label class="label py-1">
-          <span class="label-text">Objectifs</span>
-        </label>
+      <div>
+        <label class="text-sm text-base-content/70 mb-1 block">Objectifs</label>
         <textarea
           v-model="formData.objectives"
-          class="textarea textarea-bordered textarea-sm h-16"
+          class="textarea textarea-bordered textarea-sm h-16 w-full"
           placeholder="Objectifs de la phase..."
         ></textarea>
       </div>
 
-      <div class="form-control">
-        <label class="label py-1">
-          <span class="label-text">Mots-clés (pour le coach IA)</span>
-        </label>
+      <div>
+        <label class="text-sm text-base-content/70 mb-1 block">Mots-clés (pour le coach IA)</label>
         <input
           v-model="formData.keywords"
           type="text"
-          class="input input-bordered input-sm"
+          class="input input-bordered input-sm w-full"
           placeholder="Ex: Z2, volume, régularité, endurance..."
         />
       </div>
 
-      <div class="form-control">
-        <label class="label py-1">
-          <span class="label-text">Challenge (optionnel)</span>
-        </label>
+      <div>
+        <label class="text-sm text-base-content/70 mb-1 block">Challenge (optionnel)</label>
         <input
           v-model="formData.challenge"
           type="text"
-          class="input input-bordered input-sm"
+          class="input input-bordered input-sm w-full"
           placeholder="Ex: Sortie longue 3h chaque week-end"
         />
       </div>
