@@ -294,7 +294,7 @@ Format attendu :
   ]
 }
 
-⚠️ SPORTS VALIDES (UNIQUEMENT ces 4, aucun autre !) : "cycling", "running", "strength", "hiking"
+⚠️ SPORTS VALIDES (UNIQUEMENT ces 5, aucun autre !) : "cycling", "mtb", "running", "strength", "hiking"
 - NE PAS inventer de nouveau sport (pas de "recovery", "yoga", "swimming", etc.)
 - Pour une journée de repos, ne pas créer de séance
 
@@ -310,11 +310,12 @@ IMPORTANT pour les descriptions :
 - Quelques emojis au début de chaque section (🔥 💪 🧘 🚴 🏃 ⛰️)
 - Structure : Échauffement → Corps de séance → Retour au calme
 
-IMPORTANT pour zwift_workout (UNIQUEMENT pour les séances cycling) :
+IMPORTANT pour zwift_workout (UNIQUEMENT pour les séances cycling ou mtb) :
 - Génère un fichier .zwo Zwift complet au format XML
 - Le XML doit être sur UNE SEULE LIGNE (pas de retours à la ligne)
+- UTILISE DES APOSTROPHES (') et PAS de guillemets (") dans le XML pour éviter les conflits JSON
 - Utilise les puissances en % FTP (ex: 0.75 = 75% FTP)
-- Exemple : "<workout_file><author>Coach</author><name>Sweet Spot</name><description>2x20min SS</description><sportType>bike</sportType><workout><Warmup Duration=\\"600\\" PowerLow=\\"0.50\\" PowerHigh=\\"0.70\\"/><SteadyState Duration=\\"1200\\" Power=\\"0.90\\"/><SteadyState Duration=\\"300\\" Power=\\"0.55\\"/><SteadyState Duration=\\"1200\\" Power=\\"0.90\\"/><Cooldown Duration=\\"600\\" PowerLow=\\"0.65\\" PowerHigh=\\"0.50\\"/></workout></workout_file>"
+- Exemple : "<workout_file><author>Coach</author><name>Sweet Spot</name><description>2x20min SS</description><sportType>bike</sportType><workout><Warmup Duration='600' PowerLow='0.50' PowerHigh='0.70'/><SteadyState Duration='1200' Power='0.90'/><SteadyState Duration='300' Power='0.55'/><SteadyState Duration='1200' Power='0.90'/><Cooldown Duration='600' PowerLow='0.65' PowerHigh='0.50'/></workout></workout_file>"
 
 Exemples descriptions :
 
