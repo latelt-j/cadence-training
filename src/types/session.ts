@@ -1,4 +1,4 @@
-export type Sport = 'cycling' | 'running' | 'strength' | 'hiking'
+export type Sport = 'cycling' | 'mtb' | 'running' | 'strength' | 'hiking'
 
 // Training periodization phases
 export interface TrainingPhase {
@@ -141,6 +141,7 @@ export interface WeeklyStats {
 
 export const SPORT_CONFIG: Record<Sport, { emoji: string; label: string; color: string }> = {
   cycling: { emoji: '🚴', label: 'Vélo', color: 'success' },
+  mtb: { emoji: '🚵', label: 'VTT', color: 'success' },
   running: { emoji: '🏃', label: 'Course', color: 'warning' },
   strength: { emoji: '💪', label: 'Renfo', color: 'error' },
   hiking: { emoji: '🥾', label: 'Rando', color: 'info' },

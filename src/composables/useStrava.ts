@@ -319,9 +319,9 @@ export function useStrava() {
       // First, get detailed activities
       const detailedActivities = await fetchActivitiesWithDetails(days, activitiesToFetch)
 
-      const cyclingTypes = ['Ride', 'VirtualRide', 'MountainBikeRide', 'GravelRide', 'EBikeRide']
+      const cyclingTypes = ['Ride', 'VirtualRide', 'MountainBikeRide', 'GravelRide', 'EBikeRide'] // includes MTB for metrics
 
-      // For cycling activities, fetch streams and calculate metrics
+      // For cycling/MTB activities, fetch streams and calculate metrics
       const enrichedActivities = await Promise.all(
         detailedActivities.map(async (activity) => {
           const type = activity.sport_type || activity.type
@@ -379,12 +379,14 @@ export function useStrava() {
     const type = activity.sport_type || activity.type
     console.log('[Strava] Activity:', activity.name, '| Type:', type, '| Sport type:', activity.sport_type, '| Type:', activity.type)
 
-    const cyclingTypes = ['Ride', 'VirtualRide', 'MountainBikeRide', 'GravelRide', 'EBikeRide']
+    const cyclingTypes = ['Ride', 'VirtualRide', 'GravelRide', 'EBikeRide']
+    const mtbTypes = ['MountainBikeRide']
     const runningTypes = ['Run', 'TrailRun', 'VirtualRun', 'Treadmill', 'Soccer', 'Football']
     const strengthTypes = ['WeightTraining', 'Workout', 'Crossfit', 'Yoga', 'HIIT']
     const hikingTypes = ['Hike', 'Walk', 'RockClimbing']
 
     if (cyclingTypes.includes(type)) return 'cycling'
+    if (mtbTypes.includes(type)) return 'mtb'
     if (runningTypes.includes(type)) return 'running'
     if (strengthTypes.includes(type)) return 'strength'
     if (hikingTypes.includes(type)) return 'hiking'

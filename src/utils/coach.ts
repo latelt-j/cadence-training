@@ -39,7 +39,7 @@ export const generateAnalysisText = (
   athleteProfile?: AthleteProfile
 ): string => {
   const sportName =
-    s.sport === 'cycling' ? 'Vélo' : s.sport === 'running' ? 'Course à pied' : 'Renforcement'
+    s.sport === 'cycling' ? 'Vélo' : s.sport === 'mtb' ? 'VTT' : s.sport === 'running' ? 'Course à pied' : 'Renforcement'
 
   let text = `## Séance d'entraînement à analyser
 
@@ -85,9 +85,9 @@ export const generateAnalysisText = (
     }
   }
 
-  // Cycling advanced metrics
+  // Cycling/MTB advanced metrics
   if (
-    s.sport === 'cycling' &&
+    (s.sport === 'cycling' || s.sport === 'mtb') &&
     (s.intensity_factor || s.variability_index || s.aerobic_decoupling !== undefined || s.average_vam)
   ) {
     text += `\n\n**Métriques avancées:**`

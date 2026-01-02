@@ -377,10 +377,10 @@ const downloadZwoFile = () => {
           </div>
         </div>
 
-        <!-- Cycling advanced metrics -->
+        <!-- Cycling/MTB advanced metrics -->
         <div
           v-if="
-            session.sport === 'cycling' &&
+            (session.sport === 'cycling' || session.sport === 'mtb') &&
             (session.normalized_power ||
               session.intensity_factor ||
               session.variability_index ||
@@ -391,7 +391,7 @@ const downloadZwoFile = () => {
           "
           class="bg-base-200 rounded-lg p-3"
         >
-          <div class="text-sm font-medium mb-2">Metriques velo</div>
+          <div class="text-sm font-medium mb-2">{{ session.sport === 'mtb' ? 'Metriques VTT' : 'Metriques velo' }}</div>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
             <div v-if="session.normalized_power" class="bg-base-100 rounded p-2">
               <div class="text-xs text-base-content/60">NP</div>
