@@ -20,6 +20,27 @@ const copied = ref(false)
 const replaceExisting = ref(true)
 const coachDirective = ref('')
 
+// Custom date range for workout request
+const getDefaultPlanDates = () => {
+  const today = new Date()
+  const dayOfWeek = today.getDay()
+  const monday = new Date(today)
+  if (dayOfWeek === 0) {
+    monday.setDate(today.getDate() + 1)
+  } else {
+    monday.setDate(today.getDate() - (dayOfWeek - 1))
+  }
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 6)
+  return {
+    start: `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`,
+    end: `${sunday.getFullYear()}-${String(sunday.getMonth() + 1).padStart(2, '0')}-${String(sunday.getDate()).padStart(2, '0')}`,
+  }
+}
+const defaultDates = getDefaultPlanDates()
+const planStartDate = ref(defaultDates.start)
+const planEndDate = ref(defaultDates.end)
+
 // Format date as YYYY-MM-DD in LOCAL timezone (not UTC!)
 const formatLocalDate = (date: Date) => {
   const year = date.getFullYear()
@@ -52,33 +73,28 @@ const getWeekDates = () => {
   }
 }
 
-// Get week dates to plan (Monday to Sunday)
-// If today is Sunday → next week, otherwise → current week
-const getNextWeekDates = () => {
-  const today = new Date()
-  const dayOfWeek = today.getDay() // 0 = Sunday, 1 = Monday, etc.
+// Computed for fresh week dates
+const weekDates = computed(() => getWeekDates())
 
-  const monday = new Date(today)
-  if (dayOfWeek === 0) {
-    // Sunday → plan for next week (tomorrow is Monday)
-    monday.setDate(today.getDate() + 1)
-  } else {
-    // Monday to Saturday → plan for current week (go back to Monday)
-    monday.setDate(today.getDate() - (dayOfWeek - 1))
-  }
-
-  const dates = []
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday)
-    d.setDate(monday.getDate() + i)
-    dates.push(formatLocalDate(d))
+// Generate all dates in the selected plan range
+const planDatesRange = computed(() => {
+  const dates: string[] = []
+  const start = new Date(planStartDate.value)
+  const end = new Date(planEndDate.value)
+  const current = new Date(start)
+  while (current <= end) {
+    dates.push(formatLocalDate(current))
+    current.setDate(current.getDate() + 1)
   }
   return dates
-}
+})
 
-// Both computed for fresh values
-const weekDates = computed(() => getWeekDates())
-const nextWeekDates = computed(() => getNextWeekDates())
+// Get day name in French
+const getDayName = (dateStr: string) => {
+  const date = new Date(dateStr)
+  const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+  return days[date.getDay()]
+}
 
 // Filter this week's Strava sessions
 const weekStravaSessions = computed(() => {
@@ -115,13 +131,6 @@ const phaseTotalWeeks = computed(() => {
   const diffTime = phaseEnd.getTime() - phaseStart.getTime()
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
   return Math.ceil(diffDays / 7)
-})
-
-// Next week phase
-const nextWeekPhase = computed(() => {
-  if (!props.trainingPhases?.length) return null
-  const nextMonday = nextWeekDates.value[0]
-  return props.trainingPhases.find(p => p.start_date <= nextMonday! && p.end_date >= nextMonday!)
 })
 
 // Week stats
@@ -237,28 +246,26 @@ const generateCoachPrompt = () => {
     prompt += '\n'
   })
 
-  const dates = nextWeekDates.value
+  const dates = planDatesRange.value
+  const datesListStr = dates.map(d => `- ${getDayName(d)} : ${d}`).join('\n')
+
   prompt += `
 ---
-## Demande de plan pour la semaine prochaine (${dates[0]} au ${dates[6]})
+## Demande de plan pour la période du ${planStartDate.value} au ${planEndDate.value}
 
 **DATES À UTILISER (obligatoire)** :
-- Lundi : ${dates[0]}
-- Mardi : ${dates[1]}
-- Mercredi : ${dates[2]}
-- Jeudi : ${dates[3]}
-- Vendredi : ${dates[4]}
-- Samedi : ${dates[5]}
-- Dimanche : ${dates[6]}
+${datesListStr}
 `
 
-  if (nextWeekPhase.value) {
-    prompt += `\nPhase prévue : **${nextWeekPhase.value.name}**`
-    if (nextWeekPhase.value.description) {
-      prompt += ` - ${nextWeekPhase.value.description}`
+  // Find phase for the plan period
+  const planPhase = props.trainingPhases?.find(p => p.start_date <= planStartDate.value && p.end_date >= planStartDate.value)
+  if (planPhase) {
+    prompt += `\nPhase prévue : **${planPhase.name}**`
+    if (planPhase.description) {
+      prompt += ` - ${planPhase.description}`
     }
-    if (nextWeekPhase.value.goals) {
-      prompt += `\nObjectifs de la phase : ${nextWeekPhase.value.goals}`
+    if (planPhase.goals) {
+      prompt += `\nObjectifs de la phase : ${planPhase.goals}`
     }
   }
 
@@ -269,7 +276,7 @@ const generateCoachPrompt = () => {
 
   prompt += `
 
-En te basant sur le bilan ci-dessus et la phase actuelle, génère-moi un plan d'entraînement pour la semaine prochaine.
+En te basant sur le bilan ci-dessus et la phase actuelle, génère-moi un plan d'entraînement pour la période demandée.
 
 Réponds UNIQUEMENT avec le code JSON brut (pas de markdown, pas de \`\`\`). Je vais copier-coller directement.
 
@@ -421,6 +428,27 @@ const openFileDialog = () => {
 
 <template>
   <div class="space-y-4">
+    <!-- Date range picker -->
+    <div class="form-control">
+      <label class="label pb-1">
+        <span class="label-text text-xs text-base-content/60">📅 Période à planifier</span>
+      </label>
+      <div class="flex gap-2 items-center">
+        <input
+          v-model="planStartDate"
+          type="date"
+          class="input input-bordered input-sm flex-1"
+        />
+        <span class="text-base-content/60">→</span>
+        <input
+          v-model="planEndDate"
+          type="date"
+          class="input input-bordered input-sm flex-1"
+        />
+      </div>
+      <div class="text-xs text-base-content/50 mt-1">{{ planDatesRange.length }} jours</div>
+    </div>
+
     <!-- Coach directive (optional) -->
     <div class="form-control">
       <label class="label pb-1">
