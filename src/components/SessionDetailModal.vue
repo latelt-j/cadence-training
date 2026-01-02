@@ -587,14 +587,14 @@ Exemple:
       <!-- Actions footer (outside scrollable area to fix dropdown z-index) -->
       <div v-show="currentPage === 'details'" class="flex flex-wrap gap-2 pt-4 border-t border-base-300 flex-shrink-0">
         <!-- Dropdown pour copier avec commentaire -->
-        <details ref="dropdownRef" class="dropdown dropdown-top dropdown-end">
+        <details ref="dropdownRef" class="dropdown dropdown-top">
           <summary
             class="btn btn-sm btn-outline"
             :class="copied ? 'btn-success' : 'btn-primary'"
           >
             {{ copied ? '✓ Copié !' : '📋 Copier pour coach' }}
           </summary>
-          <div class="dropdown-content bg-base-200 rounded-box p-4 shadow-xl w-72 mb-2">
+          <div class="dropdown-content bg-base-200 rounded-box p-4 shadow-xl w-72 mb-2 right-0">
             <p class="text-sm font-medium mb-2">💬 Un commentaire ?</p>
             <textarea
               v-model="coachComment"
