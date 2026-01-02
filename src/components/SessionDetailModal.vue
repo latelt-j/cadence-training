@@ -594,7 +594,7 @@ Exemple:
           >
             {{ copied ? '✓ Copié !' : '📋 Copier pour coach' }}
           </summary>
-          <div class="dropdown-content bg-base-200 rounded-box p-4 shadow-xl w-72 mb-2 right-0">
+          <div class="dropdown-content bg-base-200 rounded-box p-4 shadow-xl w-72 mb-2 right-1">
             <p class="text-sm font-medium mb-2">💬 Un commentaire ?</p>
             <textarea
               v-model="coachComment"
