@@ -49,32 +49,32 @@ const formatLocalDate = (date: Date) => {
   return `${year}-${month}-${day}`
 }
 
-// Get LAST week dates (Monday to Sunday) - for the weekly review/bilan
-const getWeekDates = () => {
-  const today = new Date()
-  const dayOfWeek = today.getDay() // 0 = Sunday, 1 = Monday
+// Bilan week: the week BEFORE the planning period starts
+const bilanWeekDates = computed(() => {
+  const planStart = new Date(planStartDate.value)
+  const dayOfWeek = planStart.getDay() // 0 = Sunday, 1 = Monday
 
-  // Find last week's Monday
-  const lastMonday = new Date(today)
+  // Find the Monday of the week before planStart
+  const prevMonday = new Date(planStart)
   if (dayOfWeek === 0) {
-    // Sunday → last Monday was 6 days ago
-    lastMonday.setDate(today.getDate() - 6)
+    // planStart is Sunday → previous Monday was 6 days ago
+    prevMonday.setDate(planStart.getDate() - 6)
+  } else if (dayOfWeek === 1) {
+    // planStart is Monday → previous Monday was 7 days ago
+    prevMonday.setDate(planStart.getDate() - 7)
   } else {
-    // Mon-Sat → last Monday was (dayOfWeek + 6) days ago
-    lastMonday.setDate(today.getDate() - dayOfWeek - 6)
+    // Tue-Sat → go back to this week's Monday, then subtract 7
+    prevMonday.setDate(planStart.getDate() - (dayOfWeek - 1) - 7)
   }
 
-  const lastSunday = new Date(lastMonday)
-  lastSunday.setDate(lastMonday.getDate() + 6)
+  const prevSunday = new Date(prevMonday)
+  prevSunday.setDate(prevMonday.getDate() + 6)
 
   return {
-    start: formatLocalDate(lastMonday),
-    end: formatLocalDate(lastSunday),
+    start: formatLocalDate(prevMonday),
+    end: formatLocalDate(prevSunday),
   }
-}
-
-// Computed for fresh week dates
-const weekDates = computed(() => getWeekDates())
+})
 
 // Generate all dates in the selected plan range
 const planDatesRange = computed(() => {
@@ -96,11 +96,11 @@ const getDayName = (dateStr: string) => {
   return days[date.getDay()]
 }
 
-// Filter this week's Strava sessions
-const weekStravaSessions = computed(() => {
+// Filter Strava sessions for the bilan week (week before planning period)
+const bilanStravaSessions = computed(() => {
   if (!props.sessions) return []
-  const start = weekDates.value.start
-  const end = weekDates.value.end
+  const start = bilanWeekDates.value.start
+  const end = bilanWeekDates.value.end
   return props.sessions.filter(s => {
     return s.date >= start && s.date <= end && s.type === 'strava'
   }).sort((a, b) => a.date.localeCompare(b.date))
@@ -144,7 +144,7 @@ const weekStats = computed(() => {
     strength: { hours: 0, count: 0 },
   }
 
-  weekStravaSessions.value.forEach(s => {
+  bilanStravaSessions.value.forEach(s => {
     const hours = s.duration_min / 60
     stats.totalHours += hours
 
@@ -188,7 +188,7 @@ const formatDate = (dateStr: string) => {
 
 // Generate coach prompt
 const generateCoachPrompt = () => {
-  let prompt = `# Bilan de la semaine (${weekDates.value.start} au ${weekDates.value.end})
+  let prompt = `# Bilan de la semaine (${bilanWeekDates.value.start} au ${bilanWeekDates.value.end})
 
 ## Phase actuelle
 `
@@ -228,7 +228,7 @@ const generateCoachPrompt = () => {
   prompt += `
 ## Séances accomplies cette semaine
 
-**Volume total : ${formatHours(weekStats.value.totalHours)}** (${weekStravaSessions.value.length} séances)
+**Volume total : ${formatHours(weekStats.value.totalHours)}** (${bilanStravaSessions.value.length} séances)
 - 🚴 Vélo : ${formatHours(weekStats.value.cycling.hours)} (${weekStats.value.cycling.count} séances, ${weekStats.value.cycling.km.toFixed(1)} km, ${Math.round(weekStats.value.cycling.elevation)} D+)
 - 🏃 Course : ${formatHours(weekStats.value.running.hours)} (${weekStats.value.running.count} séances, ${weekStats.value.running.km.toFixed(1)} km, ${Math.round(weekStats.value.running.elevation)} D+)
 - 💪 Renfo : ${formatHours(weekStats.value.strength.hours)} (${weekStats.value.strength.count} séances)
@@ -236,7 +236,7 @@ const generateCoachPrompt = () => {
 ### Détail des séances
 `
 
-  weekStravaSessions.value.forEach(s => {
+  bilanStravaSessions.value.forEach(s => {
     prompt += `\n**${formatDate(s.date)} - ${s.title}** (${s.sport})\n`
     prompt += `- Durée : ${formatHours(s.duration_min / 60)}`
     if (s.actual_km) prompt += `, Distance : ${s.actual_km.toFixed(1)} km`
