@@ -3,9 +3,14 @@ export type Sport = 'cycling' | 'mtb' | 'running' | 'strength' | 'hiking'
 // Training periodization phases
 export interface TrainingPhase {
   id: string
+  number?: number // Phase number (calculated from order)
   name: string // Base, Build, Peak, Taper, Recovery, etc.
   start_date: string // YYYY-MM-DD
   end_date: string // YYYY-MM-DD
+  objectives?: string // Phase objectives
+  keywords?: string // Keywords for AI coach (e.g., "Z2, volume, régularité")
+  challenge?: string // Optional challenge for the phase
+  // Legacy fields (kept for backwards compatibility)
   description?: string
   goals?: string
 }

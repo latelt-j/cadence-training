@@ -236,6 +236,15 @@ const generateCoachPrompt = () => {
     if (phaseWeekNumber.value && phaseTotalWeeks.value) {
       prompt += `- Semaine : ${phaseWeekNumber.value}/${phaseTotalWeeks.value}\n`
     }
+    if (planPhase.objectives) {
+      prompt += `- Objectifs : ${planPhase.objectives}\n`
+    }
+    if (planPhase.keywords) {
+      prompt += `- Mots-clés : ${planPhase.keywords}\n`
+    }
+    if (planPhase.challenge) {
+      prompt += `- Challenge : ${planPhase.challenge}\n`
+    }
   } else {
     prompt += `- Phase : Non définie\n`
   }

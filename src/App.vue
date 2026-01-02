@@ -15,6 +15,7 @@ import VolumeChart from './components/VolumeChart.vue'
 import WellnessWidget from './components/WellnessWidget.vue'
 import ObjectiveSettings from './components/ObjectiveSettings.vue'
 import AthleteProfileComponent from './components/AthleteProfile.vue'
+import TrainingPhasesManager from './components/TrainingPhasesManager.vue'
 import { copySessionForCoach } from './utils/coach'
 
 const {
@@ -70,6 +71,7 @@ const { fetchSettings, updateSettings } = useSupabase()
 const trainingPhases = ref<TrainingPhase[]>([])
 const trainingObjectives = ref<TrainingObjective[]>([])
 const showObjectivesModal = ref(false)
+const showPhasesModal = ref(false)
 const athleteProfile = ref<AthleteProfile>({})
 const showAthleteProfileModal = ref(false)
 
@@ -378,6 +380,17 @@ const handleSaveAthleteProfile = async (profile: AthleteProfile) => {
   }
 }
 
+const handleSavePhases = async (phases: TrainingPhase[]) => {
+  trainingPhases.value = phases
+  try {
+    await updateSettings({ training_phases: phases } as any)
+    showToast('Phases sauvegardees')
+  } catch (e) {
+    console.error('Error saving phases:', e)
+    showToast('Erreur de sauvegarde', 'error')
+  }
+}
+
 const handleDeleteSession = async (sessionId: string) => {
   await removeSession(sessionId)
 }
@@ -522,6 +535,14 @@ const handleReset = () => {
               @click="showObjectivesModal = true"
             >
               🎯 Objectifs
+            </button>
+
+            <!-- Phases button -->
+            <button
+              class="btn btn-sm gap-1 btn-outline btn-info"
+              @click="showPhasesModal = true"
+            >
+              📊 Phases
             </button>
 
             <!-- Athlete Profile button -->
@@ -673,6 +694,20 @@ const handleReset = () => {
         />
       </div>
       <form method="dialog" class="modal-backdrop" @click="showAthleteProfileModal = false">
+        <button>close</button>
+      </form>
+    </dialog>
+
+    <!-- Training Phases Modal -->
+    <dialog class="modal" :class="{ 'modal-open': showPhasesModal }">
+      <div class="modal-box max-w-lg">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" @click="showPhasesModal = false">✕</button>
+        <TrainingPhasesManager
+          :phases="trainingPhases"
+          @save="handleSavePhases"
+        />
+      </div>
+      <form method="dialog" class="modal-backdrop" @click="showPhasesModal = false">
         <button>close</button>
       </form>
     </dialog>

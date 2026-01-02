@@ -116,6 +116,17 @@ const phaseTotalWeeks = computed(() => {
   return Math.ceil(diffDays / 7)
 })
 
+// Phase tooltip with rich info
+const phaseTooltip = computed(() => {
+  if (!currentPhase.value) return ''
+  const p = currentPhase.value
+  let tooltip = p.name
+  if (p.objectives) tooltip += ` | ${p.objectives}`
+  if (p.keywords) tooltip += ` | ${p.keywords}`
+  if (p.challenge) tooltip += ` | ${p.challenge}`
+  return tooltip
+})
+
 // Navigation
 const prevWeek = () => {
   const newDate = new Date(currentWeekStart.value)
@@ -236,9 +247,9 @@ watch(forecast, () => {}, { deep: true })
 
       <div class="flex items-center gap-2">
         <h2 class="text-xl font-bold text-primary capitalize leading-none">{{ headerTitle }}</h2>
-        <div v-if="currentPhase" class="tooltip tooltip-bottom flex items-center" :data-tip="currentPhase.name">
+        <div v-if="currentPhase" class="tooltip tooltip-bottom flex items-center" :data-tip="phaseTooltip">
           <span class="badge badge-sm badge-primary font-medium">
-            S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}
+            {{ currentPhase.name }} S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}
           </span>
         </div>
       </div>
