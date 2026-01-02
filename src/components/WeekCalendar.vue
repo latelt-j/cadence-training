@@ -248,9 +248,10 @@ watch(forecast, () => {}, { deep: true })
       <div class="flex items-center gap-2">
         <h2 class="text-xl font-bold text-primary capitalize leading-none">{{ headerTitle }}</h2>
         <div v-if="currentPhase" class="tooltip tooltip-bottom flex items-center" :data-tip="phaseTooltip">
-          <span class="badge badge-sm badge-primary font-medium">
-            {{ currentPhase.name }} S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}
-          </span>
+          <div class="badge badge-primary font-medium flex flex-col items-start py-2 h-auto">
+            <span class="text-xs font-bold">{{ currentPhase.name }} S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}</span>
+            <span v-if="currentPhase.objectives" class="text-[10px] opacity-80">{{ currentPhase.objectives }}</span>
+          </div>
         </div>
       </div>
 
