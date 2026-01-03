@@ -298,7 +298,7 @@ const getPhaseEmoji = (name: string) => {
             <div v-if="phase.objectives || phase.goals" class="text-sm mt-1">
               <span class="text-base-content/50">Objectifs:</span> {{ phase.objectives || phase.goals }}
             </div>
-            <div v-if="phase.keywords" class="text-sm text-base-content/60">
+            <div v-if="phase.keywords" class="text-sm text-base-content/60 whitespace-pre-line">
               <span class="text-base-content/50">Mots-clés:</span> {{ phase.keywords }}
             </div>
             <div v-if="phase.challenge" class="text-sm text-warning">
