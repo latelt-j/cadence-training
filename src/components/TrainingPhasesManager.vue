@@ -183,7 +183,7 @@ const getPhaseEmoji = (name: string) => {
 <template>
   <div class="space-y-4">
     <!-- Header with add button -->
-    <div class="flex justify-between items-center">
+    <div class="flex justify-between items-center pr-8">
       <h3 class="font-bold text-lg">📊 Phases d'entraînement</h3>
       <button v-if="!isEditing" class="btn btn-sm btn-primary" @click="startAdd">
         + Ajouter
