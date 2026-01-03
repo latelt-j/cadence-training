@@ -33,12 +33,28 @@ const editingPhase = ref<TrainingPhase | null>(null)
 // Form data
 const formData = ref({
   name: '',
+  emoji: '📊',
   start_date: '',
   end_date: '',
   objectives: '',
   keywords: '',
   challenge: '',
 })
+
+// Available emojis for phases
+const phaseEmojis = [
+  { emoji: '🏗️', label: 'Base' },
+  { emoji: '💪', label: 'Build' },
+  { emoji: '⚡', label: 'Peak' },
+  { emoji: '🎯', label: 'Taper' },
+  { emoji: '🧘', label: 'Récup' },
+  { emoji: '🏆', label: 'Compét' },
+  { emoji: '🔥', label: 'Intensif' },
+  { emoji: '🚴', label: 'Vélo' },
+  { emoji: '🏃', label: 'Course' },
+  { emoji: '⛰️', label: 'Montagne' },
+  { emoji: '📊', label: 'Autre' },
+]
 
 // Calculate duration in weeks
 const durationWeeks = computed(() => {
@@ -94,6 +110,7 @@ const startAdd = () => {
 
   formData.value = {
     name: '',
+    emoji: '📊',
     start_date: tomorrow.toISOString().split('T')[0] ?? '',
     end_date: endDate.toISOString().split('T')[0] ?? '',
     objectives: '',
@@ -108,6 +125,7 @@ const startEdit = (phase: TrainingPhase) => {
   editingPhase.value = phase
   formData.value = {
     name: phase.name,
+    emoji: phase.emoji || '📊',
     start_date: phase.start_date,
     end_date: phase.end_date,
     objectives: phase.objectives || phase.goals || '',
@@ -134,6 +152,7 @@ const savePhase = () => {
       localPhases.value[index] = {
         ...editingPhase.value,
         name: formData.value.name,
+        emoji: formData.value.emoji || undefined,
         start_date: formData.value.start_date,
         end_date: formData.value.end_date,
         objectives: formData.value.objectives || undefined,
@@ -146,6 +165,7 @@ const savePhase = () => {
     localPhases.value.push({
       id: uuidv4(),
       name: formData.value.name,
+      emoji: formData.value.emoji || undefined,
       start_date: formData.value.start_date,
       end_date: formData.value.end_date,
       objectives: formData.value.objectives || undefined,
@@ -194,14 +214,32 @@ const getPhaseEmoji = (name: string) => {
     <div v-if="isEditing" class="bg-base-200 rounded-lg p-4 space-y-3">
       <h4 class="font-medium">{{ editingPhase ? '✏️ Modifier la phase' : '➕ Nouvelle phase' }}</h4>
 
-      <div>
-        <label class="text-sm text-base-content/70 mb-1 block">Nom *</label>
-        <input
-          v-model="formData.name"
-          type="text"
-          class="input input-bordered input-sm w-full"
-          placeholder="Ex: Base, Build, Peak..."
-        />
+      <div class="grid grid-cols-[1fr_auto] gap-3">
+        <div>
+          <label class="text-sm text-base-content/70 mb-1 block">Nom *</label>
+          <input
+            v-model="formData.name"
+            type="text"
+            class="input input-bordered input-sm w-full"
+            placeholder="Ex: Base, Build, Peak..."
+          />
+        </div>
+        <div>
+          <label class="text-sm text-base-content/70 mb-1 block">Icône</label>
+          <div class="flex flex-wrap gap-1">
+            <button
+              v-for="item in phaseEmojis"
+              :key="item.emoji"
+              type="button"
+              class="btn btn-sm btn-square"
+              :class="formData.emoji === item.emoji ? 'btn-primary' : 'btn-ghost'"
+              :title="item.label"
+              @click="formData.emoji = item.emoji"
+            >
+              {{ item.emoji }}
+            </button>
+          </div>
+        </div>
       </div>
 
       <div class="grid grid-cols-2 gap-2">
@@ -285,7 +323,7 @@ const getPhaseEmoji = (name: string) => {
           <div class="flex-1">
             <div class="flex items-center gap-2">
               <span class="badge badge-sm badge-neutral">Phase {{ phase.number }}</span>
-              <span class="text-lg">{{ getPhaseEmoji(phase.name) }}</span>
+              <span class="text-lg">{{ phase.emoji || getPhaseEmoji(phase.name) }}</span>
               <span class="font-bold">{{ phase.name.toUpperCase() }}</span>
               <span v-if="isCurrentPhase(phase)" class="badge badge-sm badge-primary">
                 S{{ getCurrentWeek(phase) }}/{{ getPhaseDuration(phase) }}

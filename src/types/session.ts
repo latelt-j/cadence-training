@@ -5,6 +5,7 @@ export interface TrainingPhase {
   id: string
   number?: number // Phase number (calculated from order)
   name: string // Base, Build, Peak, Taper, Recovery, etc.
+  emoji?: string // Phase emoji icon
   start_date: string // YYYY-MM-DD
   end_date: string // YYYY-MM-DD
   objectives?: string // Phase objectives
