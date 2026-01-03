@@ -258,8 +258,7 @@ watch(forecast, () => {}, { deep: true })
       <div class="flex items-center gap-2 text-sm text-base-content/70">
         <span class="text-base">{{ getPhaseEmoji(currentPhase.name) }}</span>
         <span class="font-semibold text-base-content">{{ currentPhase.name.toUpperCase() }}</span>
-        <span class="text-base-content/40">•</span>
-        <span>Semaine {{ phaseWeekNumber }}/{{ phaseTotalWeeks }}</span>
+        <span class="badge badge-sm badge-primary">S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}</span>
         <span v-if="currentPhase.objectives" class="text-base-content/40">•</span>
         <span v-if="currentPhase.objectives" class="truncate">{{ currentPhase.objectives }}</span>
       </div>
