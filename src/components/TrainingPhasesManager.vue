@@ -247,12 +247,12 @@ const getPhaseEmoji = (name: string) => {
       </div>
 
       <div>
-        <label class="text-sm text-base-content/70 mb-1 block">Challenge (optionnel)</label>
+        <label class="text-sm text-base-content/70 mb-1 block">Événement (optionnel)</label>
         <input
           v-model="formData.challenge"
           type="text"
           class="input input-bordered input-sm w-full"
-          placeholder="Ex: Sortie longue 3h chaque week-end"
+          placeholder="Ex: Course 10km, Cyclosportive..."
         />
       </div>
 
@@ -302,7 +302,7 @@ const getPhaseEmoji = (name: string) => {
               <span class="text-base-content/50">Mots-clés:</span> {{ phase.keywords }}
             </div>
             <div v-if="phase.challenge" class="text-sm text-warning">
-              <span class="text-base-content/50">Challenge:</span> {{ phase.challenge }}
+              <span class="text-base-content/50">Événement:</span> {{ phase.challenge }}
             </div>
           </div>
           <div class="flex gap-1">
