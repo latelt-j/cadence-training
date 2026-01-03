@@ -228,22 +228,22 @@ const getPhaseEmoji = (name: string) => {
       </div>
 
       <div>
-        <label class="text-sm text-base-content/70 mb-1 block">Objectifs</label>
-        <textarea
+        <label class="text-sm text-base-content/70 mb-1 block">Objectif principal</label>
+        <input
           v-model="formData.objectives"
-          class="textarea textarea-bordered textarea-sm h-16 w-full"
-          placeholder="Objectifs de la phase..."
-        ></textarea>
+          type="text"
+          class="input input-bordered input-sm w-full"
+          placeholder="Ex: Construire l'endurance aérobie"
+        />
       </div>
 
       <div>
         <label class="text-sm text-base-content/70 mb-1 block">Mots-clés (pour le coach IA)</label>
-        <input
+        <textarea
           v-model="formData.keywords"
-          type="text"
-          class="input input-bordered input-sm w-full"
-          placeholder="Ex: Z2, volume, régularité, endurance..."
-        />
+          class="textarea textarea-bordered textarea-sm h-16 w-full"
+          placeholder="Ex: Z2, volume, régularité, endurance, sorties longues..."
+        ></textarea>
       </div>
 
       <div>
