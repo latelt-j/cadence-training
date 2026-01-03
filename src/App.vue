@@ -700,7 +700,7 @@ const handleReset = () => {
 
     <!-- Training Phases Modal -->
     <dialog class="modal" :class="{ 'modal-open': showPhasesModal }">
-      <div class="modal-box max-w-lg">
+      <div class="modal-box max-w-2xl">
         <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" @click="showPhasesModal = false">✕</button>
         <TrainingPhasesManager
           :phases="trainingPhases"
