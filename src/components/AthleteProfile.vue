@@ -123,6 +123,22 @@ const ftpZones = computed(() => {
         </div>
       </div>
 
+      <!-- Divider -->
+      <div class="divider text-xs text-base-content/50">Contexte</div>
+
+      <!-- Environment -->
+      <div>
+        <label class="text-sm font-medium mb-1 block">Contexte environnement</label>
+        <textarea
+          v-model="localProfile.environment"
+          class="textarea textarea-bordered w-full h-24"
+          placeholder="Ex: J'habite a Lyon (zone urbaine, pas de denivele).
+Trail/montagne possible uniquement le week-end
+(Monts d'Or a 30min, moyenne montagne a 1h en voiture)."
+        ></textarea>
+        <p class="text-xs text-base-content/50 mt-1">Inclus dans le prompt coach pour adapter les seances</p>
+      </div>
+
       <!-- HR Reserve info -->
       <div v-if="hrReserve" class="bg-base-200 rounded-lg p-3">
         <div class="text-sm font-medium">Reserve cardiaque</div>

@@ -214,6 +214,9 @@ const generateCoachPrompt = () => {
     prompt += `- FC Max : ${props.athleteProfile.max_hr ?? '?'} bpm / Repos : ${props.athleteProfile.resting_hr ?? '?'} bpm\n`
   }
   prompt += `- Fatigue actuelle (0-10) : ${fatigue.value}\n`
+  if (props.athleteProfile?.environment) {
+    prompt += `- Contexte : ${props.athleteProfile.environment}\n`
+  }
 
   // Objectives
   prompt += `\n**2. OBJECTIFS**\n`

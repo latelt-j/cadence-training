@@ -167,11 +167,12 @@ onMounted(async () => {
       }))
     }
     // Load athlete profile
-    if (settings?.ftp || settings?.max_hr || settings?.resting_hr) {
+    if (settings?.ftp || settings?.max_hr || settings?.resting_hr || settings?.environment) {
       athleteProfile.value = {
         ftp: settings.ftp ?? undefined,
         max_hr: settings.max_hr ?? undefined,
         resting_hr: settings.resting_hr ?? undefined,
+        environment: settings.environment ?? undefined,
       }
     }
   } catch (e) {
@@ -338,6 +339,7 @@ const handleSaveAthleteProfile = async (profile: AthleteProfile) => {
       ftp: profile.ftp ?? null,
       max_hr: profile.max_hr ?? null,
       resting_hr: profile.resting_hr ?? null,
+      environment: profile.environment ?? null,
     } as any)
     showToast('Profil sauvegarde')
   } catch (e) {

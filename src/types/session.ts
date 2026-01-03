@@ -28,6 +28,7 @@ export interface AthleteProfile {
   ftp?: number // Functional Threshold Power (watts)
   max_hr?: number // Maximum heart rate (bpm)
   resting_hr?: number // Resting heart rate (bpm)
+  environment?: string // Training environment context (location, terrain access)
 }
 
 // Training objective (race/event)

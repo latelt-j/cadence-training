@@ -48,6 +48,7 @@ interface DbUserSettings {
   ftp: number | null
   max_hr: number | null
   resting_hr: number | null
+  environment: string | null
   updated_at: string
 }
 
