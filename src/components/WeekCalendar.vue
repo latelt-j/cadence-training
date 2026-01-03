@@ -116,16 +116,17 @@ const phaseTotalWeeks = computed(() => {
   return Math.ceil(diffDays / 7)
 })
 
-// Phase tooltip with rich info
-const phaseTooltip = computed(() => {
-  if (!currentPhase.value) return ''
-  const p = currentPhase.value
-  let tooltip = p.name
-  if (p.objectives) tooltip += ` | ${p.objectives}`
-  if (p.keywords) tooltip += ` | ${p.keywords}`
-  if (p.challenge) tooltip += ` | ${p.challenge}`
-  return tooltip
-})
+// Phase emoji based on name
+const getPhaseEmoji = (name: string) => {
+  const lower = name.toLowerCase()
+  if (lower.includes('base') || lower.includes('fondation')) return '🏗️'
+  if (lower.includes('build') || lower.includes('construction')) return '💪'
+  if (lower.includes('peak') || lower.includes('pic') || lower.includes('affutage')) return '⚡'
+  if (lower.includes('taper') || lower.includes('affinage')) return '🎯'
+  if (lower.includes('recovery') || lower.includes('récup')) return '🧘'
+  if (lower.includes('race') || lower.includes('compet')) return '🏆'
+  return '📊'
+}
 
 // Navigation
 const prevWeek = () => {
@@ -245,17 +246,23 @@ watch(forecast, () => {}, { deep: true })
         <button class="btn btn-sm btn-ghost text-primary font-medium ml-1" @click="goToToday">Aujourd'hui</button>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center">
         <h2 class="text-xl font-bold text-primary capitalize leading-none">{{ headerTitle }}</h2>
-        <div v-if="currentPhase" class="tooltip tooltip-bottom flex items-center" :data-tip="phaseTooltip">
-          <div class="badge badge-primary font-medium flex flex-col items-start py-2 h-auto">
-            <span class="text-xs font-bold">{{ currentPhase.name }} S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}</span>
-            <span v-if="currentPhase.objectives" class="text-[10px] opacity-80">{{ currentPhase.objectives }}</span>
-          </div>
-        </div>
       </div>
 
       <div class="w-32"></div>
+    </div>
+
+    <!-- Phase Bar -->
+    <div v-if="currentPhase" class="px-3 pb-2">
+      <div class="flex items-center gap-2 text-sm text-base-content/70">
+        <span class="text-base">{{ getPhaseEmoji(currentPhase.name) }}</span>
+        <span class="font-semibold text-base-content">{{ currentPhase.name.toUpperCase() }}</span>
+        <span class="text-base-content/40">•</span>
+        <span>Semaine {{ phaseWeekNumber }}/{{ phaseTotalWeeks }}</span>
+        <span v-if="currentPhase.objectives" class="text-base-content/40">•</span>
+        <span v-if="currentPhase.objectives" class="truncate">{{ currentPhase.objectives }}</span>
+      </div>
     </div>
 
     <!-- Calendar Grid -->
