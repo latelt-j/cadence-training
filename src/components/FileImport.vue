@@ -338,10 +338,12 @@ IMPORTANT pour les descriptions :
 - Emojis au début : 🔥 💪 🧘 🚴 🏃 ⛰️
 - Structure : Échauffement → Corps → Retour au calme
 
-IMPORTANT pour zwift_workout (cycling/mtb uniquement) :
+⚠️ OBLIGATOIRE pour zwift_workout (cycling/mtb) :
+- TOUJOURS inclure le fichier Zwift XML pour TOUTES les séances vélo (indoor ET outdoor)
 - XML sur UNE SEULE LIGNE
 - APOSTROPHES (') pas guillemets (")
 - Puissances en % FTP (0.75 = 75%)
+- Durées en SECONDES
 - Exemple : "<workout_file><author>Coach</author><name>Sweet Spot</name><description>2x20min SS</description><sportType>bike</sportType><workout><Warmup Duration='600' PowerLow='0.50' PowerHigh='0.70'/><SteadyState Duration='1200' Power='0.90'/><Cooldown Duration='600' PowerLow='0.65' PowerHigh='0.50'/></workout></workout_file>"
 `
 
