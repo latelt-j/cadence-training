@@ -271,7 +271,8 @@ const downloadZwoFile = () => {
 
 <template>
   <dialog class="modal" :class="{ 'modal-open': !!session }">
-    <div class="modal-box max-w-2xl h-[40rem] flex flex-col" v-if="session">
+    <div class="modal-box w-full h-full max-h-full md:max-w-2xl md:h-[40rem] md:max-h-[90vh] rounded-none md:rounded-2xl flex flex-col" v-if="session">
+      <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-2xl z-10" @click="emit('close')">✕</button>
       <!-- Header -->
       <div class="flex items-center gap-3 mb-4 flex-shrink-0">
         <span class="text-4xl">{{ SPORT_CONFIG[session.sport].emoji }}</span>

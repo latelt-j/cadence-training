@@ -172,8 +172,9 @@ const insertExample = () => {
 
 <template>
   <dialog class="modal" :class="{ 'modal-open': open }">
-    <div class="modal-box max-w-2xl">
-      <h3 class="font-bold text-lg mb-4">
+    <div class="modal-box w-full h-full max-h-full md:max-w-2xl md:h-auto md:max-h-[90vh] rounded-none md:rounded-2xl overflow-y-auto">
+      <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-2xl z-10" @click="emit('close')">✕</button>
+      <h3 class="font-bold text-lg mb-4 pr-10">
         ➕ Ajouter une séance — <span class="text-primary">{{ formatDate(date) }}</span>
       </h3>
 

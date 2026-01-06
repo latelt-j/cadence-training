@@ -540,8 +540,9 @@ const handleReset = () => {
 
     <!-- Import Modal -->
     <dialog class="modal" :class="{ 'modal-open': showImportModal }">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4">📥 Importer des séances</h3>
+      <div class="modal-box w-full h-full max-h-full md:max-w-xl md:h-auto md:max-h-[90vh] rounded-none md:rounded-2xl">
+        <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-2xl" @click="showImportModal = false">✕</button>
+        <h3 class="font-bold text-lg mb-4 pr-10">📥 Importer des séances</h3>
         <FileImport
           :sessions="sessions"
           :training-phases="trainingPhases"
@@ -560,8 +561,9 @@ const handleReset = () => {
 
     <!-- Strava Disconnect Modal -->
     <dialog class="modal" :class="{ 'modal-open': showStravaDisconnectModal }">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg">Déconnecter Strava ?</h3>
+      <div class="modal-box w-full h-full max-h-full md:max-w-sm md:h-auto md:max-h-[90vh] rounded-none md:rounded-2xl">
+        <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-2xl" @click="showStravaDisconnectModal = false">✕</button>
+        <h3 class="font-bold text-lg pr-10">Déconnecter Strava ?</h3>
         <p class="py-4 text-base-content/70">Tu devras te reconnecter pour synchroniser tes activités.</p>
         <div class="modal-action">
           <button class="btn btn-ghost" @click="showStravaDisconnectModal = false">Annuler</button>
@@ -573,10 +575,10 @@ const handleReset = () => {
       </form>
     </dialog>
 
-
     <!-- Objectives Modal -->
     <dialog class="modal" :class="{ 'modal-open': showObjectivesModal }">
-      <div class="modal-box max-w-lg">
+      <div class="modal-box w-full h-full max-h-full md:max-w-lg md:h-auto md:max-h-[90vh] rounded-none md:rounded-2xl">
+        <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-2xl z-10" @click="showObjectivesModal = false">✕</button>
         <ObjectiveSettings
           :objectives="trainingObjectives"
           @save="handleSaveObjectives"
@@ -590,7 +592,8 @@ const handleReset = () => {
 
     <!-- Athlete Profile Modal -->
     <dialog class="modal" :class="{ 'modal-open': showAthleteProfileModal }">
-      <div class="modal-box max-w-md">
+      <div class="modal-box w-full h-full max-h-full md:max-w-md md:h-auto md:max-h-[90vh] rounded-none md:rounded-2xl">
+        <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-2xl z-10" @click="showAthleteProfileModal = false">✕</button>
         <AthleteProfileComponent
           :profile="athleteProfile"
           @save="handleSaveAthleteProfile"
@@ -604,8 +607,8 @@ const handleReset = () => {
 
     <!-- Training Phases Modal -->
     <dialog class="modal" :class="{ 'modal-open': showPhasesModal }">
-      <div class="modal-box max-w-2xl">
-        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2" @click="showPhasesModal = false">✕</button>
+      <div class="modal-box w-full h-full max-h-full md:max-w-2xl md:h-auto md:max-h-[90vh] rounded-none md:rounded-2xl">
+        <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-2xl z-10" @click="showPhasesModal = false">✕</button>
         <TrainingPhasesManager
           :phases="trainingPhases"
           @save="handleSavePhases"

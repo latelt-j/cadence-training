@@ -27,19 +27,47 @@ const checkMobile = () => {
   isMobile.value = window.innerWidth < 768
 }
 
-// Swipe handling
+// Swipe handling with animation
 let touchStartX = 0
+const swipeOffset = ref(0)
+const isAnimating = ref(false)
+const slideDirection = ref<'left' | 'right' | null>(null)
+
 const onTouchStart = (e: TouchEvent) => {
+  if (isAnimating.value) return
   touchStartX = e.touches[0]?.clientX ?? 0
+  swipeOffset.value = 0
 }
+
+const onTouchMove = (e: TouchEvent) => {
+  if (isAnimating.value) return
+  const currentX = e.touches[0]?.clientX ?? 0
+  swipeOffset.value = currentX - touchStartX
+}
+
 const onTouchEnd = (e: TouchEvent) => {
+  if (isAnimating.value) return
   const endX = e.changedTouches[0]?.clientX ?? 0
   const diff = endX - touchStartX
+
   if (diff > 50 && currentDayIndex.value > 0) {
-    currentDayIndex.value--
+    slideDirection.value = 'right'
+    isAnimating.value = true
+    setTimeout(() => {
+      currentDayIndex.value--
+      slideDirection.value = null
+      isAnimating.value = false
+    }, 200)
   } else if (diff < -50 && currentDayIndex.value < 6) {
-    currentDayIndex.value++
+    slideDirection.value = 'left'
+    isAnimating.value = true
+    setTimeout(() => {
+      currentDayIndex.value++
+      slideDirection.value = null
+      isAnimating.value = false
+    }, 200)
   }
+  swipeOffset.value = 0
 }
 
 // Current day getter with safety check
@@ -309,16 +337,23 @@ watch(forecast, () => {}, { deep: true })
     <!-- Mobile View: Single Day with Swipe -->
     <div
       v-if="isMobile"
-      class="min-h-[350px] p-3"
+      class="min-h-[400px] p-3 overflow-hidden"
       @touchstart="onTouchStart"
+      @touchmove="onTouchMove"
       @touchend="onTouchEnd"
     >
       <div
         v-if="currentDay"
-        class="flex flex-col rounded-2xl h-full"
+        class="flex flex-col rounded-2xl min-h-[350px] transition-all duration-200 ease-out"
         :class="{
           'bg-primary/10 ring-2 ring-primary/30': currentDay.isToday,
           'bg-base-200/50': !currentDay.isToday
+        }"
+        :style="{
+          transform: slideDirection === 'left' ? 'translateX(-100%) scale(0.95)' :
+                     slideDirection === 'right' ? 'translateX(100%) scale(0.95)' :
+                     `translateX(${swipeOffset * 0.3}px)`,
+          opacity: slideDirection ? 0 : 1 - Math.abs(swipeOffset) / 500
         }"
         @click="emit('addSession', currentDay.date)"
       >
@@ -354,7 +389,7 @@ watch(forecast, () => {}, { deep: true })
           <div
             v-for="session in currentDaySessions"
             :key="session.id"
-            class="session-card p-4 rounded-xl text-white cursor-pointer shadow-md"
+            class="session-card p-4 rounded-2xl text-white cursor-pointer shadow-lg h-20"
             :class="[
               `session-${session.sport}`,
               session.type !== 'strava' ? 'session-planned' : '',
@@ -363,11 +398,11 @@ watch(forecast, () => {}, { deep: true })
             @click.stop="emit('selectSession', session)"
           >
             <div class="font-semibold flex items-center gap-2 text-base">
-              <span class="text-xl">{{ SPORT_CONFIG[session.sport].emoji }}</span>
-              <span class="truncate">{{ session.title }}</span>
-              <span v-if="session.type === 'strava'" class="ml-auto opacity-70 text-lg">✓</span>
+              <span class="text-2xl">{{ SPORT_CONFIG[session.sport].emoji }}</span>
+              <span class="truncate flex-1">{{ session.title }}</span>
+              <span v-if="session.type === 'strava'" class="opacity-70 text-lg">✓</span>
             </div>
-            <div class="text-white/70 mt-2 text-sm">{{ formatDuration(session.duration_min) }}</div>
+            <div class="text-white/80 mt-1 text-sm font-medium">{{ formatDuration(session.duration_min) }}</div>
           </div>
 
           <!-- Empty state -->
