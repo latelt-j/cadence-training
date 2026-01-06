@@ -2,7 +2,6 @@
 import { ref, onMounted } from 'vue'
 import { useSessions } from './composables/useSessions'
 import { useStrava } from './composables/useStrava'
-import { useGoogleCalendar } from './composables/useGoogleCalendar'
 import { useSupabase } from './composables/useSupabase'
 import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective, ImportedPhase, AthleteProfile } from './types/session'
 import FileImport from './components/FileImport.vue'
@@ -27,7 +26,6 @@ const {
   updateSessionFeedback,
   updateSession,
   removeSession,
-  downloadJson,
   reset,
   weeklyStats,
   setCurrentWeek,
@@ -51,19 +49,6 @@ const {
   disconnect: stravaDisconnect,
 } = useStrava()
 
-const {
-  isConnected: googleConnected,
-  isLoading: googleLoading,
-  authorize: googleAuthorize,
-  handleCallback: googleHandleCallback,
-  syncToCalendar,
-  deleteAllEvents: googleDeleteAll,
-  disconnect: googleDisconnect,
-} = useGoogleCalendar()
-
-// Google modals
-const showGoogleDisconnectModal = ref(false)
-const showGoogleDeleteModal = ref(false)
 
 // Training phases & objectives & athlete profile
 const { fetchSettings, updateSettings } = useSupabase()
@@ -141,12 +126,6 @@ const showToast = (message: string, type: 'success' | 'error' = 'success') => {
   }, 3000)
 }
 
-// Delete all from Google Calendar
-const deleteFromGoogle = async () => {
-  showGoogleDeleteModal.value = false
-  const deleted = await googleDeleteAll()
-  alert(`${deleted} événement(s) supprimé(s) de Google Calendar`)
-}
 
 // Handle OAuth callbacks and init
 onMounted(async () => {
@@ -183,15 +162,11 @@ onMounted(async () => {
   const code = urlParams.get('code')
   const state = urlParams.get('state')
 
-  if (code) {
-    if (state === 'google') {
-      await googleHandleCallback(code)
-    } else {
-      const success = await stravaHandleCallback(code)
-      // Auto-sync after successful Strava connection
-      if (success) {
-        await syncStrava()
-      }
+  if (code && state !== 'google') {
+    const success = await stravaHandleCallback(code)
+    // Auto-sync after successful Strava connection
+    if (success) {
+      await syncStrava()
     }
     // Clean URL
     window.history.replaceState({}, document.title, window.location.pathname)
@@ -268,34 +243,14 @@ const syncStrava = async () => {
   }
 }
 
-// Google Calendar sync
-const syncGoogle = async () => {
-  const { added, updated } = await syncToCalendar(sessions.value)
-  if (added > 0 || updated > 0) {
-    alert(`Google Calendar : ${added} ajoutée(s), ${updated} mise(s) à jour`)
-  } else {
-    alert('Aucune séance à synchroniser')
-  }
-}
-
 // Modal states
 const showAddModal = ref(false)
 const addModalDate = ref('')
 const selectedSession = ref<ScheduledSession | null>(null)
 const sessionDetailModalRef = ref<{ onResyncComplete: () => void } | null>(null)
 
-// Theme
-const isDarkMode = ref(localStorage.getItem('theme') === 'dracula')
-
-const toggleTheme = () => {
-  isDarkMode.value = !isDarkMode.value
-  const theme = isDarkMode.value ? 'dracula' : 'cupcake'
-  document.documentElement.setAttribute('data-theme', theme)
-  localStorage.setItem('theme', theme)
-}
-
-// Initialize theme
-document.documentElement.setAttribute('data-theme', isDarkMode.value ? 'dracula' : 'cupcake')
+// Dark mode only
+document.documentElement.setAttribute('data-theme', 'dracula')
 
 // Handlers
 const handleImport = async (data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean, _phase?: ImportedPhase) => {
@@ -407,9 +362,9 @@ const handleReset = () => {
 </script>
 
 <template>
-  <div class="min-h-screen app-bg">
-    <!-- Header -->
-    <header class="sticky top-0 z-50 border-b border-base-300/50 bg-base-100/80 backdrop-blur-lg">
+  <div class="min-h-screen app-bg pb-20 md:pb-0">
+    <!-- Header - Desktop -->
+    <header class="sticky top-0 z-50 border-b border-base-300/50 bg-base-100/80 backdrop-blur-lg hidden md:block">
       <div class="container mx-auto max-w-6xl px-4">
         <div class="flex h-16 items-center justify-between">
           <!-- Logo -->
@@ -421,113 +376,125 @@ const handleReset = () => {
           </div>
 
           <!-- Actions -->
-          <div class="flex items-center gap-1">
-            <!-- Strava -->
-            <div v-if="stravaConnected" class="dropdown dropdown-end">
-              <button
-                tabindex="0"
-                class="btn btn-sm btn-ghost gap-2"
-                :class="{ 'loading': stravaLoading }"
-                :disabled="stravaLoading"
-              >
-                <span class="w-2 h-2 rounded-full bg-[#fc4c02]"></span>
-                <span v-if="!stravaLoading">Strava</span>
-                <span v-else>Sync...</span>
-              </button>
-              <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-44 p-2 shadow-xl mt-2 border border-base-300">
-                <li><a @click="syncStrava" class="rounded-lg">🔄 Synchroniser</a></li>
-                <li><a class="text-error rounded-lg" @click="showStravaDisconnectModal = true">Déconnecter</a></li>
-              </ul>
-            </div>
+          <div class="flex items-center gap-2">
+            <!-- Strava sync -->
+            <button
+              v-if="stravaConnected"
+              class="btn btn-sm btn-ghost gap-2"
+              :class="{ 'loading': stravaLoading }"
+              :disabled="stravaLoading"
+              @click="syncStrava"
+            >
+              <span class="w-2 h-2 rounded-full bg-[#fc4c02]"></span>
+              <span v-if="!stravaLoading">Sync Strava</span>
+              <span v-else>Sync...</span>
+            </button>
             <button
               v-else
-              class="btn btn-sm btn-ghost text-[#fc4c02]"
+              class="btn btn-sm btn-ghost gap-2"
               @click="stravaAuthorize"
             >
-              + Strava
+              <span class="w-2 h-2 rounded-full bg-base-content/30"></span>
+              Strava
             </button>
 
             <!-- Divider -->
-            <div class="w-px h-6 bg-base-300 mx-1"></div>
+            <div class="w-px h-6 bg-base-300"></div>
 
-            <!-- Google Calendar -->
-            <div v-if="googleConnected" class="dropdown dropdown-end">
-              <button
-                tabindex="0"
-                class="btn btn-sm btn-ghost gap-2"
-                :class="{ 'loading': googleLoading }"
-                :disabled="googleLoading"
-              >
-                <span class="w-2 h-2 rounded-full bg-[#4285f4]"></span>
-                <span v-if="!googleLoading">Calendar</span>
-                <span v-else>Sync...</span>
-              </button>
-              <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-44 p-2 shadow-xl mt-2 border border-base-300">
-                <li><a @click="syncGoogle" class="rounded-lg">🔄 Synchroniser</a></li>
-                <li><a @click="showGoogleDeleteModal = true" class="rounded-lg">🗑️ Tout supprimer</a></li>
-                <li><a class="text-error rounded-lg" @click="showGoogleDisconnectModal = true">Déconnecter</a></li>
-              </ul>
-            </div>
-            <button
-              v-else
-              class="btn btn-sm btn-ghost text-[#4285f4]"
-              @click="googleAuthorize"
-            >
-              + Calendar
+            <!-- Navigation buttons -->
+            <button class="btn btn-sm btn-ghost gap-1" @click="showObjectivesModal = true">
+              🎯 Objectifs
+            </button>
+            <button class="btn btn-sm btn-ghost gap-1" @click="showPhasesModal = true">
+              📊 Phases
+            </button>
+            <button class="btn btn-sm btn-ghost gap-1" @click="showAthleteProfileModal = true">
+              ⚡ Profil
             </button>
 
             <!-- Divider -->
-            <div class="w-px h-6 bg-base-300 mx-1"></div>
+            <div class="w-px h-6 bg-base-300"></div>
 
             <!-- Settings Menu -->
             <div class="dropdown dropdown-end">
               <button tabindex="0" class="btn btn-sm btn-ghost btn-square">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </button>
               <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-48 p-2 shadow-xl mt-2 border border-base-300">
                 <li><a @click="showImportModal = true" class="rounded-lg">📥 Importer</a></li>
-                <li><a @click="downloadJson" class="rounded-lg">💾 Exporter</a></li>
+                <li v-if="stravaConnected"><a class="text-error rounded-lg" @click="showStravaDisconnectModal = true">Déconnecter Strava</a></li>
                 <li class="border-t border-base-300 mt-1 pt-1">
                   <a class="text-error rounded-lg" @click="handleReset">🗑️ Réinitialiser</a>
                 </li>
               </ul>
             </div>
-
-            <!-- Objectives button -->
-            <button
-              class="btn btn-sm gap-1 bg-pink-500 text-white font-semibold border-0 hover:bg-pink-600 shadow-lg shadow-pink-500/40 animate-pulse-subtle"
-              @click="showObjectivesModal = true"
-            >
-              🎯 Objectifs
-            </button>
-
-            <!-- Phases button -->
-            <button
-              class="btn btn-sm gap-1 btn-outline btn-info"
-              @click="showPhasesModal = true"
-            >
-              📊 Phases
-            </button>
-
-            <!-- Athlete Profile button -->
-            <button
-              class="btn btn-sm gap-1 btn-outline btn-warning"
-              @click="showAthleteProfileModal = true"
-            >
-              &#9889; Profil
-            </button>
-
-            <!-- Theme Toggle -->
-            <button class="btn btn-sm btn-ghost btn-square" @click="toggleTheme">
-              <span v-if="isDarkMode">☀️</span>
-              <span v-else>🌙</span>
-            </button>
           </div>
         </div>
       </div>
     </header>
+
+    <!-- Header - Mobile -->
+    <header class="sticky top-0 z-50 border-b border-base-300/50 bg-base-100/80 backdrop-blur-lg md:hidden">
+      <div class="flex h-14 items-center justify-between px-4">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+            <span class="text-base">🎯</span>
+          </div>
+          <span class="text-lg font-bold tracking-tight">Cadence</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Bottom Navigation - Mobile -->
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-base-100 border-t border-base-300 z-50 safe-area-bottom">
+      <div class="flex justify-around py-2">
+        <!-- Strava Sync -->
+        <button
+          class="flex flex-col items-center gap-0.5 px-3 py-1"
+          :class="stravaLoading ? 'opacity-50' : ''"
+          @click="stravaConnected ? syncStrava() : stravaAuthorize()"
+        >
+          <span class="text-xl" :class="stravaConnected ? 'text-[#fc4c02]' : ''">
+            {{ stravaLoading ? '⏳' : '🔄' }}
+          </span>
+          <span class="text-[10px] text-base-content/70">Strava</span>
+        </button>
+
+        <!-- Objectives -->
+        <button
+          class="flex flex-col items-center gap-0.5 px-3 py-1"
+          @click="showObjectivesModal = true"
+        >
+          <span class="text-xl">🎯</span>
+          <span class="text-[10px] text-base-content/70">Objectifs</span>
+        </button>
+
+        <!-- Profile -->
+        <button
+          class="flex flex-col items-center gap-0.5 px-3 py-1"
+          @click="showAthleteProfileModal = true"
+        >
+          <span class="text-xl">⚡</span>
+          <span class="text-[10px] text-base-content/70">Profil</span>
+        </button>
+
+        <!-- More menu -->
+        <div class="dropdown dropdown-top dropdown-end">
+          <button tabindex="0" class="flex flex-col items-center gap-0.5 px-3 py-1">
+            <span class="text-xl">⋯</span>
+            <span class="text-[10px] text-base-content/70">Plus</span>
+          </button>
+          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-xl mb-2 border border-base-300">
+            <li><a @click="showPhasesModal = true" class="rounded-lg">📊 Phases</a></li>
+            <li><a @click="showImportModal = true" class="rounded-lg">📥 Importer</a></li>
+            <li v-if="stravaConnected"><a class="text-error rounded-lg" @click="showStravaDisconnectModal = true">Déconnecter Strava</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
 
     <!-- Main Content -->
     <div class="container mx-auto p-4 max-w-6xl">
@@ -606,35 +573,6 @@ const handleReset = () => {
       </form>
     </dialog>
 
-    <!-- Google Disconnect Modal -->
-    <dialog class="modal" :class="{ 'modal-open': showGoogleDisconnectModal }">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg">Déconnecter Google Calendar ?</h3>
-        <p class="py-4 text-base-content/70">Tu devras te reconnecter pour synchroniser tes séances dans ton agenda.</p>
-        <div class="modal-action">
-          <button class="btn btn-ghost" @click="showGoogleDisconnectModal = false">Annuler</button>
-          <button class="btn btn-error" @click="googleDisconnect(); showGoogleDisconnectModal = false">Déconnecter</button>
-        </div>
-      </div>
-      <form method="dialog" class="modal-backdrop" @click="showGoogleDisconnectModal = false">
-        <button>close</button>
-      </form>
-    </dialog>
-
-    <!-- Google Delete Modal -->
-    <dialog class="modal" :class="{ 'modal-open': showGoogleDeleteModal }">
-      <div class="modal-box">
-        <h3 class="font-bold text-lg">Supprimer de Google Calendar ?</h3>
-        <p class="py-4 text-base-content/70">Toutes les séances synchronisées seront supprimées de ton agenda Google.</p>
-        <div class="modal-action">
-          <button class="btn btn-ghost" @click="showGoogleDeleteModal = false">Annuler</button>
-          <button class="btn btn-error" @click="deleteFromGoogle">Supprimer</button>
-        </div>
-      </div>
-      <form method="dialog" class="modal-backdrop" @click="showGoogleDeleteModal = false">
-        <button>close</button>
-      </form>
-    </dialog>
 
     <!-- Objectives Modal -->
     <dialog class="modal" :class="{ 'modal-open': showObjectivesModal }">

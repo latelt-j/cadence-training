@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, onMounted, watch } from 'vue'
+import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import type { ScheduledSession, TrainingPhase } from '../types/session'
 import { SPORT_CONFIG } from '../types/session'
 import { useWeather } from '../composables/useWeather'
@@ -18,6 +18,36 @@ const emit = defineEmits<{
   selectSession: [session: ScheduledSession]
   weekChange: [date: Date]
 }>()
+
+// Mobile detection
+const isMobile = ref(false)
+const currentDayIndex = ref(0) // 0-6 for Mon-Sun
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth < 768
+}
+
+// Swipe handling
+let touchStartX = 0
+const onTouchStart = (e: TouchEvent) => {
+  touchStartX = e.touches[0]?.clientX ?? 0
+}
+const onTouchEnd = (e: TouchEvent) => {
+  const endX = e.changedTouches[0]?.clientX ?? 0
+  const diff = endX - touchStartX
+  if (diff > 50 && currentDayIndex.value > 0) {
+    currentDayIndex.value--
+  } else if (diff < -50 && currentDayIndex.value < 6) {
+    currentDayIndex.value++
+  }
+}
+
+// Current day getter with safety check
+const currentDay = computed(() => weekDays.value[currentDayIndex.value])
+const currentDaySessions = computed(() => {
+  const day = currentDay.value
+  return day ? sessionsByDate.value[day.date] || [] : []
+})
 
 // Current week start (Monday)
 const currentWeekStart = ref(getMonday(new Date()))
@@ -222,6 +252,18 @@ const formatDuration = (minutes: number): string => {
 onMounted(() => {
   fetchWithGeolocation()
   emit('weekChange', currentWeekStart.value)
+
+  // Mobile detection
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+
+  // Set current day index to today
+  const todayDayOfWeek = new Date().getDay()
+  currentDayIndex.value = todayDayOfWeek === 0 ? 6 : todayDayOfWeek - 1 // Convert to Mon=0, Sun=6
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
 })
 
 // Refresh weather when forecast changes
@@ -250,22 +292,110 @@ watch(forecast, () => {}, { deep: true })
         <h2 class="text-xl font-bold text-primary capitalize leading-none">{{ headerTitle }}</h2>
       </div>
 
-      <div class="w-32"></div>
+      <div class="w-32 hidden md:block"></div>
     </div>
 
     <!-- Phase Bar -->
     <div v-if="currentPhase" class="px-3 pb-2">
       <div class="flex items-center gap-2 text-sm text-base-content/70">
         <span class="text-base">{{ currentPhase.emoji || getPhaseEmoji(currentPhase.name) }}</span>
-        <span class="font-semibold text-base-content">{{ currentPhase.name.toUpperCase() }}</span>
+        <span class="font-semibold text-base-content hidden md:inline">{{ currentPhase.name.toUpperCase() }}</span>
         <span class="badge badge-sm badge-primary">S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}</span>
-        <span v-if="currentPhase.objectives" class="text-base-content/40">•</span>
-        <span v-if="currentPhase.objectives" class="truncate">{{ currentPhase.objectives }}</span>
+        <span v-if="currentPhase.objectives" class="text-base-content/40 hidden md:inline">•</span>
+        <span v-if="currentPhase.objectives" class="truncate hidden md:inline">{{ currentPhase.objectives }}</span>
       </div>
     </div>
 
-    <!-- Calendar Grid -->
-    <div class="grid grid-cols-7 min-h-[280px] p-3 gap-2">
+    <!-- Mobile View: Single Day with Swipe -->
+    <div
+      v-if="isMobile"
+      class="min-h-[350px] p-3"
+      @touchstart="onTouchStart"
+      @touchend="onTouchEnd"
+    >
+      <div
+        v-if="currentDay"
+        class="flex flex-col rounded-2xl h-full"
+        :class="{
+          'bg-primary/10 ring-2 ring-primary/30': currentDay.isToday,
+          'bg-base-200/50': !currentDay.isToday
+        }"
+        @click="emit('addSession', currentDay.date)"
+      >
+        <!-- Day Header - Mobile -->
+        <div class="p-4 text-center">
+          <div class="flex items-center justify-center gap-4">
+            <div>
+              <div class="text-sm uppercase text-base-content/50 font-medium tracking-wide">
+                {{ currentDay.dayName }}
+              </div>
+              <div
+                class="text-4xl font-bold mt-1"
+                :class="currentDay.isToday ? 'text-primary' : 'text-base-content/80'"
+              >
+                {{ currentDay.dayNumber }}
+              </div>
+              <div class="text-xs text-base-content/50 mt-1">
+                {{ currentDay.displayDate }}
+              </div>
+            </div>
+            <div v-if="currentDay.weather" class="text-center pl-4 border-l border-base-300/50">
+              <div class="text-3xl leading-none">{{ currentDay.weather.emoji }}</div>
+              <div class="text-lg font-semibold text-base-content/70 mt-1">{{ currentDay.weather.temp }}°</div>
+              <div class="text-xs text-base-content/40">
+                {{ currentDay.weather.windArrow }} {{ currentDay.weather.wind }} km/h
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sessions - Mobile -->
+        <div class="flex-1 px-4 pb-4 space-y-3 overflow-y-auto">
+          <div
+            v-for="session in currentDaySessions"
+            :key="session.id"
+            class="session-card p-4 rounded-xl text-white cursor-pointer shadow-md"
+            :class="[
+              `session-${session.sport}`,
+              session.type !== 'strava' ? 'session-planned' : '',
+              newSessionIds?.has(session.id) || (session.type === 'strava' && session.date === today) ? 'session-today' : ''
+            ]"
+            @click.stop="emit('selectSession', session)"
+          >
+            <div class="font-semibold flex items-center gap-2 text-base">
+              <span class="text-xl">{{ SPORT_CONFIG[session.sport].emoji }}</span>
+              <span class="truncate">{{ session.title }}</span>
+              <span v-if="session.type === 'strava'" class="ml-auto opacity-70 text-lg">✓</span>
+            </div>
+            <div class="text-white/70 mt-2 text-sm">{{ formatDuration(session.duration_min) }}</div>
+          </div>
+
+          <!-- Empty state -->
+          <div
+            v-if="currentDaySessions.length === 0"
+            class="text-center py-8 text-base-content/40"
+          >
+            <div class="text-4xl mb-2">🏖️</div>
+            <div>Pas de séance prévue</div>
+            <div class="text-xs mt-1">Tape pour ajouter</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dots indicator -->
+      <div class="flex justify-center gap-2 py-3">
+        <button
+          v-for="(day, i) in weekDays"
+          :key="day.date"
+          class="w-2.5 h-2.5 rounded-full transition-all"
+          :class="i === currentDayIndex ? 'bg-primary scale-125' : 'bg-base-300'"
+          @click.stop="currentDayIndex = i"
+        />
+      </div>
+    </div>
+
+    <!-- Desktop View: Week Grid -->
+    <div v-else class="grid grid-cols-7 min-h-[280px] p-3 gap-2">
       <div
         v-for="day in weekDays"
         :key="day.date"
@@ -331,8 +461,8 @@ watch(forecast, () => {}, { deep: true })
       </div>
     </div>
 
-    <!-- Footer -->
-    <div class="px-4 py-2 flex items-center justify-center gap-4 text-xs text-base-content/40">
+    <!-- Footer - Desktop only -->
+    <div class="px-4 py-2 hidden md:flex items-center justify-center gap-4 text-xs text-base-content/40">
       <span class="flex items-center gap-1">🖱️ Glisse</span>
       <span>•</span>
       <span class="flex items-center gap-1">➕ Clique jour</span>

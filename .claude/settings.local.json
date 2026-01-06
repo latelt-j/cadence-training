@@ -12,7 +12,9 @@
       "Bash(npm install:*)",
       "Bash(find:*)",
       "Bash(git pull:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(rsvg-convert:*)",
+      "Bash(ls:*)"
     ]
   }
 }
