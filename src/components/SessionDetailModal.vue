@@ -92,8 +92,9 @@ watch(() => props.session, (newSession, oldSession) => {
     // Reset Strava editing
     isEditingStrava.value = false
     suggestionCopied.value = false
-    // Reset mark as done
+    // Reset mark as done / edit duration
     showMarkAsDone.value = false
+    showEditDuration.value = false
   }
 
   editTitle.value = newSession?.title || ''
@@ -293,6 +294,37 @@ const confirmMarkAsDone = () => {
 
   showMarkAsDone.value = false
   emit('toast', 'Séance validée ✅')
+}
+
+// Mark as NOT done (revert to planned)
+const markAsNotDone = () => {
+  if (!props.session) return
+
+  emit('update', props.session.id, {
+    type: 'planned',
+  } as any)
+
+  emit('toast', 'Séance remise en prévu')
+}
+
+// Edit duration for manual sessions
+const showEditDuration = ref(false)
+const editDurationValue = ref(0)
+
+const openEditDuration = () => {
+  editDurationValue.value = props.session?.duration_min || 0
+  showEditDuration.value = true
+}
+
+const confirmEditDuration = () => {
+  if (!props.session) return
+
+  emit('update', props.session.id, {
+    duration_min: editDurationValue.value,
+  } as any)
+
+  showEditDuration.value = false
+  emit('toast', 'Durée modifiée')
 }
 </script>
 
@@ -653,6 +685,28 @@ Exemple:
         </div>
       </div>
 
+      <!-- Edit duration form for manual sessions -->
+      <div v-if="showEditDuration && session.type === 'manual'" class="mt-4 p-4 bg-info/10 border border-info/30 rounded-lg flex-shrink-0">
+        <h4 class="font-semibold mb-3 text-info">⏱️ Modifier la durée</h4>
+
+        <div class="form-control mb-3">
+          <label class="label py-1">
+            <span class="label-text">Durée (min)</span>
+          </label>
+          <input
+            type="number"
+            v-model.number="editDurationValue"
+            class="input input-bordered input-sm w-full"
+            min="1"
+          />
+        </div>
+
+        <div class="flex gap-2 justify-end">
+          <button class="btn btn-sm btn-ghost" @click="showEditDuration = false">Annuler</button>
+          <button class="btn btn-sm btn-info" @click="confirmEditDuration">💾 Enregistrer</button>
+        </div>
+      </div>
+
       <!-- Actions footer (outside scrollable area to fix dropdown z-index) -->
       <div v-show="currentPage === 'details'" class="flex flex-wrap gap-2 pt-4 border-t border-base-300 flex-shrink-0">
         <!-- Mark as done button for planned sessions -->
@@ -662,6 +716,22 @@ Exemple:
           @click="openMarkAsDone"
         >
           ✅ Marquer comme fait
+        </button>
+
+        <!-- Buttons for manual sessions -->
+        <button
+          v-if="session.type === 'manual' && !showEditDuration"
+          class="btn btn-sm btn-ghost"
+          @click="markAsNotDone"
+        >
+          ↩️ Remettre en prévu
+        </button>
+        <button
+          v-if="session.type === 'manual' && !showEditDuration"
+          class="btn btn-sm btn-info btn-outline"
+          @click="openEditDuration"
+        >
+          ⏱️ Modifier durée
         </button>
 
         <!-- Dropdown pour copier avec commentaire -->
