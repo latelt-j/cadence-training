@@ -203,17 +203,15 @@ const syncStrava = async () => {
   // First, get basic activity list (1 API call)
   const basicActivities = await fetchActivities(30)
 
-  // Filter to only new activities (not already in sessions)
-  const existingKeys = new Set(
+  // Filter to only new activities (not already in sessions) - use strava_id for dedup
+  const existingStravaIds = new Set(
     sessions.value
-      .filter(s => s.type === 'strava')
-      .map(s => `${s.title}-${s.date}`)
+      .filter(s => s.type === 'strava' && s.strava_id)
+      .map(s => s.strava_id)
   )
 
   const newActivities = basicActivities.filter(activity => {
-    const date = activity.start_date_local.split('T')[0]
-    const key = `${activity.name}-${date}`
-    return !existingKeys.has(key)
+    return !existingStravaIds.has(activity.id)
   })
 
   // Only fetch detailed data for new activities (no unnecessary API calls)
