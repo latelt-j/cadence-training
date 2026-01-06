@@ -501,7 +501,7 @@ const importCoachPhases = () => {
       </div>
 
       <div>
-        <label class="text-sm text-base-content/70 mb-1 block">⚖️ Répartition volume</label>
+        <label class="text-sm text-base-content/70 mb-1 block">Répartition volume</label>
         <div class="flex items-center gap-3 mb-2">
           <span class="text-lg">🚴</span>
           <input
@@ -514,7 +514,7 @@ const importCoachPhases = () => {
           />
           <span class="text-lg">🏃</span>
         </div>
-        <div class="flex justify-between text-sm mb-2">
+        <div class="flex justify-between text-sm mb-4">
           <span class="font-bold text-primary">{{ formData.cycling_pct }}% Vélo</span>
           <span class="text-base-content/60">{{ volumeHint }}</span>
           <span class="font-bold text-secondary">{{ running_pct }}% Run</span>
@@ -523,7 +523,7 @@ const importCoachPhases = () => {
           v-model="formData.volume_note"
           type="text"
           class="input input-bordered input-sm w-full"
-          placeholder="Note optionnelle (ex: Maintenance, Build run...)"
+          placeholder="Vigilance (ex: Maintenance cardio, Build run...)"
         />
       </div>
 
@@ -583,7 +583,7 @@ const importCoachPhases = () => {
               <span class="text-base-content/50">Mots-clés:</span> {{ phase.keywords }}
             </div>
             <div v-if="phase.volume_distribution" class="text-sm text-info">
-              <span class="text-base-content/50">⚖️ Répartition:</span> {{ phase.volume_distribution }}
+              <span class="text-base-content/50">Répartition:</span> {{ phase.volume_distribution }}
             </div>
             <div v-if="phase.challenge" class="text-sm text-warning">
               <span class="text-base-content/50">Événement:</span> {{ phase.challenge }}
