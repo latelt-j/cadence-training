@@ -583,13 +583,13 @@ const importCoachPhases = () => {
               <span class="text-base-content/50">Mots-clés:</span> {{ phase.keywords }}
             </div>
             <div v-if="phase.volume_distribution" class="text-sm text-base-content/70">
-              <span class="text-base-content/40">Répartition:</span> {{ phase.volume_distribution.replace(/\s*\([^)]*\)/, '') }}
+              <span class="text-base-content/40 font-semibold">Répartition:</span> {{ phase.volume_distribution.replace(/\s*\([^)]*\)/, '') }}
             </div>
             <div v-if="phase.volume_distribution?.includes('(')" class="text-sm text-base-content/70">
-              <span class="text-base-content/40">Vigilance:</span> ⚠️ {{ phase.volume_distribution.match(/\(([^)]+)\)/)?.[1] }}
+              <span class="text-base-content/40 font-semibold">Vigilance:</span> ⚠️ {{ phase.volume_distribution.match(/\(([^)]+)\)/)?.[1] }}
             </div>
             <div v-if="phase.challenge" class="text-sm text-base-content/70">
-              <span class="text-base-content/40">Événement:</span> 🎯 {{ phase.challenge }}
+              <span class="text-base-content/40 font-semibold">Événement:</span> 🎯 {{ phase.challenge }}
             </div>
           </div>
           <div class="flex gap-1">
