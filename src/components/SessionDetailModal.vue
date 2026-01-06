@@ -48,6 +48,11 @@ const suggestionCopied = ref(false)
 const isSaving = ref(false)
 const isResyncing = ref(false)
 
+// Mark as done (manual completion)
+const showMarkAsDone = ref(false)
+const actualDuration = ref(0)
+const completionNote = ref('')
+
 const handleResync = () => {
   if (!props.session?.strava_id) return
   isResyncing.value = true
@@ -87,6 +92,8 @@ watch(() => props.session, (newSession, oldSession) => {
     // Reset Strava editing
     isEditingStrava.value = false
     suggestionCopied.value = false
+    // Reset mark as done
+    showMarkAsDone.value = false
   }
 
   editTitle.value = newSession?.title || ''
@@ -267,6 +274,26 @@ const downloadZwoFile = () => {
   a.click()
   URL.revokeObjectURL(url)
 }
+
+// Mark as done functions
+const openMarkAsDone = () => {
+  actualDuration.value = props.session?.duration_min || 0
+  completionNote.value = ''
+  showMarkAsDone.value = true
+}
+
+const confirmMarkAsDone = () => {
+  if (!props.session) return
+
+  emit('update', props.session.id, {
+    type: 'manual',
+    duration_min: actualDuration.value,
+    coach_feedback: completionNote.value || undefined,
+  } as any)
+
+  showMarkAsDone.value = false
+  emit('toast', 'Séance validée ✅')
+}
 </script>
 
 <template>
@@ -331,7 +358,16 @@ const downloadZwoFile = () => {
       <!-- Page: Details -->
       <div v-show="currentPage === 'details'" class="space-y-4 flex-1 overflow-y-auto">
         <div class="flex gap-2">
-          <div class="badge badge-outline">{{ session.type }}</div>
+          <div
+            class="badge"
+            :class="{
+              'badge-outline': session.type === 'planned',
+              'bg-[#fc4c02] text-white border-0': session.type === 'strava',
+              'badge-success': session.type === 'manual'
+            }"
+          >
+            {{ session.type === 'manual' ? '✅ Fait' : session.type }}
+          </div>
           <div class="badge badge-primary">{{ formatDuration(session.duration_min) }}</div>
         </div>
 
@@ -584,8 +620,50 @@ Exemple:
         </div>
       </div>
 
+      <!-- Mark as done form -->
+      <div v-if="showMarkAsDone && session.type === 'planned'" class="mt-4 p-4 bg-success/10 border border-success/30 rounded-lg flex-shrink-0">
+        <h4 class="font-semibold mb-3 text-success">✅ Valider la séance</h4>
+
+        <div class="form-control mb-3">
+          <label class="label py-1">
+            <span class="label-text">Durée réelle (min)</span>
+          </label>
+          <input
+            type="number"
+            v-model.number="actualDuration"
+            class="input input-bordered input-sm w-full"
+            min="1"
+          />
+        </div>
+
+        <div class="form-control mb-3">
+          <label class="label py-1">
+            <span class="label-text">Note (optionnel)</span>
+          </label>
+          <textarea
+            v-model="completionNote"
+            class="textarea textarea-bordered textarea-sm w-full h-16"
+            placeholder="Bonnes sensations, un peu fatigué..."
+          ></textarea>
+        </div>
+
+        <div class="flex gap-2 justify-end">
+          <button class="btn btn-sm btn-ghost" @click="showMarkAsDone = false">Annuler</button>
+          <button class="btn btn-sm btn-success" @click="confirmMarkAsDone">✅ Valider</button>
+        </div>
+      </div>
+
       <!-- Actions footer (outside scrollable area to fix dropdown z-index) -->
       <div v-show="currentPage === 'details'" class="flex flex-wrap gap-2 pt-4 border-t border-base-300 flex-shrink-0">
+        <!-- Mark as done button for planned sessions -->
+        <button
+          v-if="session.type === 'planned' && !showMarkAsDone"
+          class="btn btn-sm btn-success"
+          @click="openMarkAsDone"
+        >
+          ✅ Marquer comme fait
+        </button>
+
         <!-- Dropdown pour copier avec commentaire -->
         <details ref="dropdownRef" class="dropdown dropdown-top">
           <summary

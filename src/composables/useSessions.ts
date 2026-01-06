@@ -346,7 +346,7 @@ export function useSessions() {
     weekSessions.forEach((session) => {
       const hours = session.duration_min / 60
       const sport = session.sport as Sport
-      const isAccomplished = session.type === 'strava'
+      const isAccomplished = session.type === 'strava' || session.type === 'manual'
 
       if (sport === 'cycling') {
         stats.cycling.hours += hours

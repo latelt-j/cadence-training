@@ -226,7 +226,8 @@ const draggedSession = ref<ScheduledSession | null>(null)
 const dragOverDate = ref<string | null>(null)
 
 const onDragStart = (e: DragEvent, session: ScheduledSession) => {
-  if (session.type === 'strava') {
+  // Can't drag completed sessions (strava or manual)
+  if (session.type === 'strava' || session.type === 'manual') {
     e.preventDefault()
     return
   }
@@ -390,15 +391,15 @@ watch(forecast, () => {}, { deep: true })
             class="session-card p-4 rounded-2xl text-white cursor-pointer shadow-lg h-20"
             :class="[
               `session-${session.sport}`,
-              session.type !== 'strava' ? 'session-planned' : '',
-              newSessionIds?.has(session.id) || (session.type === 'strava' && session.date === today) ? 'session-today' : ''
+              session.type === 'planned' ? 'session-planned' : '',
+              newSessionIds?.has(session.id) || ((session.type === 'strava' || session.type === 'manual') && session.date === today) ? 'session-today' : ''
             ]"
             @click.stop="emit('selectSession', session)"
           >
             <div class="font-semibold flex items-center gap-2 text-base">
               <span class="text-2xl">{{ SPORT_CONFIG[session.sport].emoji }}</span>
               <span class="truncate flex-1">{{ session.title }}</span>
-              <span v-if="session.type === 'strava'" class="opacity-70 text-lg">✓</span>
+              <span v-if="session.type === 'strava' || session.type === 'manual'" class="opacity-70 text-lg">✓</span>
             </div>
             <div class="text-white/80 mt-1 text-sm font-medium">{{ formatDuration(session.duration_min) }}</div>
           </div>
@@ -472,12 +473,12 @@ watch(forecast, () => {}, { deep: true })
             class="session-card p-2.5 rounded-xl text-white text-xs cursor-pointer shadow-sm"
             :class="[
               `session-${session.sport}`,
-              session.type !== 'strava' ? 'session-planned' : '',
-              newSessionIds?.has(session.id) || (session.type === 'strava' && session.date === today) ? 'session-today' : '',
-              session.type === 'strava' ? 'cursor-default' : 'cursor-grab'
+              session.type === 'planned' ? 'session-planned' : '',
+              newSessionIds?.has(session.id) || ((session.type === 'strava' || session.type === 'manual') && session.date === today) ? 'session-today' : '',
+              (session.type === 'strava' || session.type === 'manual') ? 'cursor-default' : 'cursor-grab'
             ]"
-            :style="{ opacity: draggedSession?.id === session.id ? 0.3 : (session.type === 'strava' && session.date !== today ? 0.6 : 1) }"
-            :draggable="session.type !== 'strava'"
+            :style="{ opacity: draggedSession?.id === session.id ? 0.3 : ((session.type === 'strava' || session.type === 'manual') && session.date !== today ? 0.6 : 1) }"
+            :draggable="session.type === 'planned'"
             @dragstart="onDragStart($event, session)"
             @dragend="onDragEnd"
             @click.stop="emit('selectSession', session)"
@@ -485,7 +486,7 @@ watch(forecast, () => {}, { deep: true })
             <div class="font-semibold flex items-center gap-1.5">
               <span class="text-sm">{{ SPORT_CONFIG[session.sport].emoji }}</span>
               <span class="truncate">{{ session.title }}</span>
-              <span v-if="session.type === 'strava'" class="ml-auto opacity-70">✓</span>
+              <span v-if="session.type === 'strava' || session.type === 'manual'" class="ml-auto opacity-70">✓</span>
             </div>
             <div class="text-white/70 mt-1 text-[11px]">{{ formatDuration(session.duration_min) }}</div>
           </div>
