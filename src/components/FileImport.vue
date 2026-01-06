@@ -332,6 +332,23 @@ Format attendu :
 
 Types : "sweet_spot", "threshold", "vo2max", "anaerobic", "long_run", "long_ride", "hills", "fartlek", "recovery", "strength", "core"
 
+⚠️ SÉANCES RENFO (sport: "strength") :
+- Adapter le contenu à la phase actuelle :
+  - Base/Fondation : renfo général, gainage, stabilité
+  - Build/Construction : renfo spécifique vélo/course, puissance
+  - Peak/Affûtage : maintien léger, mobilité
+  - Recovery : étirements, mobilité douce
+- TOUJOURS inclure "duration_min" (durée estimée en minutes)
+- Exemple :
+  {
+    "sport": "strength",
+    "type": "strength",
+    "title": "Renfo gainage",
+    "duration_min": 30,
+    "description": "💪 Séance gainage\\n\\n3 tours :\\n- Planche 45s\\n- Gainage latéral 30s/côté\\n- Superman 15 reps\\n- Bird dog 10 reps/côté\\n\\nRepos 1min entre tours",
+    "date": "2025-01-15"
+  }
+
 IMPORTANT pour les descriptions :
 - Utilise \\n pour les retours à la ligne
 - PAS de markdown
