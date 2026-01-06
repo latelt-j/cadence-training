@@ -589,7 +589,7 @@ const importCoachPhases = () => {
               <span class="text-base-content/50">Vigilance:</span> ⚠️ {{ phase.volume_distribution.match(/\(([^)]+)\)/)?.[1] }}
             </div>
             <div v-if="phase.challenge" class="text-sm text-warning">
-              <span class="text-base-content/50">Événement:</span> {{ phase.challenge }}
+              <span class="text-base-content/50">Événement:</span> 🎯 {{ phase.challenge }}
             </div>
           </div>
           <div class="flex gap-1">
