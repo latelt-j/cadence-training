@@ -577,19 +577,19 @@ const importCoachPhases = () => {
               <span class="text-base-content/50">({{ getPhaseDuration(phase) }} sem)</span>
             </div>
             <div v-if="phase.objectives || phase.goals" class="text-sm mt-1">
-              <span class="text-base-content/50">Objectifs:</span> {{ phase.objectives || phase.goals }}
+              <span class="text-base-content/50 font-semibold">Objectifs</span> {{ phase.objectives || phase.goals }}
             </div>
             <div v-if="phase.keywords" class="text-sm text-base-content/60 whitespace-pre-line">
-              <span class="text-base-content/50">Mots-clés:</span> {{ phase.keywords }}
+              <span class="text-base-content/50 font-semibold">Mots-clés</span> {{ phase.keywords }}
             </div>
             <div v-if="phase.volume_distribution" class="text-sm text-pink-400">
-              <span class="text-pink-400/60 font-semibold">Répartition:</span> {{ phase.volume_distribution.replace(/\s*\([^)]*\)/, '') }}
+              <span class="text-pink-400/60 font-semibold">Répartition</span> {{ phase.volume_distribution.replace(/\s*\([^)]*\)/, '') }}
             </div>
             <div v-if="phase.volume_distribution?.includes('(')" class="text-sm text-base-content/70">
-              <span class="text-base-content/40 font-semibold">Vigilance:</span> ⚠️ {{ phase.volume_distribution.match(/\(([^)]+)\)/)?.[1] }}
+              <span class="text-base-content/40 font-semibold">Vigilance</span> ⚠️ {{ phase.volume_distribution.match(/\(([^)]+)\)/)?.[1] }}
             </div>
             <div v-if="phase.challenge" class="text-sm text-base-content/70">
-              <span class="text-base-content/40 font-semibold">Événement:</span> 🎯 {{ phase.challenge }}
+              <span class="text-base-content/40 font-semibold">Événement</span> 🎯 {{ phase.challenge }}
             </div>
           </div>
           <div class="flex gap-1">
