@@ -31,8 +31,13 @@ export function useSessions() {
         if (!s.title && s.name) {
           updated = { ...updated, title: s.name }
         }
-        if (s.type !== 'strava' && (s.actual_km || s.actual_elevation)) {
+        // Only mark as strava if it has a strava_id
+        if (s.strava_id && s.type !== 'strava') {
           updated = { ...updated, type: 'strava' }
+        }
+        // Default unknown types to 'planned'
+        if (!s.type || !['planned', 'strava', 'manual'].includes(s.type)) {
+          updated = { ...updated, type: 'planned' }
         }
         return updated
       })
@@ -48,9 +53,16 @@ export function useSessions() {
     try {
       const dbSessions = await fetchSessions()
       console.log('Fetched sessions from Supabase:', dbSessions)
-      sessions.value = dbSessions
+      // Apply migration to ensure valid types
+      const migratedSessions = dbSessions.map(s => {
+        if (!s.type || !['planned', 'strava', 'manual'].includes(s.type)) {
+          return { ...s, type: s.strava_id ? 'strava' : 'planned' }
+        }
+        return s
+      })
+      sessions.value = migratedSessions
       // Update local cache
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(dbSessions))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(migratedSessions))
       isSynced.value = true
     } catch (error) {
       console.error('Error syncing from Supabase:', error)
@@ -77,7 +89,12 @@ export function useSessions() {
     const newSessions = jsonData.map((item) => {
       // Check if it's already a full ScheduledSession
       if ('id' in item && 'date' in item) {
-        return item as ScheduledSession
+        const session = item as ScheduledSession
+        // Ensure type is valid, default to 'planned'
+        if (!session.type || !['planned', 'strava', 'manual'].includes(session.type)) {
+          return { ...session, type: 'planned' }
+        }
+        return session
       }
       // Otherwise create a new session, preserving date if provided
       const itemWithDate = item as SessionTemplate & { date?: string }
@@ -85,6 +102,8 @@ export function useSessions() {
         ...item,
         id: uuidv4(),
         date: itemWithDate.date ?? today,
+        // Default type to 'planned' if not strava
+        type: item.strava_id ? 'strava' : (item.type || 'planned'),
       } as ScheduledSession
     })
 
