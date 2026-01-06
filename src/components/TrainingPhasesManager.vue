@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
 import type { TrainingPhase, TrainingObjective, AthleteProfile } from '../types/session'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -37,6 +37,7 @@ const sortedPhases = computed(() => {
 // Editing state
 const isEditing = ref(false)
 const editingPhase = ref<TrainingPhase | null>(null)
+const formRef = ref<HTMLElement | null>(null)
 
 // Form data
 const formData = ref({
@@ -169,6 +170,13 @@ const startAdd = () => {
   isEditing.value = true
 }
 
+// Scroll to form
+const scrollToForm = () => {
+  nextTick(() => {
+    formRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
+}
+
 // Start editing existing phase
 const startEdit = (phase: TrainingPhase) => {
   editingPhase.value = phase
@@ -185,6 +193,7 @@ const startEdit = (phase: TrainingPhase) => {
     challenge: phase.challenge || '',
   }
   isEditing.value = true
+  scrollToForm()
 }
 
 // Cancel editing
@@ -418,7 +427,7 @@ const importCoachPhases = () => {
     </div>
 
     <!-- Edit form -->
-    <div v-if="isEditing" class="bg-base-200 rounded-lg p-4 space-y-3">
+    <div v-if="isEditing" ref="formRef" class="bg-base-200 rounded-lg p-4 space-y-3">
       <h4 class="font-medium">{{ editingPhase ? '✏️ Modifier la phase' : '➕ Nouvelle phase' }}</h4>
 
       <div class="grid grid-cols-[1fr_auto] gap-3">
