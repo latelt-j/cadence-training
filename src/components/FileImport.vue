@@ -344,7 +344,11 @@ IMPORTANT pour les descriptions :
 - APOSTROPHES (') pas guillemets (")
 - Puissances en % FTP (0.75 = 75%)
 - Durées en SECONDES
-- Exemple : "<workout_file><author>Coach</author><name>Sweet Spot</name><description>2x20min SS</description><sportType>bike</sportType><workout><Warmup Duration='600' PowerLow='0.50' PowerHigh='0.70'/><SteadyState Duration='1200' Power='0.90'/><Cooldown Duration='600' PowerLow='0.65' PowerHigh='0.50'/></workout></workout_file>"
+- AJOUTER des <textevent> pour guider l'athlète pendant le workout :
+  - Format: <textevent timeoffset='X' message='...'/>
+  - timeoffset = secondes depuis le début du workout (pas du segment)
+  - Messages courts: cadence, position, respiration, motivation
+- Exemple : "<workout_file><author>Coach</author><name>Sweet Spot</name><description>2x20min SS</description><sportType>bike</sportType><workout><Warmup Duration='600' PowerLow='0.50' PowerHigh='0.70'/><textevent timeoffset='0' message='Echauffement progressif'/><textevent timeoffset='300' message='Augmentez doucement'/><SteadyState Duration='1200' Power='0.90'/><textevent timeoffset='600' message='Sweet spot! Cadence 85-95'/><textevent timeoffset='1200' message='Tenez le rythme'/><Cooldown Duration='600' PowerLow='0.65' PowerHigh='0.50'/><textevent timeoffset='1800' message='Retour au calme'/></workout></workout_file>"
 `
 
   return prompt
