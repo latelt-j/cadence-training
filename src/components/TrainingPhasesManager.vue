@@ -582,14 +582,14 @@ const importCoachPhases = () => {
             <div v-if="phase.keywords" class="text-sm text-base-content/60 whitespace-pre-line">
               <span class="text-base-content/50">Mots-clés:</span> {{ phase.keywords }}
             </div>
-            <div v-if="phase.volume_distribution" class="text-sm text-info">
-              <span class="text-base-content/50">Répartition:</span> {{ phase.volume_distribution.replace(/\s*\([^)]*\)/, '') }}
+            <div v-if="phase.volume_distribution" class="text-sm text-base-content/70">
+              <span class="text-base-content/40">Répartition:</span> {{ phase.volume_distribution.replace(/\s*\([^)]*\)/, '') }}
             </div>
-            <div v-if="phase.volume_distribution?.includes('(')" class="text-sm text-warning">
-              <span class="text-base-content/50">Vigilance:</span> ⚠️ {{ phase.volume_distribution.match(/\(([^)]+)\)/)?.[1] }}
+            <div v-if="phase.volume_distribution?.includes('(')" class="text-sm text-base-content/70">
+              <span class="text-base-content/40">Vigilance:</span> ⚠️ {{ phase.volume_distribution.match(/\(([^)]+)\)/)?.[1] }}
             </div>
-            <div v-if="phase.challenge" class="text-sm text-success">
-              <span class="text-base-content/50">Événement:</span> 🎯 {{ phase.challenge }}
+            <div v-if="phase.challenge" class="text-sm text-base-content/70">
+              <span class="text-base-content/40">Événement:</span> 🎯 {{ phase.challenge }}
             </div>
           </div>
           <div class="flex gap-1">
