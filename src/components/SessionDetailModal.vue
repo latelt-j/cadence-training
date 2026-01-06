@@ -623,7 +623,7 @@ Exemple:
         >
           🚴 Zwift
         </button>
-        <button v-if="session.type !== 'strava'" class="btn btn-sm btn-error btn-outline" @click="handleDelete">
+        <button class="btn btn-sm btn-error btn-outline" @click="handleDelete">
           🗑️ Supprimer
         </button>
       </div>
