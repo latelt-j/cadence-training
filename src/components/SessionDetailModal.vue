@@ -52,6 +52,17 @@ const isResyncing = ref(false)
 const showMarkAsDone = ref(false)
 const actualDuration = ref(0)
 const completionNote = ref('')
+const selectedFeeling = ref<string | null>(null)
+
+const feelings = [
+  { value: 'great', emoji: '💪', label: 'Super' },
+  { value: 'ok', emoji: '👍', label: 'OK' },
+  { value: 'hard', emoji: '😓', label: 'Dur' },
+]
+
+const selectFeeling = (value: string) => {
+  selectedFeeling.value = selectedFeeling.value === value ? null : value
+}
 
 const handleResync = () => {
   if (!props.session?.strava_id) return
@@ -95,6 +106,7 @@ watch(() => props.session, (newSession, oldSession) => {
     // Reset mark as done / edit duration
     showMarkAsDone.value = false
     showEditDuration.value = false
+    selectedFeeling.value = null
   }
 
   editTitle.value = newSession?.title || ''
@@ -280,16 +292,27 @@ const downloadZwoFile = () => {
 const openMarkAsDone = () => {
   actualDuration.value = props.session?.duration_min || 0
   completionNote.value = ''
+  selectedFeeling.value = null
   showMarkAsDone.value = true
 }
 
 const confirmMarkAsDone = () => {
   if (!props.session) return
 
+  // Build feedback with feeling + note
+  const feelingEmoji = feelings.find(f => f.value === selectedFeeling.value)?.emoji
+  let feedback = ''
+  if (feelingEmoji) {
+    feedback = `Ressenti: ${feelingEmoji}`
+  }
+  if (completionNote.value) {
+    feedback += feedback ? `\n${completionNote.value}` : completionNote.value
+  }
+
   emit('update', props.session.id, {
     type: 'manual',
     duration_min: actualDuration.value,
-    coach_feedback: completionNote.value || undefined,
+    coach_feedback: feedback || undefined,
   } as any)
 
   showMarkAsDone.value = false
@@ -670,12 +693,24 @@ Exemple:
 
         <div class="form-control mb-3">
           <label class="label py-1">
-            <span class="label-text">Note (optionnel)</span>
+            <span class="label-text">Ressenti</span>
           </label>
+          <div class="flex gap-2 mb-2">
+            <button
+              v-for="feeling in feelings"
+              :key="feeling.value"
+              type="button"
+              class="btn btn-sm flex-1"
+              :class="selectedFeeling === feeling.value ? 'btn-primary' : 'btn-ghost'"
+              @click="selectFeeling(feeling.value)"
+            >
+              {{ feeling.emoji }} {{ feeling.label }}
+            </button>
+          </div>
           <textarea
             v-model="completionNote"
             class="textarea textarea-bordered textarea-sm w-full h-16"
-            placeholder="Bonnes sensations, un peu fatigué..."
+            placeholder="Détails sur la séance..."
           ></textarea>
         </div>
 
