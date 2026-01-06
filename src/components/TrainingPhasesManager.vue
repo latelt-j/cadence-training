@@ -1,15 +1,23 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import type { TrainingPhase } from '../types/session'
+import type { TrainingPhase, TrainingObjective, AthleteProfile } from '../types/session'
 import { v4 as uuidv4 } from 'uuid'
 
 const props = defineProps<{
   phases: TrainingPhase[]
+  objectives?: TrainingObjective[]
+  athleteProfile?: AthleteProfile
 }>()
 
 const emit = defineEmits<{
   save: [phases: TrainingPhase[]]
 }>()
+
+// Coach prompt state
+const showCoachImport = ref(false)
+const coachJsonInput = ref('')
+const coachCopied = ref(false)
+const importError = ref('')
 
 // Local copy of phases for editing
 const localPhases = ref<TrainingPhase[]>([])
@@ -38,7 +46,46 @@ const formData = ref({
   end_date: '',
   objectives: '',
   keywords: '',
+  cycling_pct: 80,
+  volume_note: '',
   challenge: '',
+})
+
+// Computed running percentage
+const running_pct = computed(() => 100 - formData.value.cycling_pct)
+
+// Generate volume distribution string
+const formatVolumeDistribution = (cyclingPct: number, note: string) => {
+  const runningPct = 100 - cyclingPct
+  let result = `${cyclingPct}% Vélo / ${runningPct}% Run`
+  if (note) result += ` (${note})`
+  return result
+}
+
+// Parse volume distribution string
+const parseVolumeDistribution = (str: string) => {
+  const match = str.match(/(\d+)%\s*Vélo/)
+  const noteMatch = str.match(/\(([^)]+)\)/)
+  return {
+    cycling_pct: match?.[1] ? parseInt(match[1]) : 80,
+    note: noteMatch?.[1] ?? ''
+  }
+}
+
+// Hints based on cycling percentage
+const volumeHint = computed(() => {
+  const pct = formData.value.cycling_pct
+  if (pct === 100) return '🚴 Vélo pur'
+  if (pct >= 90) return '🚴 Focus vélo, run maintenance'
+  if (pct >= 80) return '🚴 Priorité vélo, cross-training léger'
+  if (pct >= 70) return '⚖️ Dominante vélo'
+  if (pct >= 60) return '⚖️ Mixte vélo-dominant'
+  if (pct === 50) return '⚖️ Équilibré 50/50'
+  if (pct >= 40) return '⚖️ Mixte run-dominant'
+  if (pct >= 30) return '🏃 Dominante course'
+  if (pct >= 20) return '🏃 Priorité run, cross-training léger'
+  if (pct >= 10) return '🏃 Focus run, vélo maintenance'
+  return '🏃 Course pure'
 })
 
 // Available emojis for phases
@@ -115,6 +162,8 @@ const startAdd = () => {
     end_date: endDate.toISOString().split('T')[0] ?? '',
     objectives: '',
     keywords: '',
+    cycling_pct: 80,
+    volume_note: '',
     challenge: '',
   }
   isEditing.value = true
@@ -123,6 +172,7 @@ const startAdd = () => {
 // Start editing existing phase
 const startEdit = (phase: TrainingPhase) => {
   editingPhase.value = phase
+  const volumeParsed = phase.volume_distribution ? parseVolumeDistribution(phase.volume_distribution) : { cycling_pct: 80, note: '' }
   formData.value = {
     name: phase.name,
     emoji: phase.emoji || '📊',
@@ -130,6 +180,8 @@ const startEdit = (phase: TrainingPhase) => {
     end_date: phase.end_date,
     objectives: phase.objectives || phase.goals || '',
     keywords: phase.keywords || '',
+    cycling_pct: volumeParsed.cycling_pct,
+    volume_note: volumeParsed.note,
     challenge: phase.challenge || '',
   }
   isEditing.value = true
@@ -145,6 +197,8 @@ const cancelEdit = () => {
 const savePhase = () => {
   if (!formData.value.name || !formData.value.start_date || !formData.value.end_date) return
 
+  const volumeDistribution = formatVolumeDistribution(formData.value.cycling_pct, formData.value.volume_note)
+
   if (editingPhase.value) {
     // Update existing
     const index = localPhases.value.findIndex(p => p.id === editingPhase.value!.id)
@@ -157,6 +211,7 @@ const savePhase = () => {
         end_date: formData.value.end_date,
         objectives: formData.value.objectives || undefined,
         keywords: formData.value.keywords || undefined,
+        volume_distribution: volumeDistribution,
         challenge: formData.value.challenge || undefined,
       }
     }
@@ -170,6 +225,7 @@ const savePhase = () => {
       end_date: formData.value.end_date,
       objectives: formData.value.objectives || undefined,
       keywords: formData.value.keywords || undefined,
+      volume_distribution: volumeDistribution,
       challenge: formData.value.challenge || undefined,
     })
   }
@@ -198,6 +254,113 @@ const getPhaseEmoji = (name: string) => {
   if (lower.includes('race') || lower.includes('compet')) return '🏆'
   return '📊'
 }
+
+// Generate coach prompt for phases
+const generateCoachPrompt = () => {
+  const today = new Date()
+  const todayStr = today.toISOString().split('T')[0]
+
+  let prompt = `Tu es un coach cycliste expert. Je veux que tu me génères un plan de phases d'entraînement.
+
+## Date d'aujourd'hui
+${todayStr}
+
+## Mon profil`
+
+  if (props.athleteProfile?.ftp) {
+    prompt += `\n- FTP: ${props.athleteProfile.ftp}W`
+  }
+  if (props.athleteProfile?.max_hr) {
+    prompt += `\n- FC Max: ${props.athleteProfile.max_hr} bpm`
+  }
+  if (props.athleteProfile?.environment) {
+    prompt += `\n- Environnement: ${props.athleteProfile.environment}`
+  }
+
+  if (props.objectives?.length) {
+    prompt += `\n\n## Mes objectifs`
+    props.objectives.forEach(obj => {
+      prompt += `\n- [${obj.priority}] ${obj.name} (${obj.date}) - ${obj.type}, ${obj.distance_km}km, D+${obj.elevation_gain}m`
+    })
+  }
+
+  prompt += `
+
+## Ta mission
+Génère-moi un plan de phases d'entraînement qui mène à mes objectifs. Chaque phase doit avoir:
+- Un nom clair (Base, Build, Peak, Taper, etc.)
+- Des dates de début et fin
+- Un objectif principal
+- Des mots-clés pour guider les séances
+
+## Format de réponse OBLIGATOIRE
+Réponds UNIQUEMENT avec un JSON valide (pas de texte avant/après), au format:
+\`\`\`json
+[
+  {
+    "name": "Base",
+    "emoji": "🏗️",
+    "start_date": "2024-01-08",
+    "end_date": "2024-02-04",
+    "objectives": "Construire l'endurance aérobie",
+    "keywords": "Z2, volume, régularité, endurance",
+    "volume_distribution": "90% Vélo / 10% Run (Maintenance)",
+    "challenge": ""
+  }
+]
+\`\`\`
+
+Emojis disponibles: 🏗️ (Base), 💪 (Build), ⚡ (Peak), 🎯 (Taper), 🧘 (Récup), 🏆 (Compét), 🔥 (Intensif), ⛰️ (Montagne)`
+
+  return prompt
+}
+
+// Copy coach prompt to clipboard
+const copyCoachPrompt = async () => {
+  await navigator.clipboard.writeText(generateCoachPrompt())
+  coachCopied.value = true
+  setTimeout(() => {
+    coachCopied.value = false
+  }, 2000)
+}
+
+// Import phases from coach JSON
+const importCoachPhases = () => {
+  importError.value = ''
+  try {
+    let cleanText = coachJsonInput.value.trim()
+    // Remove markdown code blocks if present
+    if (cleanText.startsWith('```')) {
+      cleanText = cleanText.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
+    }
+
+    const parsed = JSON.parse(cleanText)
+    const phasesArray = Array.isArray(parsed) ? parsed : [parsed]
+
+    // Validate and transform phases
+    const newPhases: TrainingPhase[] = phasesArray.map((p: any) => ({
+      id: uuidv4(),
+      name: p.name || 'Phase',
+      emoji: p.emoji,
+      start_date: p.start_date,
+      end_date: p.end_date,
+      objectives: p.objectives || p.goals,
+      keywords: p.keywords,
+      volume_distribution: p.volume_distribution,
+      challenge: p.challenge,
+    }))
+
+    // Replace all phases
+    localPhases.value = newPhases.sort((a, b) => a.start_date.localeCompare(b.start_date))
+    emit('save', localPhases.value)
+
+    // Reset
+    showCoachImport.value = false
+    coachJsonInput.value = ''
+  } catch (e) {
+    importError.value = 'JSON invalide. Vérifie le format.'
+  }
+}
 </script>
 
 <template>
@@ -205,9 +368,53 @@ const getPhaseEmoji = (name: string) => {
     <!-- Header with add button -->
     <div class="flex justify-between items-center pr-8">
       <h3 class="font-bold text-lg">📊 Phases d'entraînement</h3>
-      <button v-if="!isEditing" class="btn btn-sm btn-primary" @click="startAdd">
-        + Ajouter
+      <div v-if="!isEditing && !showCoachImport" class="flex gap-2">
+        <button class="btn btn-sm btn-ghost" @click="showCoachImport = true">
+          🤖 Coach IA
+        </button>
+        <button class="btn btn-sm btn-primary" @click="startAdd">
+          + Ajouter
+        </button>
+      </div>
+    </div>
+
+    <!-- Coach Import Section -->
+    <div v-if="showCoachImport" class="bg-base-200 rounded-lg p-4 space-y-3">
+      <h4 class="font-medium">🤖 Demander au coach IA</h4>
+      <p class="text-sm text-base-content/70">
+        1. Copie le prompt ci-dessous et colle-le dans ton IA préférée (ChatGPT, Claude...)
+      </p>
+      <button
+        class="btn btn-sm w-full"
+        :class="coachCopied ? 'btn-success' : 'btn-primary'"
+        @click="copyCoachPrompt"
+      >
+        {{ coachCopied ? '✓ Prompt copié !' : '📋 Copier le prompt pour le coach' }}
       </button>
+
+      <p class="text-sm text-base-content/70">
+        2. Colle la réponse JSON du coach ici :
+      </p>
+      <textarea
+        v-model="coachJsonInput"
+        class="textarea textarea-bordered w-full h-32 font-mono text-xs"
+        placeholder="Colle le JSON généré par le coach ici..."
+      ></textarea>
+
+      <div v-if="importError" class="text-error text-sm">{{ importError }}</div>
+
+      <div class="flex justify-end gap-2">
+        <button class="btn btn-sm btn-ghost" @click="showCoachImport = false; coachJsonInput = ''; importError = ''">
+          Annuler
+        </button>
+        <button
+          class="btn btn-sm btn-primary"
+          :disabled="!coachJsonInput.trim()"
+          @click="importCoachPhases"
+        >
+          🔄 Remplacer les phases
+        </button>
+      </div>
     </div>
 
     <!-- Edit form -->
@@ -285,6 +492,33 @@ const getPhaseEmoji = (name: string) => {
       </div>
 
       <div>
+        <label class="text-sm text-base-content/70 mb-1 block">⚖️ Répartition volume</label>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="text-lg">🚴</span>
+          <input
+            v-model.number="formData.cycling_pct"
+            type="range"
+            min="0"
+            max="100"
+            step="10"
+            class="range range-sm range-primary flex-1"
+          />
+          <span class="text-lg">🏃</span>
+        </div>
+        <div class="flex justify-between text-sm mb-2">
+          <span class="font-bold text-primary">{{ formData.cycling_pct }}% Vélo</span>
+          <span class="text-base-content/60">{{ volumeHint }}</span>
+          <span class="font-bold text-secondary">{{ running_pct }}% Run</span>
+        </div>
+        <input
+          v-model="formData.volume_note"
+          type="text"
+          class="input input-bordered input-sm w-full"
+          placeholder="Note optionnelle (ex: Maintenance, Build run...)"
+        />
+      </div>
+
+      <div>
         <label class="text-sm text-base-content/70 mb-1 block">Événement (optionnel)</label>
         <input
           v-model="formData.challenge"
@@ -338,6 +572,9 @@ const getPhaseEmoji = (name: string) => {
             </div>
             <div v-if="phase.keywords" class="text-sm text-base-content/60 whitespace-pre-line">
               <span class="text-base-content/50">Mots-clés:</span> {{ phase.keywords }}
+            </div>
+            <div v-if="phase.volume_distribution" class="text-sm text-info">
+              <span class="text-base-content/50">⚖️ Répartition:</span> {{ phase.volume_distribution }}
             </div>
             <div v-if="phase.challenge" class="text-sm text-warning">
               <span class="text-base-content/50">Événement:</span> {{ phase.challenge }}

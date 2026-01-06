@@ -6,7 +6,6 @@ import { useSupabase } from './composables/useSupabase'
 import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective, ImportedPhase, AthleteProfile } from './types/session'
 import FileImport from './components/FileImport.vue'
 import WeekCalendar from './components/WeekCalendar.vue'
-import AddSessionModal from './components/AddSessionModal.vue'
 import SessionDetailModal from './components/SessionDetailModal.vue'
 import WeeklyStats from './components/WeeklyStats.vue'
 import VolumeChart from './components/VolumeChart.vue'
@@ -21,7 +20,6 @@ const {
   init: initSessions,
   loadFromJson,
   addSession,
-  addSessions,
   updateSessionDate,
   updateSessionFeedback,
   updateSession,
@@ -244,8 +242,6 @@ const syncStrava = async () => {
 }
 
 // Modal states
-const showAddModal = ref(false)
-const addModalDate = ref('')
 const selectedSession = ref<ScheduledSession | null>(null)
 const sessionDetailModalRef = ref<{ onResyncComplete: () => void } | null>(null)
 
@@ -257,15 +253,6 @@ const handleImport = async (data: (SessionTemplate | ScheduledSession)[], replac
   await loadFromJson(data, replaceExisting)
   // Note: phases are now managed manually via TrainingPhasesManager, not auto-created from import
   showImportModal.value = false
-}
-
-const handleAddSession = (date: string) => {
-  addModalDate.value = date
-  showAddModal.value = true
-}
-
-const handleAddSessions = async (templates: SessionTemplate[]) => {
-  await addSessions(templates, addModalDate.value)
 }
 
 const handleUpdateDate = async (sessionId: string, newDate: string) => {
@@ -504,7 +491,6 @@ const handleReset = () => {
           :new-session-ids="newSessionIds"
           :training-phases="trainingPhases"
           @update-date="handleUpdateDate"
-          @add-session="handleAddSession"
           @select-session="handleSelectSession"
           @week-change="setCurrentWeek"
         />
@@ -519,13 +505,6 @@ const handleReset = () => {
     </div>
 
     <!-- Modals -->
-    <AddSessionModal
-      :open="showAddModal"
-      :date="addModalDate"
-      @close="showAddModal = false"
-      @add="handleAddSessions"
-    />
-
     <SessionDetailModal
       ref="sessionDetailModalRef"
       :session="selectedSession"
@@ -611,6 +590,8 @@ const handleReset = () => {
         <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-2xl z-10" @click="showPhasesModal = false">✕</button>
         <TrainingPhasesManager
           :phases="trainingPhases"
+          :objectives="trainingObjectives"
+          :athlete-profile="athleteProfile"
           @save="handleSavePhases"
         />
       </div>

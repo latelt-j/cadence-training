@@ -299,7 +299,6 @@ const downloadZwoFile = () => {
           </div>
           <p class="text-sm text-base-content/70">{{ formatDate(session.date) }}</p>
         </div>
-        <button class="btn btn-sm btn-circle btn-ghost" @click="emit('close')">✕</button>
       </div>
 
       <!-- Tabs -->

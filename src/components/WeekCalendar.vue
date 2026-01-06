@@ -14,7 +14,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   updateDate: [sessionId: string, newDate: string]
-  addSession: [date: string]
   selectSession: [session: ScheduledSession]
   weekChange: [date: Date]
 }>()
@@ -355,7 +354,6 @@ watch(forecast, () => {}, { deep: true })
                      `translateX(${swipeOffset * 0.3}px)`,
           opacity: slideDirection ? 0 : 1 - Math.abs(swipeOffset) / 500
         }"
-        @click="emit('addSession', currentDay.date)"
       >
         <!-- Day Header - Mobile -->
         <div class="p-4 text-center">
@@ -443,7 +441,6 @@ watch(forecast, () => {}, { deep: true })
         @dragover="onDragOver($event, day.date)"
         @dragleave="onDragLeave"
         @drop="onDrop($event, day.date)"
-        @click="emit('addSession', day.date)"
       >
         <!-- Day Header -->
         <div class="p-2 text-center h-[68px]">

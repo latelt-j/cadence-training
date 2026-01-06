@@ -10,6 +10,7 @@ export interface TrainingPhase {
   end_date: string // YYYY-MM-DD
   objectives?: string // Phase objectives
   keywords?: string // Keywords for AI coach (e.g., "Z2, volume, régularité")
+  volume_distribution?: string // e.g., "90% Vélo / 10% Run (Maintenance)"
   challenge?: string // Optional challenge for the phase
   // Legacy fields (kept for backwards compatibility)
   description?: string
