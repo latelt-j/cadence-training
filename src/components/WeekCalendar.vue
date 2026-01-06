@@ -537,7 +537,7 @@ watch(forecast, () => {}, { deep: true })
               newSessionIds?.has(session.id) || ((session.type === 'strava' || session.type === 'manual') && session.date === today) ? 'session-today' : '',
               (session.type === 'strava' || session.type === 'manual') ? 'cursor-default' : 'cursor-grab'
             ]"
-            :style="{ opacity: draggedSession?.id === session.id ? 0.3 : ((session.type === 'strava' || session.type === 'manual') && session.date !== today ? 0.6 : 1) }"
+            :style="{ opacity: draggedSession?.id === session.id ? 0.3 : 1 }"
             :draggable="session.type === 'planned'"
             @dragstart="onDragStart($event, session)"
             @dragend="onDragEnd"
@@ -570,21 +570,31 @@ watch(forecast, () => {}, { deep: true })
   cursor: grabbing;
 }
 
+/* Sport colors */
 .session-cycling {
-  background: linear-gradient(135deg, #22c55e 0%, #15803d 100%);
+  background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+}
+
+.session-mtb {
+  background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
 }
 
 .session-running {
-  background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
 }
 
 .session-strength {
   background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
 }
 
+.session-hiking {
+  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+}
+
 .session-planned {
-  opacity: 0.7;
-  border: 2px dashed rgba(255, 255, 255, 0.5);
+  opacity: 0.65 !important;
+  border: 2px dashed rgba(255, 255, 255, 0.6) !important;
+  box-shadow: none !important;
 }
 
 .session-today {
