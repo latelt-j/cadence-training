@@ -303,6 +303,13 @@ const getSessionClass = (session: ScheduledSession) => {
                     </div>
                     <div class="text-xs font-semibold mt-0.5">{{ formatDuration(session.duration_min) }}</div>
                   </div>
+                  <!-- Combo badge for multiple sessions -->
+                  <div
+                    v-if="getSessionsForDate(day.date).length >= 2"
+                    class="combo-badge"
+                  >
+                    🔥 x{{ getSessionsForDate(day.date).length }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -406,6 +413,21 @@ const getSessionClass = (session: ScheduledSession) => {
 .session-planned-share {
   opacity: 0.75;
   border: 2px dashed rgba(255, 255, 255, 0.5);
+}
+
+/* Combo badge for multiple sessions in a day */
+.combo-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fbbf24;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 /* Capture area - hex colors for html2canvas (no oklch) */
