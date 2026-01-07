@@ -259,6 +259,15 @@ const getSessionClass = (session: ScheduledSession) => {
     return `${base} session-${session.sport}-share session-planned-share`
   }
 }
+
+// Get intensity color (1-10 scale) - dot style
+const getIntensityColor = (intensity: number | undefined): string => {
+  if (!intensity) return 'bg-white/40'
+  if (intensity <= 3) return 'bg-white/80'      // Récup - blanc
+  if (intensity <= 6) return 'bg-yellow-300'    // Modéré - jaune
+  if (intensity <= 8) return 'bg-orange-400'    // Dur - orange
+  return 'bg-red-500'                            // Intense - rouge
+}
 </script>
 
 <template>
@@ -325,7 +334,14 @@ const getSessionClass = (session: ScheduledSession) => {
                       {{ getSportEmoji(session.sport) }}
                       <span v-if="isSessionDone(session)" class="text-sm">✅</span>
                     </div>
-                    <div class="text-xs font-semibold mt-0.5">{{ formatDuration(session.duration_min) }}</div>
+                    <div class="flex items-center justify-center gap-1 mt-0.5">
+                      <span class="text-xs font-semibold">{{ formatDuration(session.duration_min) }}</span>
+                      <div
+                        v-if="!isSessionDone(session) && session.intensity"
+                        class="w-1.5 h-1.5 rounded-full"
+                        :class="getIntensityColor(session.intensity)"
+                      ></div>
+                    </div>
                   </div>
                   <!-- Combo badge for multiple sessions -->
                   <div
