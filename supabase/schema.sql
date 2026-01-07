@@ -146,3 +146,11 @@ ALTER TABLE oauth_tokens DISABLE ROW LEVEL SECURITY;
 -- Run this if you already have the sessions table
 -- =============================================
 -- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS intensity INTEGER;
+
+-- =============================================
+-- MIGRATION: Add Zwift workout and planned session info
+-- Run this if you already have the sessions table
+-- =============================================
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS zwift_workout TEXT;
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS planned_title TEXT;
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS planned_description TEXT;

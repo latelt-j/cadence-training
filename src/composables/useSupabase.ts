@@ -35,6 +35,11 @@ interface DbSession {
   average_vam: number | null
   // Planned intensity (1-10)
   intensity: number | null
+  // Zwift workout XML
+  zwift_workout: string | null
+  // Planned session info (when replaced by Strava)
+  planned_title: string | null
+  planned_description: string | null
   created_at: string
   updated_at: string
 }
@@ -318,6 +323,11 @@ export function useSupabase() {
     ...(db.average_vam !== null && { average_vam: db.average_vam }),
     // Planned intensity
     ...(db.intensity !== null && { intensity: db.intensity }),
+    // Zwift workout
+    ...(db.zwift_workout && { zwift_workout: db.zwift_workout }),
+    // Planned session info
+    ...(db.planned_title && { planned_title: db.planned_title }),
+    ...(db.planned_description && { planned_description: db.planned_description }),
   })
 
   const sessionToDb = (session: ScheduledSession): Omit<DbSession, 'created_at' | 'updated_at'> => ({
@@ -351,6 +361,11 @@ export function useSupabase() {
     average_vam: session.average_vam ? Math.round(session.average_vam) : null,
     // Planned intensity
     intensity: session.intensity ?? null,
+    // Zwift workout
+    zwift_workout: session.zwift_workout ?? null,
+    // Planned session info
+    planned_title: session.planned_title ?? null,
+    planned_description: session.planned_description ?? null,
   })
 
   return {
