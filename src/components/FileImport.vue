@@ -340,6 +340,15 @@ Format attendu :
 
 Types : "sweet_spot", "threshold", "vo2max", "anaerobic", "long_run", "long_ride", "hills", "fartlek", "recovery", "strength", "core"
 
+⚠️ SÉANCES VÉLO - INDOOR vs OUTDOOR :
+- Séances INDOOR (intervalles, sweet spot, threshold, VO2max, récup active) :
+  → Préfixer le titre avec "Zwift:"
+  → Exemples: "Zwift: Sweet Spot 2x20", "Zwift: VO2max 5x4min", "Zwift: Récup Active"
+- Séances OUTDOOR (sortie longue Z2, endurance > 2h) :
+  → PAS de préfixe Zwift
+  → Exemples: "Sortie Longue Z2", "Endurance 3h"
+- Critères : durée < 90min ET intervalles → Indoor/Zwift | durée > 2h ET Z2 → Outdoor
+
 ⚠️ SÉANCES RENFO (sport: "strength") :
 - Adapter le contenu à la phase actuelle :
   - Base/Fondation : renfo général, gainage, stabilité
