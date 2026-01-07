@@ -343,8 +343,9 @@ Format attendu :
     {
       "sport": "cycling",
       "type": "sweet_spot",
-      "title": "Sweet spot 2x20min",
+      "title": "Zwift: Sweet spot 2x20min",
       "duration_min": 90,
+      "intensity": 7,
       "description": "Description",
       "date": "${dates[0]}",
       "zwift_workout": "<workout_file>...</workout_file>"
@@ -354,6 +355,14 @@ Format attendu :
 
 ⚠️ SPORTS VALIDES : "cycling", "mtb", "running", "strength", "hiking"
 - Pour une journée de repos, ne pas créer de séance
+
+⚠️ INTENSITÉ (OBLIGATOIRE) :
+- Chaque séance DOIT avoir un champ "intensity" de 1 à 10
+- 1-2 : Récupération active, très facile
+- 3-4 : Endurance facile, Z2
+- 5-6 : Tempo, modéré
+- 7-8 : Seuil, Sweet Spot, dur
+- 9-10 : VO2max, intervalles intenses, très dur
 
 Types : "sweet_spot", "threshold", "vo2max", "anaerobic", "long_run", "long_ride", "hills", "fartlek", "recovery", "strength", "core"
 

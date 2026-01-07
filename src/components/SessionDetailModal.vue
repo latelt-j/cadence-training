@@ -439,6 +439,39 @@ const confirmEditDuration = () => {
             {{ session.type === 'manual' ? '✅ Fait' : session.type }}
           </div>
           <div class="badge badge-primary">{{ formatDuration(session.duration_min) }}</div>
+          <!-- Intensity badge for planned sessions -->
+          <div
+            v-if="session.type === 'planned' && session.intensity"
+            class="badge"
+            :class="{
+              'badge-success': session.intensity <= 3,
+              'badge-warning': session.intensity > 3 && session.intensity <= 5,
+              'badge-error': session.intensity > 7,
+              'bg-orange-500 border-orange-500 text-white': session.intensity > 5 && session.intensity <= 7
+            }"
+          >
+            ⚡ {{ session.intensity }}/10
+          </div>
+        </div>
+
+        <!-- Intensity progress bar for planned sessions -->
+        <div v-if="session.type === 'planned' && session.intensity" class="mt-3">
+          <div class="flex items-center justify-between text-xs text-base-content/60 mb-1">
+            <span>Intensité prévue</span>
+            <span class="font-semibold">{{ session.intensity }}/10</span>
+          </div>
+          <div class="h-2 bg-base-300 rounded-full overflow-hidden">
+            <div
+              class="h-full rounded-full transition-all"
+              :class="{
+                'bg-success': session.intensity <= 3,
+                'bg-warning': session.intensity > 3 && session.intensity <= 5,
+                'bg-orange-500': session.intensity > 5 && session.intensity <= 7,
+                'bg-error': session.intensity > 7
+              }"
+              :style="{ width: `${session.intensity * 10}%` }"
+            ></div>
+          </div>
         </div>
 
         <!-- Description: editable for Strava -->
