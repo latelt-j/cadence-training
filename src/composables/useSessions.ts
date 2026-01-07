@@ -429,5 +429,6 @@ export function useSessions() {
     reset,
     weeklyStats,
     setCurrentWeek,
+    currentWeekDate,
   }
 }

@@ -192,90 +192,162 @@ const copyBilan = async () => {
     copied.value = false
   }, 2000)
 }
+
+// Get session class based on sport
+const getSessionClass = (session: ScheduledSession) => {
+  const base = 'session-share'
+  const sportClass = `session-${session.sport}-share`
+  const plannedClass = session.type === 'planned' ? 'session-planned-share' : ''
+  return `${base} ${sportClass} ${plannedClass}`
+}
 </script>
 
 <template>
-  <dialog class="modal" :class="{ 'modal-open': isOpen }">
-    <div class="modal-box w-full h-full max-h-full md:max-w-3xl md:h-auto md:max-h-[90vh] rounded-none md:rounded-3xl bg-base-200 flex flex-col p-6 md:p-8">
-      <!-- Close button -->
-      <button class="btn btn-circle btn-ghost absolute right-4 top-4 text-xl z-10" @click="emit('close')">✕</button>
-
-      <!-- Header -->
-      <div class="text-center mb-6">
-        <h2 class="text-3xl font-bold">📅 Ma semaine</h2>
-        <p class="text-base-content/60 mt-1">{{ weekRange }}</p>
-      </div>
-
-      <!-- Week Grid -->
-      <div class="grid grid-cols-7 gap-2 mb-6">
+  <!-- Fullscreen overlay -->
+  <Teleport to="body">
+    <Transition name="modal">
+      <div
+        v-if="isOpen"
+        class="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+      >
+        <!-- Backdrop -->
         <div
-          v-for="day in weekDates"
-          :key="day.date"
-          class="text-center"
-        >
-          <!-- Day header -->
-          <div class="text-xs text-base-content/50 font-medium mb-1">{{ day.dayName }}</div>
-          <div class="text-sm font-bold mb-2">{{ day.dayNumber }}</div>
+          class="absolute inset-0 bg-black/95 backdrop-blur-xl"
+          @click="emit('close')"
+        ></div>
 
-          <!-- Sessions for this day -->
-          <div class="space-y-1 min-h-[60px]">
+        <!-- Modal content -->
+        <div class="relative bg-base-200 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-auto p-6 md:p-8 shadow-2xl z-10">
+          <!-- Close button -->
+          <button
+            class="btn btn-circle btn-ghost absolute right-4 top-4 text-xl z-10"
+            @click="emit('close')"
+          >
+            ✕
+          </button>
+
+          <!-- Header -->
+          <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold">📅 Ma semaine</h2>
+            <p class="text-base-content/60 mt-1">{{ weekRange }}</p>
+          </div>
+
+          <!-- Week Grid -->
+          <div class="grid grid-cols-7 gap-2 mb-8">
             <div
-              v-for="session in getSessionsForDate(day.date)"
-              :key="session.id"
-              class="rounded-lg p-1.5 text-center text-xs"
-              :class="[
-                session.type === 'planned' ? 'opacity-60 border border-dashed border-base-content/30' : '',
-                session.sport === 'cycling' || session.sport === 'mtb' ? 'bg-pink-500/20' : '',
-                session.sport === 'running' ? 'bg-sky-500/20' : '',
-                session.sport === 'strength' ? 'bg-purple-500/20' : '',
-                session.sport === 'hiking' ? 'bg-lime-500/20' : '',
-              ]"
+              v-for="day in weekDates"
+              :key="day.date"
+              class="text-center"
             >
-              <div class="text-lg">{{ getSportEmoji(session.sport) }}</div>
-              <div class="text-[10px] text-base-content/70">{{ formatDuration(session.duration_min) }}</div>
+              <!-- Day header -->
+              <div class="text-xs text-base-content/50 font-medium mb-1">{{ day.dayName }}</div>
+              <div class="text-lg font-bold mb-3 text-base-content/80">{{ day.dayNumber }}</div>
+
+              <!-- Sessions for this day -->
+              <div class="space-y-2 min-h-[80px]">
+                <div
+                  v-for="session in getSessionsForDate(day.date)"
+                  :key="session.id"
+                  class="rounded-xl p-2 text-center text-white"
+                  :class="getSessionClass(session)"
+                >
+                  <div class="text-xl">{{ getSportEmoji(session.sport) }}</div>
+                  <div class="text-xs font-semibold mt-0.5">{{ formatDuration(session.duration_min) }}</div>
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- Stats -->
+          <div class="flex justify-center gap-8 text-sm mb-6 flex-wrap">
+            <span v-if="doneSessions.length > 0" class="text-emerald-400 font-semibold">
+              ✅ {{ doneSessions.length }} séances • {{ formatHours(doneHours) }}
+            </span>
+            <span v-if="plannedSessions.length > 0" class="text-base-content/50 font-medium">
+              📋 {{ plannedSessions.length }} séances • {{ formatHours(plannedHours) }}
+            </span>
+          </div>
+
+          <!-- Divider -->
+          <div class="divider my-4"></div>
+
+          <!-- Tagline -->
+          <div class="py-6 text-center">
+            <p class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-400 via-pink-500 to-rose-500 bg-clip-text text-transparent drop-shadow-lg">
+              "{{ smartTagline }}"
+            </p>
+          </div>
+
+          <!-- Share button -->
+          <div class="flex justify-center mt-4">
+            <button
+              class="btn btn-lg border-0 shadow-lg text-white px-8"
+              :class="copied ? 'btn-success' : 'bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-pink-500/40'"
+              @click="copyBilan"
+            >
+              {{ copied ? '✓ Copié !' : '📋 Copier le bilan' }}
+            </button>
+          </div>
+
+          <!-- Branding -->
+          <p class="text-xs text-base-content/30 text-center mt-8">Powered by Cadence 🎯</p>
         </div>
       </div>
-
-      <!-- Stats -->
-      <div class="flex justify-center gap-6 text-sm mb-6 flex-wrap">
-        <span v-if="doneSessions.length > 0" class="text-success">
-          ✅ {{ doneSessions.length }} séances • {{ formatHours(doneHours) }}
-        </span>
-        <span v-if="plannedSessions.length > 0" class="text-base-content/60">
-          📋 {{ plannedSessions.length }} séances • {{ formatHours(plannedHours) }}
-        </span>
-      </div>
-
-      <!-- Divider -->
-      <div class="divider my-2"></div>
-
-      <!-- Tagline -->
-      <div class="py-6 text-center">
-        <p class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-400 to-pink-600 bg-clip-text text-transparent">
-          "{{ smartTagline }}"
-        </p>
-      </div>
-
-      <!-- Share button -->
-      <div class="flex justify-center mt-4">
-        <button
-          class="btn border-0 shadow-lg text-white"
-          :class="copied ? 'btn-success' : 'bg-pink-500 hover:bg-pink-600 shadow-pink-500/30'"
-          @click="copyBilan"
-        >
-          {{ copied ? '✓ Copié !' : '📋 Copier le bilan' }}
-        </button>
-      </div>
-
-      <!-- Branding -->
-      <p class="text-xs text-base-content/30 text-center mt-6">Powered by Cadence 🎯</p>
-    </div>
-
-    <!-- Backdrop -->
-    <form method="dialog" class="modal-backdrop bg-black/70 backdrop-blur-sm" @click="emit('close')">
-      <button>close</button>
-    </form>
-  </dialog>
+    </Transition>
+  </Teleport>
 </template>
+
+<style scoped>
+/* Modal transition */
+.modal-enter-active,
+.modal-leave-active {
+  transition: all 0.3s ease;
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from > div:last-child,
+.modal-leave-to > div:last-child {
+  transform: scale(0.95);
+}
+
+/* Session cards base */
+.session-share {
+  transition: all 0.2s ease;
+}
+
+/* Cycling - Pink vif */
+.session-cycling-share,
+.session-mtb-share {
+  background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.5);
+}
+
+/* Running - Blue électrique */
+.session-running-share {
+  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+  box-shadow: 0 4px 15px rgba(14, 165, 233, 0.5);
+}
+
+/* Strength - Purple vibrant */
+.session-strength-share {
+  background: linear-gradient(135deg, #c084fc 0%, #a855f7 100%);
+  box-shadow: 0 4px 15px rgba(168, 85, 247, 0.5);
+}
+
+/* Hiking - Lime néon */
+.session-hiking-share {
+  background: linear-gradient(135deg, #a3e635 0%, #84cc16 100%);
+  box-shadow: 0 4px 15px rgba(132, 204, 22, 0.5);
+}
+
+/* Planned sessions - Same colors but with dashed border and less glow */
+.session-planned-share {
+  opacity: 0.7;
+  border: 2px dashed rgba(255, 255, 255, 0.5);
+  box-shadow: none;
+}
+</style>

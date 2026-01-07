@@ -3,7 +3,6 @@ import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
 import type { ScheduledSession, TrainingPhase } from '../types/session'
 import { SPORT_CONFIG } from '../types/session'
 import { useWeather } from '../composables/useWeather'
-import ShareWeekModal from './ShareWeekModal.vue'
 
 const { forecast, fetchWithGeolocation, getWeatherForDate, getWeatherEmoji, getWindArrow, locationName } = useWeather()
 
@@ -216,7 +215,6 @@ const goToToday = () => {
 
 // Week export for coach
 const weekExportCopied = ref(false)
-const showShareModal = ref(false)
 
 const copyWeekForCoach = async () => {
   const weekSessions = props.sessions.filter(s => {
@@ -382,19 +380,13 @@ watch(forecast, () => {}, { deep: true })
         <h2 class="text-xl font-bold text-primary capitalize leading-none">{{ headerTitle }}</h2>
       </div>
 
-      <div class="flex items-center gap-2">
-        <details class="dropdown dropdown-end">
-          <summary class="btn btn-sm btn-ghost btn-square">⋮</summary>
-          <ul class="dropdown-content menu bg-base-200 rounded-box w-52 p-2 shadow-lg z-50">
-            <li><a @click="showShareModal = true">📤 Partager ma semaine</a></li>
-            <li>
-              <a @click="copyWeekForCoach" :class="weekExportCopied ? 'text-success' : ''">
-                {{ weekExportCopied ? '✓ Copié !' : '📋 Copier bilan coach' }}
-              </a>
-            </li>
-          </ul>
-        </details>
-      </div>
+      <button
+        class="btn btn-sm btn-ghost"
+        :class="weekExportCopied ? 'text-success' : ''"
+        @click="copyWeekForCoach"
+      >
+        {{ weekExportCopied ? '✓ Copié !' : '📋 Bilan coach' }}
+      </button>
     </div>
 
     <!-- Phase Bar -->
@@ -576,14 +568,6 @@ watch(forecast, () => {}, { deep: true })
       <span>•</span>
       <span class="flex items-center gap-1">👆 Clique séance</span>
     </div>
-
-    <!-- Share Modal -->
-    <ShareWeekModal
-      :is-open="showShareModal"
-      :sessions="sessions"
-      :week-start="currentWeekStart"
-      @close="showShareModal = false"
-    />
   </div>
 </template>
 

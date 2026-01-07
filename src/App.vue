@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useSessions } from './composables/useSessions'
 import { useStrava } from './composables/useStrava'
 import { useSupabase } from './composables/useSupabase'
@@ -13,6 +13,7 @@ import WellnessWidget from './components/WellnessWidget.vue'
 import ObjectiveSettings from './components/ObjectiveSettings.vue'
 import AthleteProfileComponent from './components/AthleteProfile.vue'
 import TrainingPhasesManager from './components/TrainingPhasesManager.vue'
+import ShareWeekModal from './components/ShareWeekModal.vue'
 import { copySessionForCoach } from './utils/coach'
 
 const {
@@ -27,6 +28,7 @@ const {
   reset,
   weeklyStats,
   setCurrentWeek,
+  currentWeekDate,
 } = useSessions()
 
 // Import modal
@@ -34,6 +36,21 @@ const showImportModal = ref(false)
 
 // Strava disconnect modal
 const showStravaDisconnectModal = ref(false)
+
+// Share week modal
+const showShareModal = ref(false)
+
+// Compute week start from currentWeekDate
+const getMonday = (d: Date): Date => {
+  const date = new Date(d)
+  const day = date.getDay()
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1)
+  date.setDate(diff)
+  date.setHours(0, 0, 0, 0)
+  return date
+}
+
+const weekStart = computed(() => getMonday(currentWeekDate.value))
 
 const {
   isConnected: stravaConnected,
@@ -410,7 +427,8 @@ const handleReset = () => {
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </button>
-              <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-48 p-2 shadow-xl mt-2 border border-base-300">
+              <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-52 p-2 shadow-xl mt-2 border border-base-300">
+                <li><a @click="showShareModal = true" class="rounded-lg">📤 Partager ma semaine</a></li>
                 <li><a @click="showImportModal = true" class="rounded-lg">📥 Importer</a></li>
                 <li v-if="stravaConnected"><a class="text-error rounded-lg" @click="showStravaDisconnectModal = true">Déconnecter Strava</a></li>
                 <li class="border-t border-base-300 mt-1 pt-1">
@@ -475,6 +493,7 @@ const handleReset = () => {
             <span class="text-[10px] text-base-content/70">Plus</span>
           </button>
           <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-xl mb-2 border border-base-300">
+            <li><a @click="showShareModal = true" class="rounded-lg">📤 Partager ma semaine</a></li>
             <li><a @click="showPhasesModal = true" class="rounded-lg">📊 Phases</a></li>
             <li><a @click="showImportModal = true" class="rounded-lg">📥 Importer</a></li>
             <li v-if="stravaConnected"><a class="text-error rounded-lg" @click="showStravaDisconnectModal = true">Déconnecter Strava</a></li>
@@ -599,6 +618,14 @@ const handleReset = () => {
         <button>close</button>
       </form>
     </dialog>
+
+    <!-- Share Week Modal -->
+    <ShareWeekModal
+      :is-open="showShareModal"
+      :sessions="sessions"
+      :week-start="weekStart"
+      @close="showShareModal = false"
+    />
 
     <!-- New Activity Spotlight -->
     <Teleport to="body">
