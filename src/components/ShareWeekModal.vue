@@ -253,18 +253,19 @@ const getSessionClass = (session: ScheduledSession) => {
           @click="emit('close')"
         ></div>
 
-        <!-- Modal content with animated border -->
-        <div class="modal-card relative rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-auto shadow-2xl z-10">
-          <!-- Close button (outside capture area) -->
-          <button
-            class="btn btn-circle btn-ghost absolute right-4 top-4 text-xl z-20"
-            @click="emit('close')"
-          >
-            ✕
-          </button>
+        <!-- Modal wrapper with animated border -->
+        <div class="modal-border-wrapper z-10">
+          <div class="modal-card rounded-3xl w-full max-h-[90vh] overflow-auto shadow-2xl">
+            <!-- Close button (outside capture area) -->
+            <button
+              class="btn btn-circle btn-ghost absolute right-4 top-4 text-xl z-20"
+              @click="emit('close')"
+            >
+              ✕
+            </button>
 
-          <!-- Capture area (inline styles for html2canvas oklch compatibility) -->
-          <div ref="captureRef" class="capture-area p-6 md:p-8 rounded-3xl">
+            <!-- Capture area (inline styles for html2canvas oklch compatibility) -->
+            <div ref="captureRef" class="capture-area p-6 md:p-8 rounded-3xl">
             <!-- Header -->
             <div class="text-center mb-8">
               <div class="flex items-center justify-center gap-3">
@@ -349,6 +350,7 @@ const getSessionClass = (session: ScheduledSession) => {
               {{ isDownloading ? 'Capture...' : '📸 Télécharger l\'image' }}
             </button>
           </div>
+          </div>
         </div>
       </div>
     </Transition>
@@ -372,22 +374,22 @@ const getSessionClass = (session: ScheduledSession) => {
   transform: scale(0.95);
 }
 
-/* Modal card with animated orange border */
-.modal-card {
-  background-color: #191e24;
+/* Modal wrapper - contains the animated border */
+.modal-border-wrapper {
   position: relative;
-}
-
-.modal-card::before {
-  content: '';
-  position: absolute;
-  inset: -3px;
   border-radius: 26px;
+  padding: 3px;
   background: linear-gradient(45deg, #fc4c02, #ff8c00, #e04402, #ff6a00, #fc4c02);
   background-size: 400% 400%;
   animation: wave-border 4s ease infinite;
-  z-index: -1;
-  opacity: 0.8;
+  width: 100%;
+  max-width: 42rem;
+}
+
+/* Modal card */
+.modal-card {
+  background-color: #191e24;
+  position: relative;
 }
 
 @keyframes wave-border {
