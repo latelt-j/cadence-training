@@ -203,7 +203,11 @@ const downloadScreenshot = async () => {
 
   try {
     // Dynamic import - only load when needed
-    const { default: html2canvas } = await import('html2canvas')
+    const html2canvasModule = await import('html2canvas')
+    const html2canvas = html2canvasModule.default
+
+    console.log('html2canvas loaded:', html2canvas)
+    console.log('captureRef:', captureRef.value)
 
     const canvas = await html2canvas(captureRef.value, {
       backgroundColor: '#1d232a', // base-200 dark theme
