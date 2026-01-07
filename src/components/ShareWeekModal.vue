@@ -253,8 +253,8 @@ const getSessionClass = (session: ScheduledSession) => {
           @click="emit('close')"
         ></div>
 
-        <!-- Modal content -->
-        <div class="relative rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-auto shadow-2xl z-10" style="background-color: #191e24;">
+        <!-- Modal content with animated border -->
+        <div class="modal-card relative rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-auto shadow-2xl z-10">
           <!-- Close button (outside capture area) -->
           <button
             class="btn btn-circle btn-ghost absolute right-4 top-4 text-xl z-20"
@@ -370,6 +370,30 @@ const getSessionClass = (session: ScheduledSession) => {
 .modal-enter-from > div:last-child,
 .modal-leave-to > div:last-child {
   transform: scale(0.95);
+}
+
+/* Modal card with animated orange border */
+.modal-card {
+  background-color: #191e24;
+  position: relative;
+}
+
+.modal-card::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 26px;
+  background: linear-gradient(45deg, #fc4c02, #ff8c00, #e04402, #ff6a00, #fc4c02);
+  background-size: 400% 400%;
+  animation: wave-border 4s ease infinite;
+  z-index: -1;
+  opacity: 0.8;
+}
+
+@keyframes wave-border {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 /* Session cards base */
