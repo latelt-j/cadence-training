@@ -134,11 +134,11 @@ const strengthProgress = computed(() => getSportProgress(props.stats.strength.pl
           </div>
         </div>
 
-        <!-- Strength Stats - RED -->
-        <div class="bg-red-500/10 rounded-box relative overflow-hidden h-[120px]">
+        <!-- Strength Stats - PURPLE -->
+        <div class="bg-purple-500/10 rounded-box relative overflow-hidden h-[120px]">
           <!-- Progress background -->
           <div
-            class="absolute inset-0 bg-red-500/20 transition-all duration-500"
+            class="absolute inset-0 bg-purple-500/20 transition-all duration-500"
             :style="{ width: `${strengthProgress}%` }"
           ></div>
           <div class="relative flex flex-col h-full p-3">
@@ -146,9 +146,9 @@ const strengthProgress = computed(() => getSportProgress(props.stats.strength.pl
               <span class="text-xs opacity-70">Renfo</span>
               <span class="text-2xl">💪</span>
             </div>
-            <div class="text-red-400 text-2xl font-bold">{{ formatHours(stats.strength.hours) }}</div>
+            <div class="text-purple-400 text-2xl font-bold">{{ formatHours(stats.strength.hours) }}</div>
             <div class="text-xs opacity-70">&nbsp;</div>
-            <div v-if="stats.strength.planned + stats.strength.accomplished > 0" class="text-xs text-red-400/70 mt-auto pt-1">
+            <div v-if="stats.strength.planned + stats.strength.accomplished > 0" class="text-xs text-purple-400/70 mt-auto pt-1">
               {{ strengthProgress }}% accompli
             </div>
           </div>

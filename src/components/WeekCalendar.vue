@@ -584,11 +584,11 @@ watch(forecast, () => {}, { deep: true })
 }
 
 .session-strength {
-  background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+  background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
 }
 
 .session-hiking {
-  background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
 }
 
 .session-planned {
