@@ -286,8 +286,10 @@ const getIntensityColor = (intensity: number | undefined): string => {
 
         <!-- Modal container -->
         <div class="relative z-10 flex flex-col items-center max-w-3xl w-full">
-          <!-- Modal wrapper with animated border (capture this) -->
-          <div ref="captureRef" class="modal-border-wrapper">
+          <!-- Screenshot wrapper with black padding -->
+          <div ref="captureRef" class="screenshot-wrapper p-4 md:p-6 rounded-[2rem]">
+            <!-- Modal wrapper with animated border -->
+            <div class="modal-border-wrapper">
             <div class="modal-card rounded-3xl w-full max-h-[80vh] overflow-auto shadow-2xl relative">
               <!-- Close button -->
               <button
@@ -398,6 +400,7 @@ const getIntensityColor = (intensity: number | undefined): string => {
             </div>
               </div>
             </div>
+            </div>
           </div>
         </div>
       </div>
@@ -502,6 +505,11 @@ const getIntensityColor = (intensity: number | undefined): string => {
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.7; }
+}
+
+/* Screenshot wrapper - black padding around the modal */
+.screenshot-wrapper {
+  background-color: #000000 !important;
 }
 
 /* Capture area - hex colors for html2canvas (no oklch) */
