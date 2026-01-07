@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import type { ScheduledSession, TrainingPhase } from '../types/session'
 import { SPORT_CONFIG, type Sport } from '../types/session'
 
@@ -19,6 +19,21 @@ const emit = defineEmits<{
 
 const isDownloading = ref(false)
 const captureRef = ref<HTMLElement | null>(null)
+
+// Close on Escape key
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && props.isOpen) {
+    emit('close')
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
 
 // Week dates calculation
 const weekDates = computed(() => {
