@@ -13,6 +13,23 @@ const emit = defineEmits<{
   import: [data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean, phase?: ImportedPhase]
 }>()
 
+// Reset form to defaults
+const resetForm = () => {
+  jsonText.value = ''
+  error.value = ''
+  fatigue.value = 5
+  toutRealise.value = 'oui'
+  difficulte.value = 'normal'
+  contraintes.value = ''
+  envies.value = ''
+  // Reset dates to current week
+  const defaults = getDefaultPlanDates()
+  planStartDate.value = defaults.start
+  planEndDate.value = defaults.end
+}
+
+defineExpose({ resetForm })
+
 const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
 const jsonText = ref('')
@@ -504,23 +521,25 @@ const openFileDialog = () => {
 
     <!-- Fatigue slider -->
     <div class="form-control">
-      <label class="label pb-1">
+      <label class="label pb-0">
         <span class="label-text text-xs text-base-content/60">😰 Fatigue actuelle</span>
-        <span class="label-text-alt font-bold">{{ fatigue }}/10</span>
       </label>
-      <input
-        v-model.number="fatigue"
-        type="range"
-        min="0"
-        max="10"
-        class="range range-sm"
-        :class="{
-          'range-success': fatigue <= 3,
-          'range-warning': fatigue > 3 && fatigue <= 6,
-          'range-error': fatigue > 6
-        }"
-      />
-      <div class="flex justify-between text-xs text-base-content/40 px-1">
+      <div class="flex items-center gap-3 mt-1">
+        <input
+          v-model.number="fatigue"
+          type="range"
+          min="0"
+          max="10"
+          class="range range-sm flex-1"
+          :class="{
+            'range-success': fatigue <= 3,
+            'range-warning': fatigue > 3 && fatigue <= 6,
+            'range-error': fatigue > 6
+          }"
+        />
+        <span class="font-bold text-sm min-w-[40px] text-right">{{ fatigue }}/10</span>
+      </div>
+      <div class="flex justify-between text-xs text-base-content/40 px-1 mt-1">
         <span>Frais</span>
         <span>Fatigué</span>
       </div>

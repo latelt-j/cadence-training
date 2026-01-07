@@ -33,6 +33,12 @@ const {
 
 // Import modal
 const showImportModal = ref(false)
+const fileImportRef = ref<InstanceType<typeof FileImport> | null>(null)
+
+const closeImportModal = () => {
+  showImportModal.value = false
+  fileImportRef.value?.resetForm()
+}
 
 // Strava disconnect modal
 const showStravaDisconnectModal = ref(false)
@@ -194,7 +200,7 @@ onMounted(async () => {
 // Close any open modal on Escape
 const handleGlobalEscape = (e: KeyboardEvent) => {
   if (e.key === 'Escape') {
-    if (showImportModal.value) showImportModal.value = false
+    if (showImportModal.value) closeImportModal()
     else if (showStravaDisconnectModal.value) showStravaDisconnectModal.value = false
     else if (showObjectivesModal.value) showObjectivesModal.value = false
     else if (showPhasesModal.value) showPhasesModal.value = false
@@ -556,10 +562,11 @@ const handleReset = () => {
 
     <!-- Import Modal -->
     <dialog class="modal" :class="{ 'modal-open': showImportModal }">
-      <div class="modal-box w-full h-full max-h-full md:max-w-xl md:h-auto md:max-h-[90vh] rounded-none md:rounded-2xl">
-        <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-2xl" @click="showImportModal = false">✕</button>
+      <div class="modal-box w-full h-full max-h-full md:max-w-2xl md:h-auto md:max-h-[90vh] rounded-none md:rounded-2xl">
+        <button class="btn btn-circle btn-ghost absolute right-3 top-3 text-2xl" @click="closeImportModal">✕</button>
         <h3 class="font-bold text-lg mb-4 pr-10">📥 Importer des séances</h3>
         <FileImport
+          ref="fileImportRef"
           :sessions="sessions"
           :training-phases="trainingPhases"
           :training-objectives="trainingObjectives"
@@ -567,10 +574,10 @@ const handleReset = () => {
           @import="handleImport"
         />
         <div class="modal-action">
-          <button class="btn btn-ghost" @click="showImportModal = false">Fermer</button>
+          <button class="btn btn-ghost" @click="closeImportModal">Fermer</button>
         </div>
       </div>
-      <form method="dialog" class="modal-backdrop" @click="showImportModal = false">
+      <form method="dialog" class="modal-backdrop" @click="closeImportModal">
         <button>close</button>
       </form>
     </dialog>
