@@ -113,8 +113,8 @@ watch(() => props.session, (newSession, oldSession) => {
   editDescription.value = newSession?.description || ''
 }, { immediate: true })
 
-// Check if feedback exists
-const hasFeedback = computed(() => !!feedbackText.value.trim())
+// Check if SAVED feedback exists (not local textarea content)
+const hasSavedFeedback = computed(() => !!props.session?.coach_feedback?.trim())
 
 // Check if planned session info exists (for Strava sessions that replaced a planned one)
 const hasPlannedInfo = computed(() => {
@@ -406,7 +406,7 @@ const confirmEditDuration = () => {
           @click="currentPage = 'coach'"
         >
           💬 Coach
-          <span v-if="hasFeedback" class="ml-1 badge badge-xs badge-success">✓</span>
+          <span v-if="hasSavedFeedback" class="ml-1 badge badge-xs badge-success">✓</span>
         </button>
       </div>
 
@@ -629,7 +629,7 @@ const confirmEditDuration = () => {
       <!-- Page: Coach -->
       <div v-show="currentPage === 'coach'" class="space-y-4 flex-1 overflow-y-auto">
         <!-- Read mode: Display feedback nicely with markdown -->
-        <div v-if="hasFeedback && !isEditingFeedback" class="space-y-3">
+        <div v-if="hasSavedFeedback && !isEditingFeedback" class="space-y-3">
           <div
             class="bg-base-200 rounded-lg p-4 text-sm feedback-markdown"
             v-html="renderedFeedback"
@@ -655,7 +655,7 @@ Exemple:
 💡 Conseil: Travaille la vélocité sur le prochain entraînement"
           ></textarea>
           <div class="flex justify-end gap-2">
-            <button v-if="hasFeedback" class="btn btn-sm btn-ghost" @click="cancelEditFeedback" :disabled="isSavingFeedback">
+            <button v-if="hasSavedFeedback" class="btn btn-sm btn-ghost" @click="cancelEditFeedback" :disabled="isSavingFeedback">
               Annuler
             </button>
             <button
