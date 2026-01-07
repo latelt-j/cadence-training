@@ -489,7 +489,7 @@ watch(forecast, () => {}, { deep: true })
               <div class="text-white/80 text-sm font-medium">{{ formatDuration(session.duration_min) }}</div>
               <!-- Intensity dot for planned sessions -->
               <div v-if="session.type === 'planned' && session.intensity" class="flex items-center gap-1.5">
-                <span class="text-[10px] text-white/50">intensité</span>
+                <span class="text-[10px] text-white/50">{{ session.intensity }}/10</span>
                 <div
                   class="w-2.5 h-2.5 rounded-full"
                   :class="getIntensityColor(session.intensity)"
@@ -586,7 +586,7 @@ watch(forecast, () => {}, { deep: true })
               <div class="text-white/70 text-[11px]">{{ formatDuration(session.duration_min) }}</div>
               <!-- Intensity dot for planned sessions -->
               <div v-if="session.type === 'planned' && session.intensity" class="flex items-center gap-1">
-                <span class="text-[9px] text-white/40">int.</span>
+                <span class="text-[9px] text-white/50">{{ session.intensity }}/10</span>
                 <div
                   class="w-2 h-2 rounded-full"
                   :class="getIntensityColor(session.intensity)"
