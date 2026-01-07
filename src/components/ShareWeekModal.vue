@@ -334,11 +334,15 @@ const getIntensityColor = (intensity: number | undefined): string => {
                       {{ getSportEmoji(session.sport) }}
                       <span v-if="isSessionDone(session)" class="text-sm">✅</span>
                     </div>
-                    <div class="flex items-center justify-center gap-1 mt-0.5">
-                      <span class="text-xs font-semibold">{{ formatDuration(session.duration_min) }}</span>
+                    <div class="text-xs font-semibold mt-0.5">{{ formatDuration(session.duration_min) }}</div>
+                    <!-- Intensity indicator for planned sessions -->
+                    <div
+                      v-if="!isSessionDone(session) && session.intensity"
+                      class="flex items-center justify-center gap-1 mt-1"
+                    >
+                      <span class="text-[10px] text-white/70 font-medium">{{ session.intensity }}/10</span>
                       <div
-                        v-if="!isSessionDone(session) && session.intensity"
-                        class="w-1.5 h-1.5 rounded-full"
+                        class="w-2 h-2 rounded-full"
                         :class="getIntensityColor(session.intensity)"
                       ></div>
                     </div>
