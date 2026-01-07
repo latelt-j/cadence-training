@@ -269,18 +269,17 @@ const getSessionClass = (session: ScheduledSession) => {
         ></div>
 
         <!-- Modal container -->
-        <div class="relative z-10 flex flex-col items-center">
-          <!-- Close button (relative to modal) -->
-          <button
-            class="btn btn-circle btn-ghost absolute -right-2 -top-2 text-xl z-30"
-            @click="emit('close')"
-          >
-            ✕
-          </button>
-
+        <div class="relative z-10 flex flex-col items-center max-w-3xl w-full">
           <!-- Modal wrapper with animated border (capture this) -->
           <div ref="captureRef" class="modal-border-wrapper">
-          <div class="modal-card rounded-3xl w-full max-h-[90vh] overflow-auto shadow-2xl">
+            <!-- Close button (inside wrapper for positioning) -->
+            <button
+              class="btn btn-circle btn-sm btn-ghost absolute -right-3 -top-3 text-lg z-30 bg-base-300 hover:bg-base-200"
+              @click.stop="emit('close')"
+            >
+              ✕
+            </button>
+            <div class="modal-card rounded-3xl w-full max-h-[80vh] overflow-auto shadow-2xl">
             <!-- Content area -->
             <div class="capture-area p-6 md:p-8 rounded-3xl">
             <!-- Header -->
@@ -404,7 +403,6 @@ const getSessionClass = (session: ScheduledSession) => {
   background-size: 400% 400%;
   animation: wave-border 4s ease infinite;
   width: 100%;
-  max-width: 42rem;
 }
 
 /* Modal card */
