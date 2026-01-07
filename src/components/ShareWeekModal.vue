@@ -380,7 +380,7 @@ const getSessionClass = (session: ScheduledSession) => {
 /* DONE sessions - Strava Orange */
 .session-done-share {
   background: linear-gradient(135deg, #fc4c02 0%, #e04402 100%);
-  box-shadow: 0 4px 15px rgba(252, 76, 2, 0.5);
+  box-shadow: 0 2px 8px rgba(252, 76, 2, 0.3);
 }
 
 /* PLANNED sessions - Sport colors with dashed border */
