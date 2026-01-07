@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useSessions } from './composables/useSessions'
 import { useStrava } from './composables/useStrava'
 import { useSupabase } from './composables/useSupabase'
@@ -186,6 +186,25 @@ onMounted(async () => {
     // Clean URL
     window.history.replaceState({}, document.title, window.location.pathname)
   }
+
+  // Global escape key handler for modals
+  document.addEventListener('keydown', handleGlobalEscape)
+})
+
+// Close any open modal on Escape
+const handleGlobalEscape = (e: KeyboardEvent) => {
+  if (e.key === 'Escape') {
+    if (showImportModal.value) showImportModal.value = false
+    else if (showStravaDisconnectModal.value) showStravaDisconnectModal.value = false
+    else if (showObjectivesModal.value) showObjectivesModal.value = false
+    else if (showPhasesModal.value) showPhasesModal.value = false
+    else if (showAthleteProfileModal.value) showAthleteProfileModal.value = false
+    else if (selectedSession.value) selectedSession.value = null
+  }
+}
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleGlobalEscape)
 })
 
 // Strava sync - only fetch details for NEW activities

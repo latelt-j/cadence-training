@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { marked } from 'marked'
 import type { ScheduledSession, AthleteProfile } from '../types/session'
 import { SPORT_CONFIG } from '../types/session'
@@ -27,6 +27,21 @@ const emit = defineEmits<{
   resync: [sessionId: string, stravaId: number]
   toast: [message: string, type?: 'success' | 'error']
 }>()
+
+// Close on Escape key
+const handleKeydown = (e: KeyboardEvent) => {
+  if (e.key === 'Escape' && props.session) {
+    emit('close')
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('keydown', handleKeydown)
+})
 
 const copied = ref(false)
 const feedbackText = ref('')
