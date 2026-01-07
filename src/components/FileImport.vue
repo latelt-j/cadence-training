@@ -16,6 +16,8 @@ const emit = defineEmits<{
 // Reset form to defaults
 const resetForm = () => {
   error.value = ''
+  step.value = 'form'
+  coachResponse.value = ''
   fatigue.value = 5
   toutRealise.value = 'oui'
   difficulte.value = 'normal'
@@ -27,10 +29,12 @@ const resetForm = () => {
   planEndDate.value = defaults.end
 }
 
-defineExpose({ resetForm })
-
 const error = ref('')
 const copied = ref(false)
+const step = ref<'form' | 'paste'>('form')
+
+defineExpose({ resetForm, step })
+const coachResponse = ref('')
 
 // Nouveaux champs pour le prompt coach
 const fatigue = ref<number>(5)
@@ -415,7 +419,53 @@ const copyCoachPrompt = async () => {
   copied.value = true
   setTimeout(() => {
     copied.value = false
-  }, 2000)
+    step.value = 'paste'
+  }, 1000)
+}
+
+// Parse and save coach response
+const saveCoachResponse = () => {
+  error.value = ''
+  try {
+    let cleanText = coachResponse.value.trim()
+
+    // Remove markdown code blocks if present
+    cleanText = cleanText.replace(/^```json?\s*/i, '').replace(/\s*```$/i, '')
+
+    // Handle duplicated JSON objects (Gemini sometimes returns the same response twice)
+    const duplicateIndex = cleanText.search(/\}\s*\{/)
+    if (duplicateIndex !== -1 && cleanText.startsWith('{')) {
+      cleanText = cleanText.substring(0, duplicateIndex + 1)
+    } else {
+      // Try to extract JSON object or array from the text
+      const jsonMatch = cleanText.match(/(\{[\s\S]*\}|\[[\s\S]*\])/)
+      if (jsonMatch && jsonMatch[1]) {
+        cleanText = jsonMatch[1]
+      }
+    }
+
+    // Handle multiple arrays concatenated
+    cleanText = cleanText.replace(/\]\s*\[/g, ',')
+
+    const data = JSON.parse(cleanText)
+
+    // New format with phase: { phase: {...}, sessions: [...] }
+    if (data && typeof data === 'object' && !Array.isArray(data) && data.sessions) {
+      const phase = data.phase as ImportedPhase | undefined
+      const sessions = Array.isArray(data.sessions) ? data.sessions : [data.sessions]
+      emit('import', sessions, true, phase)
+    } else {
+      // Old format: array of sessions or single session
+      const sessions = Array.isArray(data) ? data : [data]
+      emit('import', sessions, true)
+    }
+
+    // Reset after successful import
+    coachResponse.value = ''
+    step.value = 'form'
+  } catch (e) {
+    error.value = e instanceof Error ? e.message : 'JSON invalide'
+  }
 }
 
 
@@ -423,131 +473,157 @@ const copyCoachPrompt = async () => {
 
 <template>
   <div class="space-y-4">
-    <!-- Date range picker -->
-    <div class="form-control">
-      <label class="label pb-1">
-        <span class="label-text text-xs text-base-content/60">📅 Période à planifier</span>
-      </label>
-      <div class="flex gap-2 items-center">
-        <input
-          v-model="planStartDate"
-          type="date"
-          class="input input-bordered input-sm flex-1"
-        />
-        <span class="text-base-content/60">→</span>
-        <input
-          v-model="planEndDate"
-          type="date"
-          class="input input-bordered input-sm flex-1"
-        />
-      </div>
-      <div class="text-xs text-base-content/50 mt-1">{{ planDatesRange.length }} jours</div>
-    </div>
+    <Transition name="fade" mode="out-in">
+      <!-- Step 1: Form -->
+      <div v-if="step === 'form'" key="form" class="space-y-4">
+        <!-- Date range picker -->
+        <div class="form-control">
+          <label class="label pb-1">
+            <span class="label-text text-xs text-base-content/60">📅 Période à planifier</span>
+          </label>
+          <div class="flex gap-2 items-center">
+            <input
+              v-model="planStartDate"
+              type="date"
+              class="input input-bordered input-sm flex-1"
+            />
+            <span class="text-base-content/60">→</span>
+            <input
+              v-model="planEndDate"
+              type="date"
+              class="input input-bordered input-sm flex-1"
+            />
+          </div>
+          <div class="text-xs text-base-content/50 mt-1">{{ planDatesRange.length }} jours</div>
+        </div>
 
-    <!-- Fatigue slider -->
-    <div class="form-control">
-      <label class="label pb-0">
-        <span class="label-text text-xs text-base-content/60">😰 Fatigue actuelle</span>
-      </label>
-      <div class="flex items-center gap-3 mt-1">
-        <input
-          v-model.number="fatigue"
-          type="range"
-          min="0"
-          max="10"
-          class="range range-sm flex-1"
-          :class="{
-            'range-success': fatigue <= 3,
-            'range-warning': fatigue > 3 && fatigue <= 6,
-            'range-error': fatigue > 6
-          }"
-        />
-        <span class="font-bold text-sm min-w-[40px] text-right">{{ fatigue }}/10</span>
-      </div>
-      <div class="flex justify-between text-xs text-base-content/40 px-1 mt-1">
-        <span>Frais</span>
-        <span>Fatigué</span>
-      </div>
-    </div>
-
-    <!-- Bilan ressenti -->
-    <div class="form-control">
-      <label class="label pb-1">
-        <span class="label-text text-xs text-base-content/60">📊 Bilan semaine passée</span>
-      </label>
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <div class="text-xs text-base-content/50 mb-1">Tout réalisé ?</div>
-          <div class="flex gap-1">
-            <label class="btn btn-xs" :class="toutRealise === 'oui' ? 'btn-success' : 'btn-ghost'">
-              <input type="radio" v-model="toutRealise" value="oui" class="hidden" />
-              Oui
-            </label>
-            <label class="btn btn-xs" :class="toutRealise === 'partiel' ? 'btn-warning' : 'btn-ghost'">
-              <input type="radio" v-model="toutRealise" value="partiel" class="hidden" />
-              Partiel
-            </label>
-            <label class="btn btn-xs" :class="toutRealise === 'non' ? 'btn-error' : 'btn-ghost'">
-              <input type="radio" v-model="toutRealise" value="non" class="hidden" />
-              Non
-            </label>
+        <!-- Fatigue slider -->
+        <div class="form-control">
+          <label class="label pb-0">
+            <span class="label-text text-xs text-base-content/60">😰 Fatigue actuelle</span>
+          </label>
+          <div class="flex items-center gap-3 mt-1">
+            <input
+              v-model.number="fatigue"
+              type="range"
+              min="0"
+              max="10"
+              class="range range-sm flex-1"
+              :class="{
+                'range-success': fatigue <= 3,
+                'range-warning': fatigue > 3 && fatigue <= 6,
+                'range-error': fatigue > 6
+              }"
+            />
+            <span class="font-bold text-sm min-w-[40px] text-right">{{ fatigue }}/10</span>
+          </div>
+          <div class="flex justify-between text-xs text-base-content/40 px-1 mt-1">
+            <span>Frais</span>
+            <span>Fatigué</span>
           </div>
         </div>
-        <div>
-          <div class="text-xs text-base-content/50 mb-1">Difficulté ?</div>
-          <div class="flex gap-1">
-            <label class="btn btn-xs" :class="difficulte === 'facile' ? 'btn-success' : 'btn-ghost'">
-              <input type="radio" v-model="difficulte" value="facile" class="hidden" />
-              Facile
-            </label>
-            <label class="btn btn-xs" :class="difficulte === 'normal' ? 'btn-info' : 'btn-ghost'">
-              <input type="radio" v-model="difficulte" value="normal" class="hidden" />
-              Normal
-            </label>
-            <label class="btn btn-xs" :class="difficulte === 'difficile' ? 'btn-error' : 'btn-ghost'">
-              <input type="radio" v-model="difficulte" value="difficile" class="hidden" />
-              Dur
-            </label>
+
+        <!-- Bilan ressenti -->
+        <div class="form-control">
+          <label class="label pb-1">
+            <span class="label-text text-xs text-base-content/60">📊 Bilan semaine passée</span>
+          </label>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <div class="text-xs text-base-content/50 mb-1">Tout réalisé ?</div>
+              <div class="flex gap-1">
+                <label class="btn btn-xs" :class="toutRealise === 'oui' ? 'btn-success' : 'btn-ghost'">
+                  <input type="radio" v-model="toutRealise" value="oui" class="hidden" />
+                  Oui
+                </label>
+                <label class="btn btn-xs" :class="toutRealise === 'partiel' ? 'btn-warning' : 'btn-ghost'">
+                  <input type="radio" v-model="toutRealise" value="partiel" class="hidden" />
+                  Partiel
+                </label>
+                <label class="btn btn-xs" :class="toutRealise === 'non' ? 'btn-error' : 'btn-ghost'">
+                  <input type="radio" v-model="toutRealise" value="non" class="hidden" />
+                  Non
+                </label>
+              </div>
+            </div>
+            <div>
+              <div class="text-xs text-base-content/50 mb-1">Difficulté ?</div>
+              <div class="flex gap-1">
+                <label class="btn btn-xs" :class="difficulte === 'facile' ? 'btn-success' : 'btn-ghost'">
+                  <input type="radio" v-model="difficulte" value="facile" class="hidden" />
+                  Facile
+                </label>
+                <label class="btn btn-xs" :class="difficulte === 'normal' ? 'btn-info' : 'btn-ghost'">
+                  <input type="radio" v-model="difficulte" value="normal" class="hidden" />
+                  Normal
+                </label>
+                <label class="btn btn-xs" :class="difficulte === 'difficile' ? 'btn-error' : 'btn-ghost'">
+                  <input type="radio" v-model="difficulte" value="difficile" class="hidden" />
+                  Dur
+                </label>
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- Contraintes -->
+        <div class="form-control">
+          <label class="label pb-1">
+            <span class="label-text text-xs text-base-content/60">📝 Contraintes (optionnel)</span>
+          </label>
+          <input
+            v-model="contraintes"
+            type="text"
+            class="input input-bordered input-sm w-full"
+            placeholder="Ex: Mardi seulement 45min, pas de vélo jeudi..."
+          />
+        </div>
+
+        <!-- Envies -->
+        <div class="form-control">
+          <label class="label pb-1">
+            <span class="label-text text-xs text-base-content/60">💡 Envies (optionnel)</span>
+          </label>
+          <input
+            v-model="envies"
+            type="text"
+            class="input input-bordered input-sm w-full"
+            placeholder="Ex: Faire du D+ ce week-end, tester des intervalles..."
+          />
+        </div>
+
+        <!-- Ask coach button -->
+        <button
+          class="btn w-full text-white font-semibold border-0 shadow-lg"
+          :class="copied ? 'btn-success' : 'bg-pink-500 hover:bg-pink-600 shadow-pink-500/40'"
+          @click="copyCoachPrompt"
+        >
+          {{ copied ? '✓ Copié !' : '🤖 Demander au coach (copier le prompt)' }}
+        </button>
       </div>
-    </div>
 
-    <!-- Contraintes -->
-    <div class="form-control">
-      <label class="label pb-1">
-        <span class="label-text text-xs text-base-content/60">📝 Contraintes (optionnel)</span>
-      </label>
-      <input
-        v-model="contraintes"
-        type="text"
-        class="input input-bordered input-sm w-full"
-        placeholder="Ex: Mardi seulement 45min, pas de vélo jeudi..."
-      />
-    </div>
+      <!-- Step 2: Paste coach response -->
+      <div v-else key="paste" class="space-y-4">
+        <div class="text-center">
+          <div class="text-3xl mb-2">🤖</div>
+          <p class="text-sm text-base-content/70">Prompt copié ! Colle la réponse du coach ci-dessous :</p>
+        </div>
 
-    <!-- Envies -->
-    <div class="form-control">
-      <label class="label pb-1">
-        <span class="label-text text-xs text-base-content/60">💡 Envies (optionnel)</span>
-      </label>
-      <input
-        v-model="envies"
-        type="text"
-        class="input input-bordered input-sm w-full"
-        placeholder="Ex: Faire du D+ ce week-end, tester des intervalles..."
-      />
-    </div>
+        <textarea
+          v-model="coachResponse"
+          class="textarea textarea-bordered w-full h-64 font-mono text-sm"
+          placeholder="Colle ici la réponse JSON du coach..."
+        ></textarea>
 
-    <!-- Ask coach button -->
-    <button
-      class="btn w-full text-white font-semibold border-0 shadow-lg"
-      :class="copied ? 'btn-success' : 'bg-pink-500 hover:bg-pink-600 shadow-pink-500/40'"
-      @click="copyCoachPrompt"
-    >
-      {{ copied ? '✓ Copié !' : '🤖 Demander au coach (copier le prompt)' }}
-    </button>
-
+        <button
+          class="btn w-full text-white font-semibold border-0 shadow-lg bg-pink-500 hover:bg-pink-600 shadow-pink-500/40"
+          :disabled="!coachResponse.trim()"
+          @click="saveCoachResponse"
+        >
+          💾 Sauvegarder les séances
+        </button>
+      </div>
+    </Transition>
 
     <!-- Error -->
     <div v-if="error" class="alert alert-error text-sm">
@@ -555,3 +631,15 @@ const copyCoachPrompt = async () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>

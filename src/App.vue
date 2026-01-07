@@ -574,7 +574,7 @@ const handleReset = () => {
           :athlete-profile="athleteProfile"
           @import="handleImport"
         />
-        <div class="modal-action">
+        <div v-if="fileImportRef?.step !== 'paste'" class="modal-action">
           <button class="btn btn-ghost" @click="closeImportModal">Fermer</button>
         </div>
       </div>
