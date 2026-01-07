@@ -360,10 +360,10 @@ const getIntensityColor = (intensity: number | undefined): string => {
 
             <!-- Stats -->
             <div class="flex justify-center gap-8 text-sm mb-6 flex-wrap">
-              <span v-if="doneSessions.length > 0" class="text-[#fc4c02] font-semibold">
+              <span v-if="doneSessions.length > 0" class="text-[#fc4c02] font-semibold whitespace-nowrap">
                 ✅ {{ doneSessions.length }} séances • {{ formatHours(doneHours) }}
               </span>
-              <span v-if="plannedSessions.length > 0" class="text-base-content/50 font-medium">
+              <span v-if="plannedSessions.length > 0" class="text-base-content/50 font-medium whitespace-nowrap">
                 📋 {{ plannedSessions.length }} séances • {{ formatHours(plannedHours) }}
               </span>
             </div>
