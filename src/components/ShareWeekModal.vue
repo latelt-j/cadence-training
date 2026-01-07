@@ -340,7 +340,7 @@ const getIntensityColor = (intensity: number | undefined): string => {
                       v-if="!isSessionDone(session) && session.intensity"
                       class="flex items-center justify-center gap-1 mt-1"
                     >
-                      <span class="text-[10px] text-white/70 font-medium">{{ session.intensity }}/10</span>
+                      <span class="text-[10px] text-white/80 font-bold">{{ session.intensity }}/10</span>
                       <div
                         class="w-2 h-2 rounded-full"
                         :class="getIntensityColor(session.intensity)"
