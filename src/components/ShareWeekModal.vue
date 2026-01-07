@@ -253,19 +253,19 @@ const getSessionClass = (session: ScheduledSession) => {
           @click="emit('close')"
         ></div>
 
-        <!-- Modal wrapper with animated border -->
-        <div class="modal-border-wrapper z-10">
-          <div class="modal-card rounded-3xl w-full max-h-[90vh] overflow-auto shadow-2xl">
-            <!-- Close button (outside capture area) -->
-            <button
-              class="btn btn-circle btn-ghost absolute right-4 top-4 text-xl z-20"
-              @click="emit('close')"
-            >
-              ✕
-            </button>
+        <!-- Close button (outside capture) -->
+        <button
+          class="btn btn-circle btn-ghost absolute right-4 top-4 text-xl z-30"
+          @click="emit('close')"
+        >
+          ✕
+        </button>
 
-            <!-- Capture area (inline styles for html2canvas oklch compatibility) -->
-            <div ref="captureRef" class="capture-area p-6 md:p-8 rounded-3xl">
+        <!-- Modal wrapper with animated border (capture this) -->
+        <div ref="captureRef" class="modal-border-wrapper z-10">
+          <div class="modal-card rounded-3xl w-full max-h-[90vh] overflow-auto shadow-2xl">
+            <!-- Content area -->
+            <div class="capture-area p-6 md:p-8 rounded-3xl">
             <!-- Header -->
             <div class="text-center mb-8">
               <div class="flex items-center justify-center gap-3">
@@ -336,25 +336,25 @@ const getSessionClass = (session: ScheduledSession) => {
             </div>
 
             <!-- Branding -->
-            <p class="text-xs text-base-content/30 text-center mt-4">Powered by Cadence 🎯</p>
+            <p class="text-xs text-base-content/30 text-center mt-4 pb-2">Powered by Cadence 🎯</p>
+            </div>
           </div>
+        </div>
 
-          <!-- Download button (outside capture area) -->
-          <div class="flex justify-center pb-6 -mt-2">
-            <button
-              class="btn btn-lg border-0 shadow-lg text-white px-8 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-pink-500/40"
-              :disabled="isDownloading"
-              @click="downloadScreenshot"
-            >
-              <template v-if="isDownloading">
-                Téléchargement <span class="loading loading-spinner loading-xs ml-1"></span>
-              </template>
-              <template v-else>
-                📸 Télécharger l'image
-              </template>
-            </button>
-          </div>
-          </div>
+        <!-- Download button (outside capture) -->
+        <div class="flex justify-center mt-4 z-10">
+          <button
+            class="btn btn-lg border-0 shadow-lg text-white px-8 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-pink-500/40"
+            :disabled="isDownloading"
+            @click="downloadScreenshot"
+          >
+            <template v-if="isDownloading">
+              Téléchargement <span class="loading loading-spinner loading-xs ml-1"></span>
+            </template>
+            <template v-else>
+              📸 Télécharger l'image
+            </template>
+          </button>
         </div>
       </div>
     </Transition>
@@ -368,13 +368,18 @@ const getSessionClass = (session: ScheduledSession) => {
   transition: all 0.3s ease;
 }
 
+.modal-enter-active .modal-border-wrapper,
+.modal-leave-active .modal-border-wrapper {
+  transition: transform 0.3s ease;
+}
+
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
 }
 
-.modal-enter-from > div:last-child,
-.modal-leave-to > div:last-child {
+.modal-enter-from .modal-border-wrapper,
+.modal-leave-to .modal-border-wrapper {
   transform: scale(0.95);
 }
 
