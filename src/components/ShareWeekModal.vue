@@ -279,7 +279,7 @@ const getSessionClass = (session: ScheduledSession) => {
         <div class="relative z-10 flex flex-col items-center max-w-3xl w-full">
           <!-- Modal wrapper with animated border (capture this) -->
           <div ref="captureRef" class="modal-border-wrapper">
-            <div class="modal-card rounded-3xl w-full max-h-[80vh] overflow-auto shadow-2xl relative">
+            <div class="modal-card rounded-3xl w-full max-h-[80vh] overflow-y-auto overflow-x-hidden shadow-2xl relative">
               <!-- Close button -->
               <button
                 class="btn btn-circle btn-sm btn-ghost absolute right-3 top-3 text-lg z-30 screenshot-hide"
