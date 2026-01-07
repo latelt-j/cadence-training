@@ -15,7 +15,6 @@ const emit = defineEmits<{
 
 // Reset form to defaults
 const resetForm = () => {
-  jsonText.value = ''
   error.value = ''
   fatigue.value = 5
   toutRealise.value = 'oui'
@@ -30,12 +29,8 @@ const resetForm = () => {
 
 defineExpose({ resetForm })
 
-const fileInput = ref<HTMLInputElement | null>(null)
-const isDragging = ref(false)
-const jsonText = ref('')
 const error = ref('')
 const copied = ref(false)
-const replaceExisting = ref(true)
 
 // Nouveaux champs pour le prompt coach
 const fatigue = ref<number>(5)
@@ -423,86 +418,7 @@ const copyCoachPrompt = async () => {
   }, 2000)
 }
 
-const parseAndEmit = (text: string) => {
-  error.value = ''
-  try {
-    let cleanText = text.trim()
 
-    // Remove markdown code blocks if present
-    cleanText = cleanText.replace(/^```json?\s*/i, '').replace(/\s*```$/i, '')
-
-    // Handle duplicated JSON objects (Gemini sometimes returns the same response twice)
-    // Look for }{ pattern (end of object followed by start of another)
-    const duplicateIndex = cleanText.search(/\}\s*\{/)
-    if (duplicateIndex !== -1 && cleanText.startsWith('{')) {
-      // Find the matching closing brace for the first object
-      cleanText = cleanText.substring(0, duplicateIndex + 1)
-    } else {
-      // Try to extract JSON object or array from the text
-      const jsonMatch = cleanText.match(/(\{[\s\S]*\}|\[[\s\S]*\])/)
-      if (jsonMatch && jsonMatch[1]) {
-        cleanText = jsonMatch[1]
-      }
-    }
-
-    // Handle multiple arrays concatenated
-    cleanText = cleanText.replace(/\]\s*\[/g, ',')
-
-    const data = JSON.parse(cleanText)
-
-    // New format with phase: { phase: {...}, sessions: [...] }
-    if (data && typeof data === 'object' && !Array.isArray(data) && data.sessions) {
-      const phase = data.phase as ImportedPhase | undefined
-      const sessions = Array.isArray(data.sessions) ? data.sessions : [data.sessions]
-      emit('import', sessions, replaceExisting.value, phase)
-    } else {
-      // Old format: array of sessions or single session
-      const sessions = Array.isArray(data) ? data : [data]
-      emit('import', sessions, replaceExisting.value)
-    }
-
-    jsonText.value = ''
-  } catch (e) {
-    error.value = e instanceof Error ? e.message : 'JSON invalide'
-  }
-}
-
-const handleFile = async (file: File) => {
-  const text = await file.text()
-  parseAndEmit(text)
-}
-
-const onFileChange = (event: Event) => {
-  const target = event.target as HTMLInputElement
-  if (target.files?.[0]) {
-    handleFile(target.files[0])
-  }
-}
-
-const onDrop = (event: DragEvent) => {
-  isDragging.value = false
-  const file = event.dataTransfer?.files[0]
-  if (file) {
-    handleFile(file)
-  }
-}
-
-const onPaste = (event: ClipboardEvent) => {
-  const text = event.clipboardData?.getData('text')
-  if (text) {
-    jsonText.value = text
-  }
-}
-
-const handleSubmit = () => {
-  if (jsonText.value.trim()) {
-    parseAndEmit(jsonText.value)
-  }
-}
-
-const openFileDialog = () => {
-  fileInput.value?.click()
-}
 </script>
 
 <template>
@@ -632,68 +548,6 @@ const openFileDialog = () => {
       {{ copied ? '✓ Copié !' : '🤖 Demander au coach (copier le prompt)' }}
     </button>
 
-    <div class="divider text-xs text-base-content/50">OU IMPORTER</div>
-
-    <!-- Drop zone -->
-    <div
-      class="border-2 border-dashed rounded-box p-6 transition-all cursor-pointer"
-      :class="isDragging ? 'border-primary bg-primary/10' : 'border-base-300 hover:border-primary'"
-      @dragover.prevent="isDragging = true"
-      @dragleave="isDragging = false"
-      @drop.prevent="onDrop"
-      @click="openFileDialog"
-    >
-      <input
-        ref="fileInput"
-        type="file"
-        accept=".json"
-        class="hidden"
-        @change="onFileChange"
-      />
-      <div class="flex flex-col items-center gap-2 text-base-content/70">
-        <span class="text-3xl">📁</span>
-        <p class="text-sm font-medium">Glisse un fichier JSON ou clique</p>
-      </div>
-    </div>
-
-    <div class="divider text-xs text-base-content/50">OU</div>
-
-    <!-- Paste area -->
-    <div class="space-y-2">
-      <textarea
-        v-model="jsonText"
-        class="textarea textarea-bordered w-full h-40 font-mono text-sm"
-        placeholder='Colle ton JSON ici...
-
-[
-  {
-    "sport": "cycling",
-    "type": "sweet_spot",
-    "title": "Sweet spot 2x20min",
-    "duration_min": 90,
-    "date": "2025-01-15"
-  }
-]'
-        @paste="onPaste"
-      ></textarea>
-      <div class="form-control">
-        <label class="label cursor-pointer justify-start gap-2">
-          <input
-            type="checkbox"
-            v-model="replaceExisting"
-            class="checkbox checkbox-sm checkbox-primary"
-          />
-          <span class="label-text">Remplacer les séances existantes sur ces jours</span>
-        </label>
-      </div>
-      <button
-        class="btn btn-primary btn-sm w-full"
-        :disabled="!jsonText.trim()"
-        @click="handleSubmit"
-      >
-        Importer
-      </button>
-    </div>
 
     <!-- Error -->
     <div v-if="error" class="alert alert-error text-sm">
