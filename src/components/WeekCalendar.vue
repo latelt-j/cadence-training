@@ -406,7 +406,7 @@ watch(forecast, () => {}, { deep: true })
           📤 Partager
         </button>
         <button
-          class="btn btn-sm btn-ghost"
+          class="btn btn-sm border-0 text-white bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
           @click="emit('openImportModal')"
         >
           🪄 Planifier
