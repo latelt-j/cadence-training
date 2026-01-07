@@ -279,7 +279,7 @@ const getSessionClass = (session: ScheduledSession) => {
         <div class="relative z-10 flex flex-col items-center max-w-3xl w-full">
           <!-- Modal wrapper with animated border (capture this) -->
           <div ref="captureRef" class="modal-border-wrapper">
-            <div class="modal-card rounded-3xl w-full max-h-[80vh] overflow-y-auto overflow-x-hidden shadow-2xl relative">
+            <div class="modal-card rounded-3xl w-full max-h-[80vh] overflow-auto shadow-2xl relative">
               <!-- Close button -->
               <button
                 class="btn btn-circle btn-sm btn-ghost absolute right-3 top-3 text-lg z-30 screenshot-hide"
@@ -291,11 +291,11 @@ const getSessionClass = (session: ScheduledSession) => {
               <div class="capture-area p-6 md:p-8 rounded-3xl">
             <!-- Header -->
             <div class="text-center mb-8">
-              <div class="flex items-center justify-center gap-3">
-                <h2 class="text-2xl md:text-3xl font-bold">
+              <div class="flex items-center justify-center gap-3 flex-wrap">
+                <h2 class="text-2xl md:text-3xl font-bold break-words">
                   {{ currentPhase ? `${currentPhase.emoji || getPhaseEmoji(currentPhase.name)} ${currentPhase.name.toUpperCase()}` : '📅 Ma semaine' }}
                 </h2>
-                <span v-if="phaseWeekInfo" class="badge badge-primary badge-lg font-bold">
+                <span v-if="phaseWeekInfo" class="badge badge-primary badge-lg font-bold shrink-0">
                   S{{ phaseWeekInfo.current }}/{{ phaseWeekInfo.total }}
                 </span>
               </div>
@@ -352,8 +352,8 @@ const getSessionClass = (session: ScheduledSession) => {
             <div class="divider my-4"></div>
 
             <!-- Tagline -->
-            <div class="py-6 text-center">
-              <p class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-pink-400 via-pink-500 to-rose-500 bg-clip-text text-transparent drop-shadow-lg">
+            <div class="py-6 text-center px-2">
+              <p class="text-xl md:text-2xl font-bold bg-gradient-to-r from-pink-400 via-pink-500 to-rose-500 bg-clip-text text-transparent drop-shadow-lg break-words">
                 "{{ smartTagline }}"
               </p>
             </div>
