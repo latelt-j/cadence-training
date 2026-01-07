@@ -195,7 +195,7 @@ const smartTagline = computed(() => {
   ])
 })
 
-// Download screenshot (lazy load html2canvas)
+// Download screenshot (lazy load modern-screenshot)
 const downloadScreenshot = async () => {
   if (!captureRef.value || isDownloading.value) return
 
@@ -203,18 +203,14 @@ const downloadScreenshot = async () => {
 
   try {
     // Dynamic import - only load when needed
-    const html2canvasModule = await import('html2canvas')
-    const html2canvas = html2canvasModule.default
+    const { domToPng } = await import('modern-screenshot')
 
-    const canvas = await html2canvas(captureRef.value, {
-      backgroundColor: '#1d232a', // base-200 dark theme
-      scale: 2, // Higher quality
-      useCORS: true,
-      logging: false,
+    const dataUrl = await domToPng(captureRef.value, {
+      scale: 2,
+      backgroundColor: '#1d232a',
     })
 
-    // Convert to data URL and download
-    const dataUrl = canvas.toDataURL('image/png')
+    // Download
     const a = document.createElement('a')
     a.href = dataUrl
     const dateStr = new Date().toISOString().split('T')[0]
