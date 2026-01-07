@@ -488,7 +488,7 @@ watch(forecast, () => {}, { deep: true })
             <div class="text-white/80 mt-1 text-sm font-medium">{{ formatDuration(session.duration_min) }}</div>
             <!-- Intensity bar for planned sessions -->
             <div v-if="session.type === 'planned' && session.intensity" class="mt-2 flex items-center gap-2">
-              <div class="flex-1 h-1.5 bg-black/30 rounded-full overflow-hidden">
+              <div class="flex-1 h-1.5 bg-black/50 rounded-full overflow-hidden">
                 <div
                   class="h-full rounded-full transition-all"
                   :class="getIntensityColor(session.intensity)"
@@ -585,7 +585,7 @@ watch(forecast, () => {}, { deep: true })
             </div>
             <div class="text-white/70 mt-1 text-[11px]">{{ formatDuration(session.duration_min) }}</div>
             <!-- Intensity bar for planned sessions -->
-            <div v-if="session.type === 'planned' && session.intensity" class="mt-1.5 h-1.5 bg-black/30 rounded-full overflow-hidden">
+            <div v-if="session.type === 'planned' && session.intensity" class="mt-1.5 h-1.5 bg-black/50 rounded-full overflow-hidden">
               <div
                 class="h-full rounded-full"
                 :class="getIntensityColor(session.intensity)"
