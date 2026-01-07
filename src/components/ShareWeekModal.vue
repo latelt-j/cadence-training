@@ -343,11 +343,15 @@ const getSessionClass = (session: ScheduledSession) => {
           <div class="flex justify-center pb-6 -mt-2">
             <button
               class="btn btn-lg border-0 shadow-lg text-white px-8 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-pink-500/40"
-              :class="{ 'loading': isDownloading }"
               :disabled="isDownloading"
               @click="downloadScreenshot"
             >
-              {{ isDownloading ? 'Capture...' : '📸 Télécharger l\'image' }}
+              <template v-if="isDownloading">
+                Téléchargement <span class="loading loading-spinner loading-xs ml-1"></span>
+              </template>
+              <template v-else>
+                📸 Télécharger l'image
+              </template>
             </button>
           </div>
           </div>
