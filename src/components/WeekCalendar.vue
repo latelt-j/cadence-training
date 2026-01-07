@@ -605,13 +605,12 @@ watch(forecast, () => {}, { deep: true })
       </div>
     </div>
 
-    <!-- Footer - Desktop only -->
-    <div class="px-4 py-2 hidden md:flex items-center justify-center gap-4 text-xs text-base-content/40">
-      <span class="flex items-center gap-1">🖱️ Glisse</span>
-      <span>•</span>
-      <span class="flex items-center gap-1">➕ Clique jour</span>
-      <span>•</span>
-      <span class="flex items-center gap-1">👆 Clique séance</span>
+    <!-- Footer - Desktop only: Current cycle info -->
+    <div v-if="currentPhase" class="px-4 py-2 hidden md:flex items-center justify-center gap-2 text-xs text-base-content/50">
+      <span>{{ currentPhase.emoji || getPhaseEmoji(currentPhase.name) }}</span>
+      <span class="font-medium">{{ currentPhase.name }}</span>
+      <span class="text-base-content/30">•</span>
+      <span>S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}</span>
     </div>
   </div>
 </template>

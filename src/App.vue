@@ -334,7 +334,7 @@ const handleSavePhases = async (phases: TrainingPhase[]) => {
   trainingPhases.value = phases
   try {
     await updateSettings({ training_phases: phases } as any)
-    showToast('Phases sauvegardees')
+    showToast('Cycles sauvegardés')
   } catch (e) {
     console.error('Error saving phases:', e)
     showToast('Erreur de sauvegarde', 'error')
@@ -435,7 +435,7 @@ const handleReset = () => {
               🎯 Objectifs
             </button>
             <button class="btn btn-sm btn-ghost gap-1 hover:bg-pink-500/20 hover:text-pink-400" @click="showPhasesModal = true">
-              📊 Phases
+              📊 Cycles
             </button>
             <button class="btn btn-sm btn-ghost gap-1 hover:bg-pink-500/20 hover:text-pink-400" @click="showAthleteProfileModal = true">
               ⚡ Profil
@@ -517,7 +517,7 @@ const handleReset = () => {
             <span class="text-[10px] text-base-content/70">Plus</span>
           </button>
           <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-xl mb-2 border border-base-300">
-            <li><a @click="showPhasesModal = true" class="rounded-lg">📊 Phases</a></li>
+            <li><a @click="showPhasesModal = true" class="rounded-lg">📊 Cycles</a></li>
             <li><a @click="showImportModal = true" class="rounded-lg">📥 Importer</a></li>
             <li v-if="stravaConnected"><a class="text-error rounded-lg" @click="showStravaDisconnectModal = true">Déconnecter Strava</a></li>
           </ul>

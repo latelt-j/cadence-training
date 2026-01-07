@@ -247,7 +247,7 @@ const savePhase = () => {
 
 // Delete phase
 const deletePhase = (phase: TrainingPhase) => {
-  if (!confirm(`Supprimer la phase "${phase.name}" ?`)) return
+  if (!confirm(`Supprimer le cycle "${phase.name}" ?`)) return
   localPhases.value = localPhases.value.filter(p => p.id !== phase.id)
   emit('save', localPhases.value)
 }
@@ -269,7 +269,7 @@ const generateCoachPrompt = () => {
   const today = new Date()
   const todayStr = today.toISOString().split('T')[0]
 
-  let prompt = `Tu es un coach cycliste expert. Je veux que tu me génères un plan de phases d'entraînement.
+  let prompt = `Tu es un coach cycliste expert. Je veux que tu me génères un plan de cycles d'entraînement.
 
 ## Date d'aujourd'hui
 ${todayStr}
@@ -296,7 +296,7 @@ ${todayStr}
   prompt += `
 
 ## Ta mission
-Génère-moi un plan de phases d'entraînement qui mène à mes objectifs. Chaque phase doit avoir:
+Génère-moi un plan de cycles d'entraînement qui mène à mes objectifs. Chaque cycle doit avoir:
 - Un nom clair (Base, Build, Peak, Taper, etc.)
 - Des dates de début et fin
 - Un objectif principal
@@ -349,7 +349,7 @@ const importCoachPhases = () => {
     // Validate and transform phases
     const newPhases: TrainingPhase[] = phasesArray.map((p: any) => ({
       id: uuidv4(),
-      name: p.name || 'Phase',
+      name: p.name || 'Cycle',
       emoji: p.emoji,
       start_date: p.start_date,
       end_date: p.end_date,
@@ -376,7 +376,7 @@ const importCoachPhases = () => {
   <div class="space-y-4">
     <!-- Header with add button -->
     <div class="flex justify-between items-center pr-8">
-      <h3 class="font-bold text-lg">📊 Phases d'entraînement</h3>
+      <h3 class="font-bold text-lg">📊 Cycles d'entraînement</h3>
       <div v-if="!isEditing && !showCoachImport" class="flex gap-2">
         <button class="btn btn-sm btn-ghost" @click="showCoachImport = true">
           🤖 Coach IA
@@ -421,14 +421,14 @@ const importCoachPhases = () => {
           :disabled="!coachJsonInput.trim()"
           @click="importCoachPhases"
         >
-          🔄 Remplacer les phases
+          🔄 Remplacer les cycles
         </button>
       </div>
     </div>
 
     <!-- Edit form -->
     <div v-if="isEditing" ref="formRef" class="bg-base-200 rounded-lg p-4 space-y-3">
-      <h4 class="font-medium">{{ editingPhase ? '✏️ Modifier la phase' : '➕ Nouvelle phase' }}</h4>
+      <h4 class="font-medium">{{ editingPhase ? '✏️ Modifier le cycle' : '➕ Nouveau cycle' }}</h4>
 
       <div class="grid grid-cols-[1fr_auto] gap-3">
         <div>
@@ -551,8 +551,8 @@ const importCoachPhases = () => {
 
     <!-- Phases list -->
     <div v-if="sortedPhases.length === 0 && !isEditing" class="text-center py-8 text-base-content/50">
-      <p>Aucune phase définie</p>
-      <p class="text-sm">Clique sur "+ Ajouter" pour créer ta première phase</p>
+      <p>Aucun cycle défini</p>
+      <p class="text-sm">Clique sur "+ Ajouter" pour créer ton premier cycle</p>
     </div>
 
     <div v-else class="space-y-3">
@@ -565,7 +565,7 @@ const importCoachPhases = () => {
         <div class="flex justify-between items-start">
           <div class="flex-1">
             <div class="flex items-center gap-2">
-              <span class="badge badge-sm badge-neutral">Phase {{ phase.number }}</span>
+              <span class="badge badge-sm badge-neutral">Cycle {{ phase.number }}</span>
               <span class="text-lg">{{ phase.emoji || getPhaseEmoji(phase.name) }}</span>
               <span class="font-bold">{{ phase.name.toUpperCase() }}</span>
               <span v-if="isCurrentPhase(phase)" class="badge badge-sm badge-primary">

@@ -255,9 +255,9 @@ const generateCoachPrompt = () => {
   }
 
   // Current phase
-  prompt += `\n**3. PHASE ACTUELLE**\n`
+  prompt += `\n**3. CYCLE ACTUEL**\n`
   if (planPhase) {
-    prompt += `- Phase : ${planPhase.name}`
+    prompt += `- Cycle : ${planPhase.name}`
     if (planPhase.description) prompt += ` - ${planPhase.description}`
     prompt += `\n`
     if (phaseWeekNumber.value && phaseTotalWeeks.value) {
@@ -273,7 +273,7 @@ const generateCoachPrompt = () => {
       prompt += `- Challenge : ${planPhase.challenge}\n`
     }
   } else {
-    prompt += `- Phase : Non définie\n`
+    prompt += `- Cycle : Non défini\n`
   }
 
   // Bilan last week
