@@ -414,17 +414,6 @@ watch(forecast, () => {}, { deep: true })
       </div>
     </div>
 
-    <!-- Phase Bar -->
-    <div v-if="currentPhase" class="px-3 pb-2">
-      <div class="flex items-center gap-2 text-sm text-base-content/70">
-        <span class="text-base">{{ currentPhase.emoji || getPhaseEmoji(currentPhase.name) }}</span>
-        <span class="font-semibold text-base-content hidden md:inline">{{ currentPhase.name.toUpperCase() }}</span>
-        <span class="badge badge-sm badge-primary">S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}</span>
-        <span v-if="currentPhase.objectives" class="text-base-content/40 hidden md:inline">•</span>
-        <span v-if="currentPhase.objectives" class="truncate hidden md:inline">{{ currentPhase.objectives }}</span>
-      </div>
-    </div>
-
     <!-- Mobile View: Single Day with Swipe -->
     <div
       v-if="isMobile"
