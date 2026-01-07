@@ -16,6 +16,7 @@ const emit = defineEmits<{
   updateDate: [sessionId: string, newDate: string]
   selectSession: [session: ScheduledSession]
   weekChange: [date: Date]
+  openShareModal: []
 }>()
 
 // Mobile detection
@@ -213,58 +214,6 @@ const goToToday = () => {
   emit('weekChange', currentWeekStart.value)
 }
 
-// Week export for coach
-const weekExportCopied = ref(false)
-
-const copyWeekForCoach = async () => {
-  const weekSessions = props.sessions.filter(s => {
-    const sessionDate = new Date(s.date)
-    const weekEnd = new Date(currentWeekStart.value)
-    weekEnd.setDate(weekEnd.getDate() + 6)
-    return sessionDate >= currentWeekStart.value && sessionDate <= weekEnd
-  }).sort((a, b) => a.date.localeCompare(b.date))
-
-  const formatSessionDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric' })
-  }
-
-  let text = `📅 BILAN SEMAINE\n`
-  text += `${headerTitle.value}\n\n`
-
-  const done = weekSessions.filter(s => s.type === 'strava' || s.type === 'manual')
-  const planned = weekSessions.filter(s => s.type === 'planned')
-
-  if (done.length > 0) {
-    text += `✅ RÉALISÉ (${done.length})\n`
-    done.forEach(s => {
-      const duration = Math.floor(s.duration_min / 60) > 0
-        ? `${Math.floor(s.duration_min / 60)}h${(s.duration_min % 60).toString().padStart(2, '0')}`
-        : `${s.duration_min}min`
-      text += `• ${formatSessionDate(s.date)} - ${SPORT_CONFIG[s.sport].emoji} ${s.title} (${duration})\n`
-    })
-    text += `\n`
-  }
-
-  if (planned.length > 0) {
-    text += `📋 PRÉVU (${planned.length})\n`
-    planned.forEach(s => {
-      const duration = Math.floor(s.duration_min / 60) > 0
-        ? `${Math.floor(s.duration_min / 60)}h${(s.duration_min % 60).toString().padStart(2, '0')}`
-        : `${s.duration_min}min`
-      text += `• ${formatSessionDate(s.date)} - ${SPORT_CONFIG[s.sport].emoji} ${s.title} (${duration})\n`
-    })
-    text += `\n`
-  }
-
-  text += `💬 Qu'en penses-tu ? Je peux ajouter une séance ?`
-
-  await navigator.clipboard.writeText(text)
-  weekExportCopied.value = true
-  setTimeout(() => {
-    weekExportCopied.value = false
-  }, 2000)
-}
-
 // Current month/year for header
 const headerTitle = computed(() => {
   const start = currentWeekStart.value
@@ -382,10 +331,9 @@ watch(forecast, () => {}, { deep: true })
 
       <button
         class="btn btn-sm btn-ghost"
-        :class="weekExportCopied ? 'text-success' : ''"
-        @click="copyWeekForCoach"
+        @click="emit('openShareModal')"
       >
-        {{ weekExportCopied ? '✓ Copié !' : '📋 Bilan coach' }}
+        📤 Partager
       </button>
     </div>
 

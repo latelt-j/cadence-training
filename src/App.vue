@@ -512,6 +512,7 @@ const handleReset = () => {
           @update-date="handleUpdateDate"
           @select-session="handleSelectSession"
           @week-change="setCurrentWeek"
+          @open-share-modal="showShareModal = true"
         />
 
         <WeeklyStats :stats="weeklyStats" />
@@ -624,6 +625,7 @@ const handleReset = () => {
       :is-open="showShareModal"
       :sessions="sessions"
       :week-start="weekStart"
+      :training-phases="trainingPhases"
       @close="showShareModal = false"
     />
 
