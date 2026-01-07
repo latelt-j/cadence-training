@@ -536,6 +536,7 @@ const handleReset = () => {
           @select-session="handleSelectSession"
           @week-change="setCurrentWeek"
           @open-share-modal="showShareModal = true"
+          @open-import-modal="showImportModal = true"
         />
 
         <WeeklyStats :stats="weeklyStats" />
