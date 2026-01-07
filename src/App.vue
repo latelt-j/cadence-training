@@ -428,7 +428,6 @@ const handleReset = () => {
                 </svg>
               </button>
               <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-52 p-2 shadow-xl mt-2 border border-base-300">
-                <li><a @click="showShareModal = true" class="rounded-lg">📤 Partager ma semaine</a></li>
                 <li><a @click="showImportModal = true" class="rounded-lg">📥 Importer</a></li>
                 <li v-if="stravaConnected"><a class="text-error rounded-lg" @click="showStravaDisconnectModal = true">Déconnecter Strava</a></li>
                 <li class="border-t border-base-300 mt-1 pt-1">
@@ -493,7 +492,6 @@ const handleReset = () => {
             <span class="text-[10px] text-base-content/70">Plus</span>
           </button>
           <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-xl mb-2 border border-base-300">
-            <li><a @click="showShareModal = true" class="rounded-lg">📤 Partager ma semaine</a></li>
             <li><a @click="showPhasesModal = true" class="rounded-lg">📊 Phases</a></li>
             <li><a @click="showImportModal = true" class="rounded-lg">📥 Importer</a></li>
             <li v-if="stravaConnected"><a class="text-error rounded-lg" @click="showStravaDisconnectModal = true">Déconnecter Strava</a></li>
