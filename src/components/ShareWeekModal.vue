@@ -206,9 +206,6 @@ const downloadScreenshot = async () => {
     const html2canvasModule = await import('html2canvas')
     const html2canvas = html2canvasModule.default
 
-    console.log('html2canvas loaded:', html2canvas)
-    console.log('captureRef:', captureRef.value)
-
     const canvas = await html2canvas(captureRef.value, {
       backgroundColor: '#1d232a', // base-200 dark theme
       scale: 2, // Higher quality
@@ -270,8 +267,8 @@ const getSessionClass = (session: ScheduledSession) => {
             ✕
           </button>
 
-          <!-- Capture area -->
-          <div ref="captureRef" class="p-6 md:p-8 bg-base-200 rounded-3xl">
+          <!-- Capture area (inline styles for html2canvas oklch compatibility) -->
+          <div ref="captureRef" class="capture-area p-6 md:p-8 rounded-3xl">
             <!-- Header -->
             <div class="text-center mb-8">
               <div class="flex items-center justify-center gap-3">
@@ -413,5 +410,40 @@ const getSessionClass = (session: ScheduledSession) => {
 .session-planned-share {
   opacity: 0.75;
   border: 2px dashed rgba(255, 255, 255, 0.5);
+}
+
+/* Capture area - hex colors for html2canvas (no oklch) */
+.capture-area {
+  background-color: #1d232a !important;
+  color: #a6adbb !important;
+}
+
+.capture-area h2,
+.capture-area .font-bold {
+  color: #ffffff !important;
+}
+
+.capture-area .text-base-content\/50,
+.capture-area .text-base-content\/60,
+.capture-area .text-base-content\/80 {
+  color: #6b7280 !important;
+}
+
+.capture-area .text-base-content\/30 {
+  color: #4b5563 !important;
+}
+
+.capture-area .badge-primary {
+  background-color: #7c3aed !important;
+  color: #ffffff !important;
+}
+
+.capture-area .divider {
+  border-color: #374151 !important;
+}
+
+.capture-area .divider::before,
+.capture-area .divider::after {
+  background-color: #374151 !important;
 }
 </style>
