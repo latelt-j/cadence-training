@@ -143,7 +143,7 @@ const chartOptions = computed(() => ({
       speed: 500,
     },
   },
-  colors: ['#22c55e', '#38bdf8', '#fbbf24'],
+  colors: ['#22c55e', '#ec4899', '#fbbf24'], // TSB green, Fitness pink, Fatigue yellow
   stroke: {
     width: [3, 2, 2],
     curve: 'smooth' as const,
@@ -257,16 +257,16 @@ const chartOptions = computed(() => ({
 
         <!-- Stats row -->
         <div class="grid grid-cols-3 gap-2 mt-4">
-          <div class="text-center p-2 bg-base-200 rounded-lg">
-            <div class="text-lg font-bold text-info">{{ currentCTL !== null ? Math.round(currentCTL) : '-' }}</div>
+          <div class="text-center p-2 bg-pink-500/10 rounded-lg">
+            <div class="text-lg font-bold text-pink-400">{{ currentCTL !== null ? Math.round(currentCTL) : '-' }}</div>
             <div class="text-xs text-base-content/60">Fitness</div>
           </div>
-          <div class="text-center p-2 bg-base-200 rounded-lg">
-            <div class="text-lg font-bold text-warning">{{ currentATL !== null ? Math.round(currentATL) : '-' }}</div>
+          <div class="text-center p-2 bg-amber-500/10 rounded-lg">
+            <div class="text-lg font-bold text-amber-400">{{ currentATL !== null ? Math.round(currentATL) : '-' }}</div>
             <div class="text-xs text-base-content/60">Fatigue</div>
           </div>
-          <div class="text-center p-2 bg-base-200 rounded-lg">
-            <div class="text-lg font-bold text-primary">{{ currentHRV !== null ? Math.round(currentHRV) : '-' }}</div>
+          <div class="text-center p-2 bg-sky-500/10 rounded-lg">
+            <div class="text-lg font-bold text-sky-400">{{ currentHRV !== null ? Math.round(currentHRV) : '-' }}</div>
             <div class="text-xs text-base-content/60">HRV</div>
           </div>
         </div>

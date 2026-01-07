@@ -70,8 +70,8 @@ const chartData = computed(() => {
     const week = weeks.get(key)
     if (week) {
       const hours = session.duration_min / 60
-      const isDone = session.type === 'strava'
-      if (session.sport === 'cycling') {
+      const isDone = session.type === 'strava' || session.type === 'manual'
+      if (session.sport === 'cycling' || session.sport === 'mtb') {
         if (isDone) week.cyclingDone += hours
         else week.cyclingPlanned += hours
       } else if (session.sport === 'running') {
@@ -91,28 +91,28 @@ const chartData = computed(() => {
       {
         label: 'Vélo (fait)',
         data: sortedWeeks.map(w => Math.round(w.cyclingDone * 10) / 10),
-        backgroundColor: 'rgba(34, 197, 94, 0.9)',
+        backgroundColor: 'rgba(236, 72, 153, 0.9)', // pink-500
         borderRadius: 4,
         stack: 'cycling',
       },
       {
         label: 'Vélo (prévu)',
         data: sortedWeeks.map(w => Math.round(w.cyclingPlanned * 10) / 10),
-        backgroundColor: 'rgba(34, 197, 94, 0.35)',
+        backgroundColor: 'rgba(236, 72, 153, 0.35)', // pink-500/35
         borderRadius: 4,
         stack: 'cycling',
       },
       {
         label: 'Course (fait)',
         data: sortedWeeks.map(w => Math.round(w.runningDone * 10) / 10),
-        backgroundColor: 'rgba(245, 158, 11, 0.9)',
+        backgroundColor: 'rgba(56, 189, 248, 0.9)', // sky-400
         borderRadius: 4,
         stack: 'running',
       },
       {
         label: 'Course (prévu)',
         data: sortedWeeks.map(w => Math.round(w.runningPlanned * 10) / 10),
-        backgroundColor: 'rgba(245, 158, 11, 0.35)',
+        backgroundColor: 'rgba(56, 189, 248, 0.35)', // sky-400/35
         borderRadius: 4,
         stack: 'running',
       },
