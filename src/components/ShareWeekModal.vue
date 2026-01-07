@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import html2canvas from 'html2canvas'
 import type { ScheduledSession, TrainingPhase } from '../types/session'
 import { SPORT_CONFIG, type Sport } from '../types/session'
 
@@ -196,18 +195,21 @@ const smartTagline = computed(() => {
   ])
 })
 
-// Download screenshot
+// Download screenshot (lazy load html2canvas)
 const downloadScreenshot = async () => {
   if (!captureRef.value || isDownloading.value) return
 
   isDownloading.value = true
 
   try {
+    // Dynamic import - only load when needed
+    const { default: html2canvas } = await import('html2canvas')
+
     const canvas = await html2canvas(captureRef.value, {
       backgroundColor: '#1d232a', // base-200 dark theme
       scale: 2, // Higher quality
       useCORS: true,
-      logging: true, // Enable logging for debug
+      logging: false,
     })
 
     // Convert to data URL and download
