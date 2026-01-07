@@ -599,7 +599,7 @@ watch(forecast, () => {}, { deep: true })
       <span>{{ currentPhase.emoji || getPhaseEmoji(currentPhase.name) }}</span>
       <span class="font-medium">{{ currentPhase.name }}</span>
       <span class="text-base-content/30">•</span>
-      <span>S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}</span>
+      <span class="badge badge-xs bg-pink-500 text-white border-0">S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}</span>
     </div>
   </div>
 </template>
