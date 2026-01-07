@@ -268,16 +268,18 @@ const getSessionClass = (session: ScheduledSession) => {
           @click="emit('close')"
         ></div>
 
-        <!-- Close button (outside capture) -->
-        <button
-          class="btn btn-circle btn-ghost absolute right-4 top-4 text-xl z-30"
-          @click="emit('close')"
-        >
-          ✕
-        </button>
+        <!-- Modal container -->
+        <div class="relative z-10 flex flex-col items-center">
+          <!-- Close button (relative to modal) -->
+          <button
+            class="btn btn-circle btn-ghost absolute -right-2 -top-2 text-xl z-30"
+            @click="emit('close')"
+          >
+            ✕
+          </button>
 
-        <!-- Modal wrapper with animated border (capture this) -->
-        <div ref="captureRef" class="modal-border-wrapper z-10">
+          <!-- Modal wrapper with animated border (capture this) -->
+          <div ref="captureRef" class="modal-border-wrapper">
           <div class="modal-card rounded-3xl w-full max-h-[90vh] overflow-auto shadow-2xl">
             <!-- Content area -->
             <div class="capture-area p-6 md:p-8 rounded-3xl">
@@ -354,12 +356,11 @@ const getSessionClass = (session: ScheduledSession) => {
             <p class="text-xs text-base-content/30 text-center mt-4 pb-2">Powered by Cadence 🎯</p>
             </div>
           </div>
-        </div>
+          </div>
 
-        <!-- Download button (outside capture) -->
-        <div class="flex justify-center mt-4 z-10">
+          <!-- Download button (outside capture) -->
           <button
-            class="btn btn-lg border-0 shadow-lg text-white px-8 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-pink-500/40"
+            class="btn btn-lg border-0 shadow-lg text-white px-8 mt-4 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-pink-500/40"
             :disabled="isDownloading"
             @click="downloadScreenshot"
           >
@@ -383,11 +384,6 @@ const getSessionClass = (session: ScheduledSession) => {
   transition: all 0.3s ease;
 }
 
-.modal-enter-active .modal-border-wrapper,
-.modal-leave-active .modal-border-wrapper {
-  transition: transform 0.3s ease;
-}
-
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
@@ -401,6 +397,7 @@ const getSessionClass = (session: ScheduledSession) => {
 /* Modal wrapper - contains the animated border */
 .modal-border-wrapper {
   position: relative;
+  transition: transform 0.3s ease;
   border-radius: 26px;
   padding: 3px;
   background: linear-gradient(45deg, #fc4c02, #ff8c00, #e04402, #ff6a00, #fc4c02);
