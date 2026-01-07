@@ -102,8 +102,8 @@ export function useSessions() {
         ...item,
         id: uuidv4(),
         date: itemWithDate.date ?? today,
-        // Default type to 'planned' if not strava
-        type: item.strava_id ? 'strava' : (item.type || 'planned'),
+        // Always 'planned' for new imported sessions (workout type like "sweet_spot" is preserved in ...item)
+        type: item.strava_id ? 'strava' : 'planned',
       } as ScheduledSession
     })
 
