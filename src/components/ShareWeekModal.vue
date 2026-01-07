@@ -207,22 +207,21 @@ const downloadScreenshot = async () => {
       backgroundColor: '#1d232a', // base-200 dark theme
       scale: 2, // Higher quality
       useCORS: true,
-      logging: false,
+      logging: true, // Enable logging for debug
     })
 
-    // Convert to blob and download
-    canvas.toBlob((blob) => {
-      if (!blob) return
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      const dateStr = new Date().toISOString().split('T')[0]
-      a.download = `cadence-semaine-${dateStr}.png`
-      a.click()
-      URL.revokeObjectURL(url)
-    }, 'image/png')
+    // Convert to data URL and download
+    const dataUrl = canvas.toDataURL('image/png')
+    const a = document.createElement('a')
+    a.href = dataUrl
+    const dateStr = new Date().toISOString().split('T')[0]
+    a.download = `cadence-semaine-${dateStr}.png`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
   } catch (error) {
     console.error('Screenshot error:', error)
+    alert('Erreur lors de la capture. Vérifiez la console.')
   } finally {
     isDownloading.value = false
   }
