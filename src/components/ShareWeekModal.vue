@@ -223,6 +223,13 @@ const downloadScreenshot = async () => {
     const dataUrl = await domToPng(captureRef.value, {
       scale: 2,
       backgroundColor: '#191e24',
+      // Filter out elements with screenshot-hide class
+      filter: (node: Node) => {
+        if (node instanceof Element && node.classList.contains('screenshot-hide')) {
+          return false
+        }
+        return true
+      },
     })
 
     // Download
@@ -272,16 +279,16 @@ const getSessionClass = (session: ScheduledSession) => {
         <div class="relative z-10 flex flex-col items-center max-w-3xl w-full">
           <!-- Modal wrapper with animated border (capture this) -->
           <div ref="captureRef" class="modal-border-wrapper">
-            <!-- Close button (inside wrapper for positioning) -->
-            <button
-              class="btn btn-circle btn-sm btn-ghost absolute -right-3 -top-3 text-lg z-30 bg-base-300 hover:bg-base-200"
-              @click.stop="emit('close')"
-            >
-              ✕
-            </button>
-            <div class="modal-card rounded-3xl w-full max-h-[80vh] overflow-auto shadow-2xl">
-            <!-- Content area -->
-            <div class="capture-area p-6 md:p-8 rounded-3xl">
+            <div class="modal-card rounded-3xl w-full max-h-[80vh] overflow-auto shadow-2xl relative">
+              <!-- Close button -->
+              <button
+                class="btn btn-circle btn-sm btn-ghost absolute right-3 top-3 text-lg z-30 screenshot-hide"
+                @click.stop="emit('close')"
+              >
+                ✕
+              </button>
+              <!-- Content area -->
+              <div class="capture-area p-6 md:p-8 rounded-3xl">
             <!-- Header -->
             <div class="text-center mb-8">
               <div class="flex items-center justify-center gap-3">
@@ -352,24 +359,26 @@ const getSessionClass = (session: ScheduledSession) => {
             </div>
 
             <!-- Branding -->
-            <p class="text-xs text-base-content/30 text-center mt-4 pb-2">Powered by Cadence 🎯</p>
+            <p class="text-xs text-base-content/30 text-center mt-4">Powered by Cadence 🎯</p>
+
+            <!-- Download button -->
+            <div class="flex justify-center pt-4 pb-2 screenshot-hide">
+              <button
+                class="btn btn-lg border-0 shadow-lg text-white px-8 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-pink-500/40"
+                :disabled="isDownloading"
+                @click="downloadScreenshot"
+              >
+                <template v-if="isDownloading">
+                  Téléchargement <span class="loading loading-spinner loading-xs ml-1"></span>
+                </template>
+                <template v-else>
+                  📸 Télécharger l'image
+                </template>
+              </button>
+            </div>
+              </div>
             </div>
           </div>
-          </div>
-
-          <!-- Download button (outside capture) -->
-          <button
-            class="btn btn-lg border-0 shadow-lg text-white px-8 mt-4 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-pink-500/40"
-            :disabled="isDownloading"
-            @click="downloadScreenshot"
-          >
-            <template v-if="isDownloading">
-              Téléchargement <span class="loading loading-spinner loading-xs ml-1"></span>
-            </template>
-            <template v-else>
-              📸 Télécharger l'image
-            </template>
-          </button>
         </div>
       </div>
     </Transition>
