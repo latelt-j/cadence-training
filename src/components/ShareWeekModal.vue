@@ -207,7 +207,7 @@ const downloadScreenshot = async () => {
 
     const dataUrl = await domToPng(captureRef.value, {
       scale: 2,
-      backgroundColor: '#1d232a',
+      backgroundColor: '#191e24',
     })
 
     // Download
@@ -254,7 +254,7 @@ const getSessionClass = (session: ScheduledSession) => {
         ></div>
 
         <!-- Modal content -->
-        <div class="relative bg-base-200 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-auto shadow-2xl z-10">
+        <div class="relative rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-auto shadow-2xl z-10" style="background-color: #191e24;">
           <!-- Close button (outside capture area) -->
           <button
             class="btn btn-circle btn-ghost absolute right-4 top-4 text-xl z-20"
@@ -432,7 +432,7 @@ const getSessionClass = (session: ScheduledSession) => {
 
 /* Capture area - hex colors for html2canvas (no oklch) */
 .capture-area {
-  background-color: #1d232a !important;
+  background-color: #191e24 !important;
   color: #a6adbb !important;
 }
 
