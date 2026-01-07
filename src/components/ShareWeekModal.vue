@@ -217,12 +217,18 @@ const downloadScreenshot = async () => {
   isDownloading.value = true
 
   try {
+    // Add padding for screenshot
+    captureRef.value.style.padding = '24px'
+
+    // Wait for styles to apply
+    await new Promise(resolve => setTimeout(resolve, 50))
+
     // Dynamic import - only load when needed
     const { domToPng } = await import('modern-screenshot')
 
     const dataUrl = await domToPng(captureRef.value, {
       scale: 2,
-      backgroundColor: '#191e24',
+      backgroundColor: '#000000',
       // Filter out elements with screenshot-hide class
       filter: (node: Node) => {
         if (node instanceof Element && node.classList.contains('screenshot-hide')) {
@@ -231,6 +237,9 @@ const downloadScreenshot = async () => {
         return true
       },
     })
+
+    // Remove padding after capture
+    captureRef.value.style.padding = ''
 
     // Download
     const a = document.createElement('a')
@@ -243,6 +252,8 @@ const downloadScreenshot = async () => {
   } catch (error) {
     console.error('Screenshot error:', error)
     alert('Erreur lors de la capture. Vérifiez la console.')
+    // Remove padding on error too
+    if (captureRef.value) captureRef.value.style.padding = ''
   } finally {
     isDownloading.value = false
   }
@@ -286,8 +297,8 @@ const getIntensityColor = (intensity: number | undefined): string => {
 
         <!-- Modal container -->
         <div class="relative z-10 flex flex-col items-center max-w-3xl w-full">
-          <!-- Screenshot wrapper with black padding -->
-          <div ref="captureRef" class="screenshot-wrapper p-4 md:p-6 rounded-[2rem]">
+          <!-- Screenshot wrapper with black padding (padding added during capture) -->
+          <div ref="captureRef" class="screenshot-wrapper rounded-[2rem]">
             <!-- Modal wrapper with animated border -->
             <div class="modal-border-wrapper">
             <div class="modal-card rounded-3xl w-full max-h-[80vh] overflow-auto shadow-2xl relative">
