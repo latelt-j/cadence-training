@@ -337,13 +337,13 @@ const formatDuration = (minutes: number): string => {
   return `${hours}h${mins.toString().padStart(2, '0')}`
 }
 
-// Get intensity color (1-10 scale)
+// Get intensity color (1-10 scale) - dot style
 const getIntensityColor = (intensity: number | undefined): string => {
-  if (!intensity) return 'bg-base-content/20'
-  if (intensity <= 3) return 'bg-success'      // Green - easy
-  if (intensity <= 5) return 'bg-warning'      // Yellow - moderate
-  if (intensity <= 7) return 'bg-orange-500'   // Orange - hard
-  return 'bg-error'                             // Red - very hard
+  if (!intensity) return 'bg-white/40'
+  if (intensity <= 3) return 'bg-white/80'      // Récup - blanc
+  if (intensity <= 6) return 'bg-yellow-300'    // Modéré - jaune
+  if (intensity <= 8) return 'bg-orange-400'    // Dur - orange
+  return 'bg-red-500'                            // Intense - rouge
 }
 
 // Init
@@ -485,17 +485,16 @@ watch(forecast, () => {}, { deep: true })
               <span class="truncate flex-1">{{ session.title }}</span>
               <span v-if="session.type === 'strava' || session.type === 'manual'" class="opacity-70 text-lg">✓</span>
             </div>
-            <div class="text-white/80 mt-1 text-sm font-medium">{{ formatDuration(session.duration_min) }}</div>
-            <!-- Intensity bar for planned sessions -->
-            <div v-if="session.type === 'planned' && session.intensity" class="mt-2 flex items-center gap-2">
-              <div class="flex-1 h-1.5 bg-black/50 rounded-full overflow-hidden">
+            <div class="flex items-center justify-between mt-1">
+              <div class="text-white/80 text-sm font-medium">{{ formatDuration(session.duration_min) }}</div>
+              <!-- Intensity dot for planned sessions -->
+              <div v-if="session.type === 'planned' && session.intensity" class="flex items-center gap-1.5">
+                <span class="text-[10px] text-white/50">intensité</span>
                 <div
-                  class="h-full rounded-full transition-all"
+                  class="w-2.5 h-2.5 rounded-full"
                   :class="getIntensityColor(session.intensity)"
-                  :style="{ width: `${session.intensity * 10}%` }"
                 ></div>
               </div>
-              <span class="text-[10px] text-white/60">{{ session.intensity }}/10</span>
             </div>
           </div>
 
@@ -583,14 +582,16 @@ watch(forecast, () => {}, { deep: true })
               <span class="truncate">{{ session.title }}</span>
               <span v-if="session.type === 'strava' || session.type === 'manual'" class="ml-auto opacity-70">✓</span>
             </div>
-            <div class="text-white/70 mt-1 text-[11px]">{{ formatDuration(session.duration_min) }}</div>
-            <!-- Intensity bar for planned sessions -->
-            <div v-if="session.type === 'planned' && session.intensity" class="mt-1.5 h-1.5 bg-black/50 rounded-full overflow-hidden">
-              <div
-                class="h-full rounded-full"
-                :class="getIntensityColor(session.intensity)"
-                :style="{ width: `${session.intensity * 10}%` }"
-              ></div>
+            <div class="flex items-center justify-between mt-1">
+              <div class="text-white/70 text-[11px]">{{ formatDuration(session.duration_min) }}</div>
+              <!-- Intensity dot for planned sessions -->
+              <div v-if="session.type === 'planned' && session.intensity" class="flex items-center gap-1">
+                <span class="text-[9px] text-white/40">int.</span>
+                <div
+                  class="w-2 h-2 rounded-full"
+                  :class="getIntensityColor(session.intensity)"
+                ></div>
+              </div>
             </div>
           </div>
         </div>
