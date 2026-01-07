@@ -372,9 +372,9 @@ IMPORTANT pour les descriptions :
 - Emojis au début : 🔥 💪 🧘 🚴 🏃 ⛰️
 - Structure : Échauffement → Corps → Retour au calme
 
-⚠️ OBLIGATOIRE pour zwift_workout (séances INDOOR uniquement) :
-- Inclure le fichier Zwift XML UNIQUEMENT pour les séances indoor (titre commençant par "Zwift:")
-- NE PAS inclure zwift_workout pour les sorties outdoor (Sortie Longue, Endurance, etc.)
+🚨 RÈGLE CRITIQUE - zwift_workout :
+- OBLIGATOIRE : Chaque séance "Zwift:" DOIT avoir un zwift_workout XML complet (NE JAMAIS OUBLIER)
+- INTERDIT : Les sorties outdoor (Sortie Longue, Endurance) ne doivent PAS avoir de zwift_workout
 - XML sur UNE SEULE LIGNE
 - APOSTROPHES (') pas guillemets (")
 - Puissances en % FTP (0.75 = 75%)
