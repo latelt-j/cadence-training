@@ -120,21 +120,29 @@ const currentPhase = computed(() => {
   return props.trainingPhases.find(p => p.start_date <= today && p.end_date >= today)
 })
 
+// Parse date string as local date (not UTC)
+const parseLocalDate = (dateStr: string): Date => {
+  const parts = dateStr.split('-').map(Number)
+  return new Date(parts[0] ?? 2025, (parts[1] ?? 1) - 1, parts[2] ?? 1)
+}
+
 // Week number within current phase
 const phaseWeekNumber = computed(() => {
   if (!currentPhase.value) return null
-  const phaseStart = new Date(currentPhase.value.start_date)
+  const phaseStart = parseLocalDate(currentPhase.value.start_date)
+  phaseStart.setHours(0, 0, 0, 0)
   const today = new Date()
+  today.setHours(0, 0, 0, 0)
   const diffTime = today.getTime() - phaseStart.getTime()
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-  return Math.floor(diffDays / 7) + 1
+  return Math.max(1, Math.floor(diffDays / 7) + 1)
 })
 
 // Total weeks in current phase
 const phaseTotalWeeks = computed(() => {
   if (!currentPhase.value) return null
-  const phaseStart = new Date(currentPhase.value.start_date)
-  const phaseEnd = new Date(currentPhase.value.end_date)
+  const phaseStart = parseLocalDate(currentPhase.value.start_date)
+  const phaseEnd = parseLocalDate(currentPhase.value.end_date)
   const diffTime = phaseEnd.getTime() - phaseStart.getTime()
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
   return Math.ceil(diffDays / 7)
