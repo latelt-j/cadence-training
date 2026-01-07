@@ -298,7 +298,7 @@ const getIntensityColor = (intensity: number | undefined): string => {
         <!-- Modal container -->
         <div class="relative z-10 flex flex-col items-center max-w-3xl w-full">
           <!-- Screenshot wrapper with black padding (padding added during capture) -->
-          <div ref="captureRef" class="screenshot-wrapper rounded-[2rem]">
+          <div ref="captureRef" class="screenshot-wrapper rounded-[2rem] w-full">
             <!-- Modal wrapper with animated border -->
             <div class="modal-border-wrapper">
             <div class="modal-card rounded-3xl w-full max-h-[80vh] overflow-auto shadow-2xl relative">
