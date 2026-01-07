@@ -140,3 +140,9 @@ ALTER TABLE oauth_tokens DISABLE ROW LEVEL SECURITY;
 -- ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS max_hr INTEGER;
 -- ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS resting_hr INTEGER;
 -- ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS environment TEXT;
+
+-- =============================================
+-- MIGRATION: Add planned intensity to sessions
+-- Run this if you already have the sessions table
+-- =============================================
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS intensity INTEGER;

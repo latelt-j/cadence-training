@@ -33,6 +33,8 @@ interface DbSession {
   variability_index: number | null
   aerobic_decoupling: number | null
   average_vam: number | null
+  // Planned intensity (1-10)
+  intensity: number | null
   created_at: string
   updated_at: string
 }
@@ -314,6 +316,8 @@ export function useSupabase() {
     ...(db.variability_index !== null && { variability_index: db.variability_index }),
     ...(db.aerobic_decoupling !== null && { aerobic_decoupling: db.aerobic_decoupling }),
     ...(db.average_vam !== null && { average_vam: db.average_vam }),
+    // Planned intensity
+    ...(db.intensity !== null && { intensity: db.intensity }),
   })
 
   const sessionToDb = (session: ScheduledSession): Omit<DbSession, 'created_at' | 'updated_at'> => ({
@@ -345,6 +349,8 @@ export function useSupabase() {
     variability_index: session.variability_index ?? null,
     aerobic_decoupling: session.aerobic_decoupling ?? null,
     average_vam: session.average_vam ? Math.round(session.average_vam) : null,
+    // Planned intensity
+    intensity: session.intensity ?? null,
   })
 
   return {
