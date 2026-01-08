@@ -577,10 +577,8 @@ const importCoachPhases = () => {
         <hr v-if="index > 0" :class="getPhaseStatus(phase) !== 'future' ? 'bg-primary' : ''" />
 
         <!-- Timeline start: dates -->
-        <div class="timeline-start text-xs text-base-content/50 text-right pr-2">
-          <div>{{ formatDate(phase.start_date).split('/').slice(0, 2).join('/') }}</div>
-          <div class="text-base-content/30">↓</div>
-          <div>{{ formatDate(phase.end_date).split('/').slice(0, 2).join('/') }}</div>
+        <div class="timeline-start text-xs text-base-content/50 text-right pr-2 whitespace-nowrap">
+          {{ formatDate(phase.start_date).split('/').slice(0, 2).join('/') }} → {{ formatDate(phase.end_date).split('/').slice(0, 2).join('/') }}
         </div>
 
         <!-- Timeline middle: icon -->
