@@ -32,6 +32,7 @@ Planifie tes séances comme un général planifie ses batailles. Déplace-les à
 - **Vue desktop** : grille 7 jours avec météo
 - **Vue mobile** : swipe entre les jours avec animations fluides
 - **Couleurs par sport** : 🚴 Rose (vélo) / 🏃 Bleu (course) / 💪 Rouge (renfo)
+- **Bouton ✨ Planifier** : accès rapide à la génération de plan IA
 
 ### 🔥 Sync Strava Intelligente
 Tes activités Strava débarquent automatiquement avec tous les détails :
@@ -41,10 +42,10 @@ Tes activités Strava débarquent automatiquement avec tous les détails :
 - **Métriques avancées calculées** : IF, VI, Aerobic Decoupling, VAM
 - Remplacement automatique des séances prévues du même sport
 
-### 📊 Phases d'Entraînement
+### 📊 Cycles d'Entraînement
 La **vraie** périodisation comme les pros :
-- **Phases** : Base, Build, Peak, Taper, Recovery...
-- **Objectifs par phase** avec mots-clés pour l'IA
+- **Cycles** : Base, Build, Peak, Taper, Recovery...
+- **Objectifs par cycle** avec mots-clés pour l'IA
 - **Répartition volume** : slider vélo/course qui s'ajuste auto
 - **Challenges** : parce que faut se faire mal
 - **Semaine X/Y** affichée dans le calendrier
@@ -106,6 +107,14 @@ L'IA génère du **JSON prêt à importer** avec :
 - Séances structurées
 - **Fichiers Zwift XML** pour le vélo indoor
 - Descriptions avec échauffement/corps/récup
+- **Titres Strava DRÔLES** : autodérision, jeux de mots, humour sur la souffrance 🎭
+
+### 📸 Partage Semaine
+Génère une belle image de ta semaine pour flex sur les réseaux :
+- Résumé visuel avec stats (km, heures, D+)
+- Contour noir élégant pour le style
+- Téléchargeable en PNG haute qualité
+- Parfait pour Instagram/Stories/WhatsApp
 
 ### 🌤️ Météo Intégrée
 - Prévisions 7 jours sur chaque jour du calendrier
@@ -191,5 +200,5 @@ MIT - Parce que la souffrance doit être partagée.
 <p align="center">
   <i>Fait avec 💦 sueur et ☕ café</i>
   <br>
-  <b>2024-2025 - L'année où tout change</b>
+  <b>2025-2026 - L'année où tout change</b>
 </p>
