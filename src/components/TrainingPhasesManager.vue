@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onMounted } from 'vue'
 import type { TrainingPhase, TrainingObjective, AthleteProfile } from '../types/session'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -38,6 +38,24 @@ const sortedPhases = computed(() => {
 const isEditing = ref(false)
 const editingPhase = ref<TrainingPhase | null>(null)
 const formRef = ref<HTMLElement | null>(null)
+const currentPhaseRef = ref<HTMLElement | null>(null)
+
+// Get phase status (past, current, future)
+const getPhaseStatus = (phase: TrainingPhase): 'past' | 'current' | 'future' => {
+  const today = new Date().toISOString().split('T')[0] ?? ''
+  if (phase.end_date < today) return 'past'
+  if (phase.start_date <= today && phase.end_date >= today) return 'current'
+  return 'future'
+}
+
+// Auto-scroll to current phase on mount
+onMounted(() => {
+  nextTick(() => {
+    setTimeout(() => {
+      currentPhaseRef.value?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 100)
+  })
+})
 
 // Form data
 const formData = ref({
@@ -130,12 +148,6 @@ const formatDate = (dateStr: string) => {
     month: '2-digit',
     year: 'numeric',
   })
-}
-
-// Check if phase is current
-const isCurrentPhase = (phase: TrainingPhase) => {
-  const today = new Date().toISOString().split('T')[0] ?? ''
-  return phase.start_date <= today && phase.end_date >= today
 }
 
 // Get current week within phase
@@ -549,55 +561,82 @@ const importCoachPhases = () => {
       </div>
     </div>
 
-    <!-- Phases list -->
+    <!-- Cycles Timeline -->
     <div v-if="sortedPhases.length === 0 && !isEditing" class="text-center py-8 text-base-content/50">
       <p>Aucun cycle défini</p>
       <p class="text-sm">Clique sur "+ Ajouter" pour créer ton premier cycle</p>
     </div>
 
-    <div v-else class="space-y-3">
-      <div
-        v-for="phase in sortedPhases"
+    <ul v-else class="timeline timeline-vertical timeline-compact">
+      <li
+        v-for="(phase, index) in sortedPhases"
         :key="phase.id"
-        class="bg-base-200 rounded-lg p-3"
-        :class="{ 'ring-2 ring-primary': isCurrentPhase(phase) }"
+        :ref="el => { if (getPhaseStatus(phase) === 'current') currentPhaseRef = el as HTMLElement }"
       >
-        <div class="flex justify-between items-start">
-          <div class="flex-1">
-            <div class="flex items-center gap-2">
-              <span class="badge badge-sm badge-neutral">Cycle {{ phase.number }}</span>
-              <span class="text-lg">{{ phase.emoji || getPhaseEmoji(phase.name) }}</span>
-              <span class="font-bold">{{ phase.name.toUpperCase() }}</span>
-              <span v-if="isCurrentPhase(phase)" class="badge badge-sm badge-primary">
-                S{{ getCurrentWeek(phase) }}/{{ getPhaseDuration(phase) }}
-              </span>
-            </div>
-            <div class="text-sm text-base-content/70 mt-1">
-              {{ formatDate(phase.start_date) }} → {{ formatDate(phase.end_date) }}
-              <span class="text-base-content/50">({{ getPhaseDuration(phase) }} sem)</span>
-            </div>
-            <div v-if="phase.objectives || phase.goals" class="text-sm mt-1">
-              <span class="text-base-content/50 font-semibold">Objectifs</span> {{ phase.objectives || phase.goals }}
-            </div>
-            <div v-if="phase.keywords" class="text-sm text-base-content/60 whitespace-pre-line">
-              <span class="text-base-content/50 font-semibold">Mots-clés</span> {{ phase.keywords }}
-            </div>
-            <div v-if="phase.volume_distribution" class="text-sm text-pink-400">
-              <span class="text-pink-400/60 font-semibold">Répartition</span> {{ phase.volume_distribution.replace(/\s*\([^)]*\)/, '') }}
-            </div>
-            <div v-if="phase.volume_distribution?.includes('(')" class="text-sm text-base-content/70">
-              <span class="text-base-content/40 font-semibold">Vigilance</span> ⚠️ {{ phase.volume_distribution.match(/\(([^)]+)\)/)?.[1] }}
-            </div>
-            <div v-if="phase.challenge" class="text-sm text-base-content/70">
-              <span class="text-base-content/40 font-semibold">Événement</span> 🎯 {{ phase.challenge }}
-            </div>
-          </div>
-          <div class="flex gap-1">
-            <button class="btn btn-xs btn-ghost" @click="startEdit(phase)">✏️</button>
-            <button class="btn btn-xs btn-ghost text-error" @click="deletePhase(phase)">🗑️</button>
+        <!-- Timeline connector (before) -->
+        <hr v-if="index > 0" :class="getPhaseStatus(phase) !== 'future' ? 'bg-primary' : ''" />
+
+        <!-- Timeline start: dates -->
+        <div class="timeline-start text-xs text-base-content/50 text-right pr-2">
+          <div>{{ formatDate(phase.start_date).split('/').slice(0, 2).join('/') }}</div>
+          <div class="text-base-content/30">↓</div>
+          <div>{{ formatDate(phase.end_date).split('/').slice(0, 2).join('/') }}</div>
+        </div>
+
+        <!-- Timeline middle: icon -->
+        <div class="timeline-middle">
+          <div
+            class="w-8 h-8 rounded-full flex items-center justify-center text-lg"
+            :class="{
+              'bg-primary text-primary-content': getPhaseStatus(phase) === 'current',
+              'bg-primary/30 text-primary': getPhaseStatus(phase) === 'past',
+              'bg-base-300 text-base-content/30': getPhaseStatus(phase) === 'future'
+            }"
+          >
+            {{ phase.emoji || getPhaseEmoji(phase.name) }}
           </div>
         </div>
-      </div>
-    </div>
+
+        <!-- Timeline end: content -->
+        <div
+          class="timeline-end timeline-box ml-2 flex-1"
+          :class="{
+            'border-primary border-2 bg-primary/10': getPhaseStatus(phase) === 'current',
+            'bg-base-200': getPhaseStatus(phase) !== 'current'
+          }"
+        >
+          <div class="flex justify-between items-start gap-2">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="font-bold">{{ phase.name.toUpperCase() }}</span>
+                <span class="badge badge-xs badge-neutral">{{ getPhaseDuration(phase) }} sem</span>
+                <span v-if="getPhaseStatus(phase) === 'current'" class="badge badge-xs badge-primary">
+                  S{{ getCurrentWeek(phase) }}/{{ getPhaseDuration(phase) }}
+                </span>
+              </div>
+              <div v-if="phase.objectives || phase.goals" class="text-sm mt-1 text-base-content/70">
+                {{ phase.objectives || phase.goals }}
+              </div>
+              <div v-if="phase.keywords" class="text-xs text-base-content/50 mt-1">
+                {{ phase.keywords }}
+              </div>
+              <div v-if="phase.volume_distribution" class="text-xs text-pink-400 mt-1">
+                {{ phase.volume_distribution.replace(/\s*\([^)]*\)/, '') }}
+              </div>
+              <div v-if="phase.challenge" class="text-xs text-base-content/60 mt-1">
+                🎯 {{ phase.challenge }}
+              </div>
+            </div>
+            <div class="flex gap-1 shrink-0">
+              <button class="btn btn-xs btn-ghost" @click="startEdit(phase)">✏️</button>
+              <button class="btn btn-xs btn-ghost text-error" @click="deletePhase(phase)">🗑️</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Timeline connector (after) -->
+        <hr v-if="index < sortedPhases.length - 1" :class="getPhaseStatus(phase) !== 'future' ? 'bg-primary' : ''" />
+      </li>
+    </ul>
   </div>
 </template>
