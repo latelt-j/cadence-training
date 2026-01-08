@@ -15,6 +15,7 @@ import AthleteProfileComponent from './components/AthleteProfile.vue'
 import TrainingPhasesManager from './components/TrainingPhasesManager.vue'
 import ShareWeekModal from './components/ShareWeekModal.vue'
 import { copySessionForCoach } from './utils/coach'
+import { VibeKanbanWebCompanion } from 'vibe-kanban-web-companion'
 
 const {
   sessions,
@@ -395,6 +396,7 @@ const handleReset = () => {
 </script>
 
 <template>
+  <VibeKanbanWebCompanion />
   <div class="min-h-screen app-bg pb-20 md:pb-0">
     <!-- Header - Desktop -->
     <header class="sticky top-0 z-50 border-b border-base-300/50 bg-base-100/80 backdrop-blur-lg hidden md:block">
