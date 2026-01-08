@@ -416,6 +416,13 @@ Je partage mes séances sur Strava avec beaucoup de followers. Les titres et des
   - Format: <textevent timeoffset='X' message='...'/>
   - timeoffset = secondes depuis le début du workout (pas du segment)
   - Messages courts: cadence, position, respiration, motivation
+
+✅ VÉRIFICATION MATHÉMATIQUE OBLIGATOIRE :
+- Tu DOIS calculer la somme de toutes les Duration='X' de tes segments XML
+- La somme totale (en secondes) DOIT être strictement égale à duration_min * 60
+- SI le total est trop court : Tu DOIS prolonger le <Cooldown> ou le dernier intervalle de récupération pour tomber pile sur le bon temps
+- INTERDIT de générer un fichier plus court que la durée annoncée dans le JSON
+
 - Exemple : "<workout_file><author>Coach</author><name>Sweet Spot</name><description>2x20min SS</description><sportType>bike</sportType><workout><Warmup Duration='600' PowerLow='0.50' PowerHigh='0.70'/><textevent timeoffset='0' message='Echauffement progressif'/><textevent timeoffset='300' message='Augmentez doucement'/><SteadyState Duration='1200' Power='0.90'/><textevent timeoffset='600' message='Sweet spot! Cadence 85-95'/><textevent timeoffset='1200' message='Tenez le rythme'/><Cooldown Duration='600' PowerLow='0.65' PowerHigh='0.50'/><textevent timeoffset='1800' message='Retour au calme'/></workout></workout_file>"
 `
 
