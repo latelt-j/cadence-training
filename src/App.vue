@@ -254,6 +254,10 @@ const syncStrava = async () => {
     if (plannedSameSport) {
       sessionToAdd.planned_title = plannedSameSport.title
       sessionToAdd.planned_description = plannedSameSport.description
+      // Conserver l'intensité prévue
+      if (plannedSameSport.intensity) {
+        sessionToAdd.intensity = plannedSameSport.intensity
+      }
       await removeSession(plannedSameSport.id)
       replacedPlanned++
     }
