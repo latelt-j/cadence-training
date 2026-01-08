@@ -30,15 +30,19 @@ const progressPercent = computed(() => {
 })
 
 const batteryColor = computed(() => {
-  if (progressPercent.value >= 80) return 'bg-success'
-  if (progressPercent.value >= 50) return 'bg-warning'
-  return 'bg-error'
+  if (progressPercent.value >= 90) return 'bg-pink-400'
+  if (progressPercent.value >= 70) return 'bg-pink-500'
+  if (progressPercent.value >= 50) return 'bg-pink-600'
+  if (progressPercent.value >= 30) return 'bg-pink-700'
+  return 'bg-pink-800'
 })
 
 const batteryTextColor = computed(() => {
-  if (progressPercent.value >= 80) return 'text-success'
-  if (progressPercent.value >= 50) return 'text-warning'
-  return 'text-error'
+  if (progressPercent.value >= 90) return 'text-pink-400'
+  if (progressPercent.value >= 70) return 'text-pink-500'
+  if (progressPercent.value >= 50) return 'text-pink-600'
+  if (progressPercent.value >= 30) return 'text-pink-700'
+  return 'text-pink-800'
 })
 
 // Per-sport progress
