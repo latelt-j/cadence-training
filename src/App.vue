@@ -10,6 +10,7 @@ import SessionDetailModal from './components/SessionDetailModal.vue'
 import WeeklyStats from './components/WeeklyStats.vue'
 import VolumeChart from './components/VolumeChart.vue'
 import WellnessWidget from './components/WellnessWidget.vue'
+import CycleProgressTimeline from './components/CycleProgressTimeline.vue'
 import ObjectiveSettings from './components/ObjectiveSettings.vue'
 import AthleteProfileComponent from './components/AthleteProfile.vue'
 import TrainingPhasesManager from './components/TrainingPhasesManager.vue'
@@ -542,6 +543,8 @@ const handleReset = () => {
           @open-share-modal="showShareModal = true"
           @open-import-modal="showImportModal = true"
         />
+
+        <CycleProgressTimeline :phases="trainingPhases" />
 
         <WeeklyStats :stats="weeklyStats" />
 
