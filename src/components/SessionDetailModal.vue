@@ -817,8 +817,8 @@ Exemple:
           ⏱️ Modifier durée
         </button>
 
-        <!-- Dropdown pour copier avec commentaire -->
-        <details ref="dropdownRef" class="dropdown dropdown-top">
+        <!-- Dropdown pour copier avec commentaire (only for completed sessions) -->
+        <details v-if="session.strava_id || session.actual_km" ref="dropdownRef" class="dropdown dropdown-top">
           <summary
             class="btn btn-sm btn-outline"
             :class="copied ? 'btn-success' : 'btn-primary'"
