@@ -342,10 +342,10 @@ Format attendu :
     {
       "sport": "cycling",
       "type": "sweet_spot",
-      "title": "Zwift: Sweet spot 2x20min",
+      "title": "Zwift: Sweet Torture 2x20 - Mes jambes négocient",
       "duration_min": 90,
       "intensity": 7,
-      "description": "Description",
+      "description": "🔥 40 minutes à 90% FTP, qu'est-ce qui pourrait mal tourner?\\n\\nÉchauffement 10min\\n2x20min Sweet Spot (5min récup)\\nRetour au calme 10min\\n\\nSpoiler: tout. Tout peut mal tourner.",
       "date": "${dates[0]}",
       "zwift_workout": "<workout_file>...</workout_file>"
     }
@@ -396,6 +396,14 @@ IMPORTANT pour les descriptions :
 - PAS de markdown
 - Emojis au début : 🔥 💪 🧘 🚴 🏃 ⛰️
 - Structure : Échauffement → Corps → Retour au calme
+
+🎭 TITRES & DESCRIPTIONS STRAVA - SOIS CRÉATIF ET DRÔLE !
+Je partage mes séances sur Strava avec beaucoup de followers. Les titres et descriptions doivent :
+- Être DRÔLES, décalés, avec de l'autodérision
+- Faire sourire/rire les gens qui lisent
+- Utiliser des références pop culture, des jeux de mots, de l'humour cycliste/runner
+- Exemples de titres fun : "La souffrance était au rendez-vous (et moi aussi, malheureusement)", "Sweet Spot ou Sweet Torture?", "Mes jambes ont déposé une plainte", "Je pédale donc je souffre", "VO2max: Violence Organisée 2 fois max"
+- Dans les descriptions : ajoute des commentaires sarcastiques, des observations drôles sur la douleur, la météo, les sensations
 
 🚨 RÈGLE CRITIQUE - zwift_workout :
 - OBLIGATOIRE : Chaque séance "Zwift:" DOIT avoir un zwift_workout XML complet (NE JAMAIS OUBLIER)
