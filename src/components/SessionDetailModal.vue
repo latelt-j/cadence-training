@@ -65,6 +65,7 @@ const isResyncing = ref(false)
 
 // Mark as done (manual completion)
 const showMarkAsDone = ref(false)
+const showEditDuration = ref(false)
 const actualDuration = ref(0)
 const completionNote = ref('')
 const selectedFeeling = ref<string | null>(null)
@@ -346,7 +347,6 @@ const markAsNotDone = () => {
 }
 
 // Edit duration for manual sessions
-const showEditDuration = ref(false)
 const editDurationValue = ref(0)
 
 const openEditDuration = () => {
