@@ -194,17 +194,20 @@ export const generateAnalysisText = (
 
 **PARTIE 2 - Suggestions pour Strava (texte simple, PAS de markdown) :**
 
+🎭 IMPORTANT : Sois DRÔLE et CRÉATIF ! Je partage sur Strava avec beaucoup de followers.
+Les titres/descriptions doivent faire sourire : autodérision, jeux de mots, références pop culture, humour sur la souffrance...
+
 Propose 3 variantes de titre + description :
 
-1. **Sobre** (sans emoji)
+1. **Sobre mais malin** (sans emoji, humour subtil)
 Titre:
 Description:
 
-2. **Équilibré** (1-2 emojis)
+2. **Fun et décalé** (1-2 emojis, ton léger)
 Titre:
 Description:
 
-3. **Expressif** (plusieurs emojis)
+3. **Full entertainment** (plusieurs emojis, assumé drôle)
 Titre:
 Description:`
 
