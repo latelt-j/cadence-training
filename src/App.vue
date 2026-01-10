@@ -395,7 +395,7 @@ const handleReset = () => {
 </script>
 
 <template>
-  <div class="min-h-screen app-bg pb-20 md:pb-0 overflow-x-hidden">
+  <div class="min-h-screen app-bg pb-20 md:pb-0">
     <!-- Header - Desktop -->
     <header class="sticky top-0 z-50 border-b border-base-300/50 bg-base-100/80 backdrop-blur-lg hidden md:block">
       <div class="container mx-auto max-w-6xl px-4">
