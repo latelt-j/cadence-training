@@ -391,7 +391,7 @@ watch(forecast, () => {}, { deep: true })
         <h2 class="text-xl font-bold text-primary capitalize leading-none">{{ headerTitle }}</h2>
       </div>
 
-      <div class="flex items-center gap-1">
+      <div class="flex items-center gap-2">
         <button
           class="btn btn-sm btn-ghost"
           :class="weekExportCopied ? 'text-success' : ''"
