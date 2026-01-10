@@ -640,11 +640,45 @@ watch(forecast, () => {}, { deep: true })
 }
 
 .session-planned {
+  position: relative;
   opacity: 0.65 !important;
   border-top: 2px dashed rgba(255, 255, 255, 0.6) !important;
   border-left: 2px dashed rgba(255, 255, 255, 0.6) !important;
   border-right: 2px dashed rgba(255, 255, 255, 0.6) !important;
+  border-bottom: none !important;
   box-shadow: none !important;
+  margin-bottom: 10px !important;
+}
+
+.session-planned::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  border-radius: var(--radius-sm);
+}
+
+/* Sport-specific underline colors for planned sessions */
+.session-planned.session-cycling::after {
+  background: rgba(16, 185, 129, 0.6);
+}
+
+.session-planned.session-running::after {
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.session-planned.session-strength::after {
+  background: rgba(147, 51, 234, 0.6);
+}
+
+.session-planned.session-mtb::after {
+  background: rgba(146, 64, 14, 0.6);
+}
+
+.session-planned.session-hiking::after {
+  background: rgba(101, 163, 13, 0.6);
 }
 
 .session-today {
