@@ -648,10 +648,19 @@ watch(forecast, () => {}, { deep: true })
 }
 
 .session-today {
-  animation: glow 2s ease-in-out infinite;
-  border-top: 2px solid rgba(255, 215, 0, 0.6) !important;
-  border-left: 2px solid rgba(255, 215, 0, 0.6) !important;
-  border-right: 2px solid rgba(255, 215, 0, 0.6) !important;
+  position: relative;
+  margin-bottom: 10px !important;
+}
+
+.session-today::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: rgba(255, 215, 0, 0.6);
+  border-radius: var(--radius-sm);
 }
 
 .session-new {
