@@ -619,7 +619,7 @@ watch(forecast, () => {}, { deep: true })
 
 /* Sport border colors */
 .session-cycling {
-  border-bottom-color: #ffffff;
+  border-bottom-color: #10b981;
 }
 
 .session-mtb {
@@ -627,11 +627,11 @@ watch(forecast, () => {}, { deep: true })
 }
 
 .session-running {
-  border-bottom-color: #0ea5e9;
+  border-bottom-color: #ffffff;
 }
 
 .session-strength {
-  border-bottom-color: #9333ea;
+  border-bottom-color: #eab308;
 }
 
 .session-hiking {
