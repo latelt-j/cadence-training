@@ -611,9 +611,9 @@ watch(forecast, () => {}, { deep: true })
   cursor: grabbing;
 }
 
-/* Base session card - emerald background */
+/* Base session card - dark background */
 .session-card {
-  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  background: #0a0f0c;
   border-bottom: 3px solid transparent;
 }
 
