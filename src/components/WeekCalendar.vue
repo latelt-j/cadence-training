@@ -645,8 +645,8 @@ watch(forecast, () => {}, { deep: true })
 
 .session-new {
   animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards,
-             glow 2s ease-in-out 0.5s infinite;
-  border: 2px solid rgba(255, 215, 0, 0.7) !important;
+             glowPink 2s ease-in-out 0.5s infinite;
+  border: 2px solid rgba(236, 72, 153, 0.7) !important;
 }
 
 @keyframes glow {
@@ -655,6 +655,15 @@ watch(forecast, () => {}, { deep: true })
   }
   50% {
     box-shadow: 0 0 10px rgba(255, 215, 0, 0.45), 0 0 20px rgba(255, 215, 0, 0.25);
+  }
+}
+
+@keyframes glowPink {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(236, 72, 153, 0.4), 0 0 16px rgba(236, 72, 153, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(236, 72, 153, 0.6), 0 0 28px rgba(236, 72, 153, 0.3);
   }
 }
 
