@@ -11,5 +11,5 @@
   <rect x="0" y="0" width="512" height="512" rx="100" ry="100" fill="url(#bgGrad)"/>
 
   <!-- C letter -->
-  <text x="256" y="340" font-family="system-ui, -apple-system, sans-serif" font-size="320" font-weight="bold" fill="white" text-anchor="middle">C</text>
+  <text x="256" y="256" font-family="system-ui, -apple-system, sans-serif" font-size="320" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="central">C</text>
 </svg>
