@@ -64,124 +64,6 @@ const defaultDates = getDefaultPlanDates()
 const planStartDate = ref(defaultDates.start)
 const planEndDate = ref(defaultDates.end)
 
-// Calendar state
-const showCalendar = ref(false)
-const calendarMonth = ref(new Date().getMonth())
-const calendarYear = ref(new Date().getFullYear())
-const selectingStart = ref(true) // true = selecting start, false = selecting end
-
-// Calendar helpers
-const calendarDays = computed(() => {
-  const days: { date: string; day: number; isCurrentMonth: boolean; isToday: boolean }[] = []
-  const firstDay = new Date(calendarYear.value, calendarMonth.value, 1)
-  const lastDay = new Date(calendarYear.value, calendarMonth.value + 1, 0)
-
-  // Start from Monday (adjust if first day is not Monday)
-  let startOffset = firstDay.getDay() - 1
-  if (startOffset < 0) startOffset = 6 // Sunday
-
-  // Previous month days
-  const prevMonthLastDay = new Date(calendarYear.value, calendarMonth.value, 0)
-  for (let i = startOffset - 1; i >= 0; i--) {
-    const d = prevMonthLastDay.getDate() - i
-    const date = new Date(calendarYear.value, calendarMonth.value - 1, d)
-    days.push({
-      date: formatLocalDate(date),
-      day: d,
-      isCurrentMonth: false,
-      isToday: false
-    })
-  }
-
-  // Current month days
-  const today = formatLocalDate(new Date())
-  for (let d = 1; d <= lastDay.getDate(); d++) {
-    const date = new Date(calendarYear.value, calendarMonth.value, d)
-    const dateStr = formatLocalDate(date)
-    days.push({
-      date: dateStr,
-      day: d,
-      isCurrentMonth: true,
-      isToday: dateStr === today
-    })
-  }
-
-  // Next month days to fill the grid (6 rows = 42 days)
-  const remaining = 42 - days.length
-  for (let d = 1; d <= remaining; d++) {
-    const date = new Date(calendarYear.value, calendarMonth.value + 1, d)
-    days.push({
-      date: formatLocalDate(date),
-      day: d,
-      isCurrentMonth: false,
-      isToday: false
-    })
-  }
-
-  return days
-})
-
-const calendarMonthName = computed(() => {
-  return new Date(calendarYear.value, calendarMonth.value).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
-})
-
-const prevMonth = () => {
-  if (calendarMonth.value === 0) {
-    calendarMonth.value = 11
-    calendarYear.value--
-  } else {
-    calendarMonth.value--
-  }
-}
-
-const nextMonth = () => {
-  if (calendarMonth.value === 11) {
-    calendarMonth.value = 0
-    calendarYear.value++
-  } else {
-    calendarMonth.value++
-  }
-}
-
-const isInRange = (dateStr: string) => {
-  return dateStr >= planStartDate.value && dateStr <= planEndDate.value
-}
-
-const isRangeStart = (dateStr: string) => dateStr === planStartDate.value
-const isRangeEnd = (dateStr: string) => dateStr === planEndDate.value
-
-const selectDate = (dateStr: string) => {
-  if (selectingStart.value) {
-    planStartDate.value = dateStr
-    // If new start is after current end, reset end to start + 6 days
-    if (dateStr > planEndDate.value) {
-      const newEnd = new Date(dateStr)
-      newEnd.setDate(newEnd.getDate() + 6)
-      planEndDate.value = formatLocalDate(newEnd)
-    }
-    selectingStart.value = false
-  } else {
-    // Selecting end
-    if (dateStr >= planStartDate.value) {
-      planEndDate.value = dateStr
-    } else {
-      // If clicked before start, make it the new start
-      planStartDate.value = dateStr
-    }
-    selectingStart.value = true
-    showCalendar.value = false
-  }
-}
-
-const openCalendar = () => {
-  // Set calendar to the month of the start date
-  const startDate = new Date(planStartDate.value)
-  calendarMonth.value = startDate.getMonth()
-  calendarYear.value = startDate.getFullYear()
-  selectingStart.value = true
-  showCalendar.value = true
-}
-
 // Format date as YYYY-MM-DD in LOCAL timezone (not UTC!)
 const formatLocalDate = (date: Date) => {
   const year = date.getFullYear()
@@ -611,79 +493,25 @@ const saveCoachResponse = () => {
     <Transition name="fade" mode="out-in">
       <!-- Step 1: Form -->
       <div v-if="step === 'form'" key="form" class="space-y-4">
-        <!-- Date range picker with calendar -->
+        <!-- Date range picker -->
         <div class="form-control">
           <label class="label pb-1">
             <span class="label-text text-xs text-base-content/60">📅 Période à planifier</span>
           </label>
-
-          <!-- Date display button -->
-          <button
-            type="button"
-            class="btn btn-outline btn-sm justify-between font-normal"
-            @click="openCalendar"
-          >
-            <span>{{ new Date(planStartDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) }}</span>
-            <span class="text-base-content/40">→</span>
-            <span>{{ new Date(planEndDate).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }) }}</span>
-            <span class="badge badge-sm badge-ghost ml-2">{{ planDatesRange.length }}j</span>
-          </button>
-
-          <!-- Calendar dropdown -->
-          <div v-if="showCalendar" class="mt-2 p-3 bg-base-200 rounded-xl border border-base-300">
-            <!-- Calendar header -->
-            <div class="flex items-center justify-between mb-3">
-              <button type="button" class="btn btn-sm btn-ghost btn-circle" @click="prevMonth">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <span class="font-semibold capitalize">{{ calendarMonthName }}</span>
-              <button type="button" class="btn btn-sm btn-ghost btn-circle" @click="nextMonth">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-
-            <!-- Selection hint -->
-            <div class="text-center text-xs text-base-content/60 mb-2">
-              {{ selectingStart ? 'Sélectionne le début' : 'Sélectionne la fin' }}
-            </div>
-
-            <!-- Day names -->
-            <div class="grid grid-cols-7 gap-1 mb-1">
-              <div v-for="(day, i) in ['L', 'M', 'M', 'J', 'V', 'S', 'D']" :key="i" class="text-center text-xs text-base-content/50 font-medium py-1">
-                {{ day }}
-              </div>
-            </div>
-
-            <!-- Calendar grid -->
-            <div class="grid grid-cols-7 gap-1">
-              <button
-                v-for="day in calendarDays"
-                :key="day.date"
-                type="button"
-                class="aspect-square rounded-lg text-sm font-medium transition-all"
-                :class="{
-                  'text-base-content/30': !day.isCurrentMonth,
-                  'text-base-content': day.isCurrentMonth && !isInRange(day.date),
-                  'bg-pink-500 text-white': isRangeStart(day.date) || isRangeEnd(day.date),
-                  'bg-pink-500/20 text-pink-300': isInRange(day.date) && !isRangeStart(day.date) && !isRangeEnd(day.date),
-                  'ring-2 ring-pink-400': day.isToday,
-                  'hover:bg-base-300': !isInRange(day.date)
-                }"
-                @click="selectDate(day.date)"
-              >
-                {{ day.day }}
-              </button>
-            </div>
-
-            <!-- Quick actions -->
-            <div class="flex gap-2 mt-3 pt-3 border-t border-base-300">
-              <button type="button" class="btn btn-xs btn-ghost flex-1" @click="showCalendar = false">Annuler</button>
-            </div>
+          <div class="flex gap-2 items-center">
+            <input
+              v-model="planStartDate"
+              type="date"
+              class="input input-bordered input-sm flex-1"
+            />
+            <span class="text-base-content/60">→</span>
+            <input
+              v-model="planEndDate"
+              type="date"
+              class="input input-bordered input-sm flex-1"
+            />
           </div>
+          <div class="text-xs text-base-content/50 mt-1">{{ planDatesRange.length }} jours</div>
         </div>
 
         <!-- Fatigue slider -->
