@@ -412,13 +412,12 @@ const handleReset = () => {
             <button
               v-if="stravaConnected"
               class="btn btn-sm btn-ghost gap-2 hover:bg-pink-500/20 hover:text-pink-400"
-              :class="{ 'loading': stravaLoading }"
               :disabled="stravaLoading"
               @click="syncStrava"
             >
-              <span class="w-2 h-2 rounded-full bg-[#fc4c02]"></span>
-              <span v-if="!stravaLoading">Sync Strava</span>
-              <span v-else>Sync...</span>
+              <span v-if="stravaLoading" class="loading loading-spinner loading-xs"></span>
+              <span v-else class="w-2 h-2 rounded-full bg-[#fc4c02]"></span>
+              Sync Strava
             </button>
             <button
               v-else
@@ -483,12 +482,11 @@ const handleReset = () => {
         <!-- Strava Sync -->
         <button
           class="flex flex-col items-center gap-0.5 px-3 py-1"
-          :class="stravaLoading ? 'opacity-50' : ''"
+          :disabled="stravaLoading"
           @click="stravaConnected ? syncStrava() : stravaAuthorize()"
         >
-          <span class="text-xl" :class="stravaConnected ? 'text-[#fc4c02]' : ''">
-            {{ stravaLoading ? '⏳' : '🔄' }}
-          </span>
+          <span v-if="stravaLoading" class="loading loading-spinner loading-sm"></span>
+          <span v-else class="text-xl" :class="stravaConnected ? 'text-[#fc4c02]' : ''">🔄</span>
           <span class="text-[10px] text-base-content/70">Strava</span>
         </button>
 

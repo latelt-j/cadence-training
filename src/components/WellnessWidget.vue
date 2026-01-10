@@ -247,7 +247,8 @@ const chartOptions = computed(() => ({
           @click="refresh"
           :disabled="isLoading"
         >
-          <span :class="{ 'animate-spin': isLoading }">🔄</span>
+          <span v-if="isLoading" class="loading loading-spinner loading-xs"></span>
+          <span v-else>🔄</span>
         </button>
       </div>
 

@@ -491,9 +491,10 @@ const confirmEditDuration = () => {
             </button>
             <div class="flex gap-2">
               <button class="btn btn-sm btn-ghost" @click="cancelEditStrava" :disabled="isSaving">Annuler</button>
-              <button class="btn btn-sm btn-primary" @click="saveStrava" :disabled="!editTitle.trim() || isSaving">
+              <button class="btn btn-sm btn-primary gap-1" @click="saveStrava" :disabled="!editTitle.trim() || isSaving">
                 <span v-if="isSaving" class="loading loading-spinner loading-xs"></span>
-                {{ isSaving ? 'Envoi...' : '💾 Enregistrer' }}
+                <span v-else>💾</span>
+                Enregistrer
               </button>
             </div>
           </div>
@@ -717,7 +718,10 @@ Exemple:
               @click="saveFeedback"
             >
               <span v-if="isSavingFeedback" class="loading loading-spinner loading-xs"></span>
-              {{ isSavingFeedback ? 'Sauvegarde...' : feedbackSaved ? '✓ Sauvegardé !' : feedbackError ? '✗ Erreur' : '💾 Sauvegarder' }}
+              <span v-else-if="feedbackSaved">✓</span>
+              <span v-else-if="feedbackError">✗</span>
+              <span v-else>💾</span>
+              {{ feedbackSaved ? 'Sauvegardé !' : feedbackError ? 'Erreur' : 'Sauvegarder' }}
             </button>
           </div>
         </div>
@@ -840,12 +844,13 @@ Exemple:
         </details>
         <button
           v-if="session.type === 'strava' && session.strava_id"
-          class="btn btn-sm btn-outline btn-info"
+          class="btn btn-sm btn-outline btn-info gap-1"
           :disabled="isResyncing"
           @click="handleResync"
         >
           <span v-if="isResyncing" class="loading loading-spinner loading-xs"></span>
-          {{ isResyncing ? 'Sync...' : '🔄 Re-sync' }}
+          <span v-else>🔄</span>
+          Re-sync
         </button>
         <button
           v-if="session.zwift_workout"

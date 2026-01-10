@@ -397,16 +397,13 @@ const getIntensityColor = (intensity: number | undefined): string => {
             <!-- Download button -->
             <div class="flex justify-center pt-4 pb-2 screenshot-hide">
               <button
-                class="btn btn-lg border-0 shadow-lg text-white px-8 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-pink-500/40"
+                class="btn btn-lg border-0 shadow-lg text-white px-8 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-pink-500/40 gap-2"
                 :disabled="isDownloading"
                 @click="downloadScreenshot"
               >
-                <template v-if="isDownloading">
-                  Téléchargement <span class="loading loading-spinner loading-xs ml-1"></span>
-                </template>
-                <template v-else>
-                  📸 Télécharger l'image
-                </template>
+                <span v-if="isDownloading" class="loading loading-spinner loading-sm"></span>
+                <span v-else>📸</span>
+                Télécharger l'image
               </button>
             </div>
               </div>
