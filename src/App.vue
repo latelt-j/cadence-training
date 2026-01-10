@@ -402,9 +402,7 @@ const handleReset = () => {
         <div class="flex h-16 items-center justify-between">
           <!-- Logo -->
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <span class="text-lg">🎯</span>
-            </div>
+            <img src="/icon.svg" alt="Cadence" class="w-9 h-9 rounded-xl" />
             <span class="text-xl font-bold tracking-tight">Cadence</span>
           </div>
 
@@ -473,9 +471,7 @@ const handleReset = () => {
     <header class="sticky top-0 z-50 border-b border-base-300/50 bg-base-100/80 backdrop-blur-lg md:hidden">
       <div class="flex h-14 items-center justify-between px-4">
         <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-            <span class="text-base">🎯</span>
-          </div>
+          <img src="/icon.svg" alt="Cadence" class="w-8 h-8 rounded-xl" />
           <span class="text-lg font-bold tracking-tight">Cadence</span>
         </div>
       </div>
