@@ -60,9 +60,12 @@ const ftpZones = computed(() => {
 
 <template>
   <div class="space-y-4">
-    <div class="flex items-center gap-2">
-      <span class="text-2xl">&#9889;</span>
-      <h3 class="font-bold text-lg">Profil athlete</h3>
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-2">
+        <span class="text-2xl">&#9889;</span>
+        <h3 class="font-bold text-lg">Profil athlete</h3>
+      </div>
+      <button class="btn btn-sm btn-circle btn-ghost" @click="emit('close')">✕</button>
     </div>
 
     <p class="text-sm text-base-content/70">

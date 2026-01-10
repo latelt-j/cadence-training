@@ -116,11 +116,14 @@ const switchType = (type: 'trail' | 'road_cycling') => {
 
 <template>
   <div class="space-y-4">
-    <div class="flex items-center justify-between">
+    <div class="flex items-center justify-between mb-4">
       <h3 class="font-bold text-lg">🎯 Objectifs</h3>
-      <button class="btn btn-sm btn-primary" @click="addObjective">
-        + Ajouter
-      </button>
+      <div class="flex items-center gap-2">
+        <button class="btn btn-sm btn-primary" @click="addObjective">
+          + Ajouter
+        </button>
+        <button class="btn btn-sm btn-circle btn-ghost" @click="emit('close')">✕</button>
+      </div>
     </div>
 
     <!-- Objective editor -->

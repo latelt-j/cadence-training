@@ -11,6 +11,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   save: [phases: TrainingPhase[]]
+  close: []
 }>()
 
 // Coach prompt state
@@ -387,15 +388,18 @@ const importCoachPhases = () => {
 <template>
   <div class="space-y-4">
     <!-- Header with add button -->
-    <div class="flex justify-between items-center pr-8">
+    <div class="flex justify-between items-center mb-4">
       <h3 class="font-bold text-lg">📊 Cycles d'entraînement</h3>
-      <div v-if="!isEditing && !showCoachImport" class="flex gap-2">
-        <button class="btn btn-sm btn-ghost" @click="showCoachImport = true">
-          🤖 Coach IA
-        </button>
-        <button class="btn btn-sm btn-primary" @click="startAdd">
-          + Ajouter
-        </button>
+      <div class="flex items-center gap-2">
+        <template v-if="!isEditing && !showCoachImport">
+          <button class="btn btn-sm btn-ghost" @click="showCoachImport = true">
+            🤖 Coach IA
+          </button>
+          <button class="btn btn-sm btn-primary" @click="startAdd">
+            + Ajouter
+          </button>
+        </template>
+        <button class="btn btn-sm btn-circle btn-ghost" @click="emit('close')">✕</button>
       </div>
     </div>
 
