@@ -165,21 +165,21 @@ const chartOptions = computed(() => ({
         <div class="btn-group">
           <button
             class="btn btn-sm"
-            :class="period === 1 ? 'btn-primary' : 'btn-ghost'"
+            :class="period === 1 ? 'bg-emerald-500 text-white' : 'btn-ghost'"
             @click="period = 1"
           >
             1 mois
           </button>
           <button
             class="btn btn-sm"
-            :class="period === 3 ? 'btn-primary' : 'btn-ghost'"
+            :class="period === 3 ? 'bg-emerald-500 text-white' : 'btn-ghost'"
             @click="period = 3"
           >
             3 mois
           </button>
           <button
             class="btn btn-sm"
-            :class="period === 6 ? 'btn-primary' : 'btn-ghost'"
+            :class="period === 6 ? 'bg-emerald-500 text-white' : 'btn-ghost'"
             @click="period = 6"
           >
             6 mois

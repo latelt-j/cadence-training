@@ -119,7 +119,7 @@ const switchType = (type: 'trail' | 'road_cycling') => {
     <div class="flex items-center justify-between mb-4">
       <h3 class="font-bold text-lg">🎯 Objectifs</h3>
       <div class="flex items-center gap-2">
-        <button class="btn btn-sm btn-primary" @click="addObjective">
+        <button class="btn btn-sm bg-emerald-500 text-white hover:bg-emerald-600 border-0" @click="addObjective">
           + Ajouter
         </button>
         <button class="btn btn-sm btn-circle btn-ghost" @click="emit('close')">✕</button>
@@ -136,14 +136,14 @@ const switchType = (type: 'trail' | 'road_cycling') => {
       <div class="flex gap-2">
         <button
           class="btn btn-sm flex-1"
-          :class="editingObjective.type === 'trail' ? 'btn-primary' : 'btn-ghost'"
+          :class="editingObjective.type === 'trail' ? 'bg-emerald-500 text-white hover:bg-emerald-600 border-0' : 'btn-ghost'"
           @click="switchType('trail')"
         >
           🏃 Trail
         </button>
         <button
           class="btn btn-sm flex-1"
-          :class="editingObjective.type === 'road_cycling' ? 'btn-primary' : 'btn-ghost'"
+          :class="editingObjective.type === 'road_cycling' ? 'bg-emerald-500 text-white hover:bg-emerald-600 border-0' : 'btn-ghost'"
           @click="switchType('road_cycling')"
         >
           🚴 Vélo route
@@ -216,7 +216,7 @@ const switchType = (type: 'trail' | 'road_cycling') => {
 
       <div class="flex justify-end gap-2">
         <button class="btn btn-sm btn-ghost" @click="cancelEdit">Annuler</button>
-        <button class="btn btn-sm btn-primary" @click="saveObjective" :disabled="!editingObjective.name">
+        <button class="btn btn-sm bg-emerald-500 text-white hover:bg-emerald-600 border-0" @click="saveObjective" :disabled="!editingObjective.name">
           Valider
         </button>
       </div>
@@ -241,7 +241,7 @@ const switchType = (type: 'trail' | 'road_cycling') => {
             >{{ obj.priority || 'A' }}</span>
             <span>{{ obj.type === 'trail' ? '🏃' : '🚴' }}</span>
             <span class="font-medium">{{ obj.name }}</span>
-            <span class="badge badge-sm badge-primary">{{ daysUntil(obj.date) }}</span>
+            <span class="badge badge-sm bg-emerald-500 text-white">{{ daysUntil(obj.date) }}</span>
           </div>
           <div class="text-xs text-base-content/60 mt-1">
             {{ formatDate(obj.date) }} • {{ obj.distance_km }} km • {{ obj.elevation_gain }}m D+
@@ -263,7 +263,7 @@ const switchType = (type: 'trail' | 'road_cycling') => {
     <!-- Save button -->
     <div class="flex justify-end gap-2 pt-4 border-t border-base-300">
       <button class="btn btn-ghost" @click="emit('close')">Annuler</button>
-      <button class="btn btn-primary" @click="saveAll">Enregistrer</button>
+      <button class="btn bg-emerald-500 text-white hover:bg-emerald-600 border-0" @click="saveAll">Enregistrer</button>
     </div>
   </div>
 </template>

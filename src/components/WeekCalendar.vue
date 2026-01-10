@@ -631,7 +631,7 @@ watch(forecast, () => {}, { deep: true })
 }
 
 .session-strength {
-  border-bottom-color: #eab308;
+  border-bottom-color: #00bcff;
 }
 
 .session-hiking {

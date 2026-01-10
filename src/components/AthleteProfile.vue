@@ -164,7 +164,7 @@ Trail/montagne possible uniquement le week-end
     <!-- Actions -->
     <div class="flex justify-end gap-2 pt-4 border-t border-base-300">
       <button class="btn btn-ghost" @click="emit('close')">Annuler</button>
-      <button class="btn btn-primary" @click="saveProfile">Enregistrer</button>
+      <button class="btn btn bg-emerald-500 text-white hover:bg-emerald-600 border-0" @click="saveProfile">Enregistrer</button>
     </div>
   </div>
 </template>

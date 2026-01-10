@@ -328,17 +328,17 @@ const chartOptions = computed(() => ({
             <div class="flex gap-1">
               <button
                 class="btn btn-xs"
-                :class="chartPeriod === 'week' ? 'btn-primary' : 'btn-ghost'"
+                :class="chartPeriod === 'week' ? 'bg-emerald-500 text-white' : 'btn-ghost'"
                 @click="chartPeriod = 'week'"
               >7j</button>
               <button
                 class="btn btn-xs"
-                :class="chartPeriod === 'month' ? 'btn-primary' : 'btn-ghost'"
+                :class="chartPeriod === 'month' ? 'bg-emerald-500 text-white' : 'btn-ghost'"
                 @click="chartPeriod = 'month'"
               >30j</button>
               <button
                 class="btn btn-xs"
-                :class="chartPeriod === '3months' ? 'btn-primary' : 'btn-ghost'"
+                :class="chartPeriod === '3months' ? 'bg-emerald-500 text-white' : 'btn-ghost'"
                 @click="chartPeriod = '3months'"
               >90j</button>
             </div>

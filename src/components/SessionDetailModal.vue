@@ -564,7 +564,7 @@ const cancelModifyAI = () => {
           >
             {{ session.type === 'manual' ? '✅ Fait' : session.type }}
           </div>
-          <div class="badge badge-primary">{{ formatDuration(session.duration_min) }}</div>
+          <div class="badge bg-emerald-500 text-white">{{ formatDuration(session.duration_min) }}</div>
           <!-- Intensity badge for planned sessions -->
           <div
             v-if="session.type === 'planned' && session.intensity"
@@ -617,7 +617,7 @@ const cancelModifyAI = () => {
             </button>
             <div class="flex gap-2">
               <button class="btn btn-sm btn-ghost" @click="cancelEditStrava" :disabled="isSaving">Annuler</button>
-              <button class="btn btn-sm btn-primary gap-1" @click="saveStrava" :disabled="!editTitle.trim() || isSaving">
+              <button class="btn btn-sm bg-emerald-500 text-white hover:bg-emerald-600 border-0 gap-1" @click="saveStrava" :disabled="!editTitle.trim() || isSaving">
                 <span v-if="isSaving" class="loading loading-spinner loading-xs"></span>
                 <span v-else>💾</span>
                 Enregistrer
@@ -790,7 +790,7 @@ const cancelModifyAI = () => {
         </div>
 
         <button
-          class="btn btn-primary w-full"
+          class="btn bg-emerald-500 text-white hover:bg-emerald-600 border-0 w-full"
           @click="applyPlannedInfo"
         >
           ✏️ Appliquer à l'activité
@@ -838,7 +838,7 @@ Exemple:
               :class="{
                 'btn-success': feedbackSaved,
                 'btn-error': feedbackError,
-                'btn-primary': !feedbackSaved && !feedbackError
+                'bg-emerald-500 text-white hover:bg-emerald-600 border-0': !feedbackSaved && !feedbackError
               }"
               :disabled="isSavingFeedback"
               @click="saveFeedback"
@@ -879,7 +879,7 @@ Exemple:
               :key="feeling.value"
               type="button"
               class="btn btn-sm flex-1"
-              :class="selectedFeeling === feeling.value ? 'btn-primary' : 'btn-ghost'"
+              :class="selectedFeeling === feeling.value ? 'bg-emerald-500 text-white hover:bg-emerald-600 border-0' : 'btn-ghost'"
               @click="selectFeeling(feeling.value)"
             >
               {{ feeling.emoji }} {{ feeling.label }}
@@ -939,7 +939,7 @@ Exemple:
         <div class="flex gap-2 justify-end">
           <button class="btn btn-sm btn-ghost" @click="cancelModifyAI">Annuler</button>
           <button
-            class="btn btn-sm btn-primary"
+            class="btn btn-sm bg-emerald-500 text-white hover:bg-emerald-600 border-0"
             :disabled="!modifyJsonInput.trim()"
             @click="applyModifiedSession"
           >
@@ -962,7 +962,7 @@ Exemple:
         <!-- Modify with AI button for planned sessions -->
         <button
           v-if="session.type === 'planned' && !showMarkAsDone && !showModifyAI"
-          class="btn btn-sm btn-outline btn-primary"
+          class="btn btn-sm btn-outline bg-emerald-500 text-white hover:bg-emerald-600 border-0"
           :class="modifyPromptCopied ? 'btn-success' : ''"
           @click="copyModifyPrompt"
         >
@@ -989,7 +989,7 @@ Exemple:
         <details v-if="session.strava_id || session.actual_km" ref="dropdownRef" class="dropdown dropdown-top">
           <summary
             class="btn btn-sm btn-outline"
-            :class="copied ? 'btn-success' : 'btn-primary'"
+            :class="copied ? 'btn-success' : 'bg-emerald-500 text-white hover:bg-emerald-600 border-0'"
           >
             {{ copied ? '✓ Copié !' : '📋 Copier pour coach' }}
           </summary>
@@ -1002,7 +1002,7 @@ Exemple:
             ></textarea>
             <div class="flex justify-end gap-2 mt-2">
               <button class="btn btn-sm btn-ghost" @click="copyForAnalysis(false)">Passer</button>
-              <button class="btn btn-sm btn-primary" @click="copyForAnalysis(true)">📋 Copier</button>
+              <button class="btn btn-sm bg-emerald-500 text-white hover:bg-emerald-600 border-0" @click="copyForAnalysis(true)">📋 Copier</button>
             </div>
           </div>
         </details>

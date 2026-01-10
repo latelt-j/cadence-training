@@ -395,7 +395,7 @@ const importCoachPhases = () => {
           <button class="btn btn-sm btn-ghost" @click="showCoachImport = true">
             🤖 Coach IA
           </button>
-          <button class="btn btn-sm btn-primary" @click="startAdd">
+          <button class="btn btn-sm btn bg-emerald-500 text-white hover:bg-emerald-600 border-0" @click="startAdd">
             + Ajouter
           </button>
         </template>
@@ -411,7 +411,7 @@ const importCoachPhases = () => {
       </p>
       <button
         class="btn btn-sm w-full"
-        :class="coachCopied ? 'btn-success' : 'btn-primary'"
+        :class="coachCopied ? 'btn-success' : 'btn bg-emerald-500 text-white hover:bg-emerald-600 border-0'"
         @click="copyCoachPrompt"
       >
         {{ coachCopied ? '✓ Prompt copié !' : '📋 Copier le prompt pour le coach' }}
@@ -433,7 +433,7 @@ const importCoachPhases = () => {
           Annuler
         </button>
         <button
-          class="btn btn-sm btn-primary"
+          class="btn btn-sm btn bg-emerald-500 text-white hover:bg-emerald-600 border-0"
           :disabled="!coachJsonInput.trim()"
           @click="importCoachPhases"
         >
@@ -464,7 +464,7 @@ const importCoachPhases = () => {
               :key="item.emoji"
               type="button"
               class="btn btn-sm btn-square"
-              :class="formData.emoji === item.emoji ? 'btn-primary' : 'btn-ghost'"
+              :class="formData.emoji === item.emoji ? 'btn bg-emerald-500 text-white hover:bg-emerald-600 border-0' : 'btn-ghost'"
               :title="item.label"
               @click="formData.emoji = item.emoji"
             >
@@ -526,7 +526,7 @@ const importCoachPhases = () => {
             min="0"
             max="100"
             step="10"
-            class="range range-sm range-primary flex-1"
+            class="range range-sm range-success flex-1"
           />
           <span class="text-lg">🏃</span>
         </div>
@@ -556,7 +556,7 @@ const importCoachPhases = () => {
       <div class="flex justify-end gap-2 pt-2">
         <button class="btn btn-sm btn-ghost" @click="cancelEdit">Annuler</button>
         <button
-          class="btn btn-sm btn-primary"
+          class="btn btn-sm btn bg-emerald-500 text-white hover:bg-emerald-600 border-0"
           :disabled="!formData.name || !formData.start_date || !formData.end_date"
           @click="savePhase"
         >
@@ -580,7 +580,7 @@ const importCoachPhases = () => {
         <p class="text-lg">Aucun cycle défini</p>
         <p class="text-sm mt-1">Crée tes cycles manuellement ou demande à l'IA</p>
         <div class="flex justify-center gap-2 mt-4">
-          <button class="btn btn-sm btn-primary" @click="startAdd">+ Ajouter</button>
+          <button class="btn btn-sm btn bg-emerald-500 text-white hover:bg-emerald-600 border-0" @click="startAdd">+ Ajouter</button>
           <button class="btn btn-sm btn-ghost" @click="showCoachImport = true">🤖 Générer avec l'IA</button>
         </div>
       </div>
@@ -627,7 +627,7 @@ const importCoachPhases = () => {
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="font-bold">{{ phase.name.toUpperCase() }}</span>
                 <span class="badge badge-xs badge-neutral">{{ getPhaseDuration(phase) }} sem</span>
-                <span v-if="getPhaseStatus(phase) === 'current'" class="badge badge-xs badge-primary">
+                <span v-if="getPhaseStatus(phase) === 'current'" class="badge badge-xs bg-emerald-500 text-white">
                   S{{ getCurrentWeek(phase) }}/{{ getPhaseDuration(phase) }}
                 </span>
               </div>

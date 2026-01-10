@@ -311,7 +311,7 @@ const getIntensityColor = (intensity: number | undefined): string => {
                   <h2 class="text-2xl md:text-3xl font-bold break-words">
                     {{ currentPhase ? `${currentPhase.emoji || getPhaseEmoji(currentPhase.name)} ${currentPhase.name.toUpperCase()}` : '📅 Ma semaine' }}
                   </h2>
-                  <span v-if="phaseWeekInfo" class="badge badge-primary badge-lg font-bold shrink-0">
+                  <span v-if="phaseWeekInfo" class="badge bg-emerald-500 text-white badge-lg font-bold shrink-0">
                     S{{ phaseWeekInfo.current }}/{{ phaseWeekInfo.total }}
                   </span>
                 </div>
@@ -542,7 +542,7 @@ const getIntensityColor = (intensity: number | undefined): string => {
   color: #4b5563 !important;
 }
 
-.capture-area .badge-primary {
+.capture-area .bg-emerald-500 text-white {
   background-color: #7c3aed !important;
   color: #ffffff !important;
 }
