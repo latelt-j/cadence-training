@@ -141,7 +141,7 @@ const chartData = computed(() => {
 // ApexCharts configuration
 const chartSeries = computed(() => [
   {
-    name: 'TSB (Forme)',
+    name: 'Forme (TSB)',
     data: chartData.value.map(d => ({ x: d.date, y: d.tsb })),
   },
   {
