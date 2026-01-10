@@ -241,8 +241,12 @@ const chartOptions = computed(() => ({
         <!-- Main status -->
         <div class="flex items-center gap-4 mt-2">
           <div
-            class="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold"
-            :class="getTsbColor(currentTSB)"
+            class="w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold transition-all"
+            :class="[
+              getTsbColor(currentTSB),
+              currentTSB !== null && currentTSB <= -10 ? 'animate-pulse shadow-lg shadow-orange-500/50' : '',
+              currentTSB !== null && currentTSB <= -25 ? 'shadow-rose-600/60 ring-2 ring-rose-500/50' : ''
+            ]"
           >
             {{ currentTSB ?? '?' }}
           </div>
