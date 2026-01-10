@@ -576,7 +576,7 @@ const importCoachPhases = () => {
         <p class="text-lg">Aucun cycle défini</p>
         <p class="text-sm mt-1">Crée tes cycles manuellement ou demande à l'IA</p>
         <div class="flex justify-center gap-2 mt-4">
-          <button class="btn btn-sm btn-primary" @click="addPhase">+ Ajouter</button>
+          <button class="btn btn-sm btn-primary" @click="startAdd">+ Ajouter</button>
           <button class="btn btn-sm btn-ghost" @click="showCoachImport = true">🤖 Générer avec l'IA</button>
         </div>
       </div>
