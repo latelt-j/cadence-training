@@ -17,6 +17,7 @@ marked.setOptions({
 const props = defineProps<{
   session: ScheduledSession | null
   athleteProfile?: AthleteProfile
+  weekSessions?: ScheduledSession[] // Sessions of the current week for context
 }>()
 
 const emit = defineEmits<{
@@ -123,6 +124,10 @@ watch(() => props.session, (newSession, oldSession) => {
     showMarkAsDone.value = false
     showEditDuration.value = false
     selectedFeeling.value = null
+    // Reset AI modification
+    showModifyAI.value = false
+    modifyJsonInput.value = ''
+    modifyError.value = ''
   }
 
   editTitle.value = newSession?.title || ''
@@ -349,6 +354,12 @@ const markAsNotDone = () => {
 // Edit duration for manual sessions
 const editDurationValue = ref(0)
 
+// Modify with AI (for planned sessions)
+const showModifyAI = ref(false)
+const modifyPromptCopied = ref(false)
+const modifyJsonInput = ref('')
+const modifyError = ref('')
+
 const openEditDuration = () => {
   editDurationValue.value = props.session?.duration_min || 0
   showEditDuration.value = true
@@ -363,6 +374,121 @@ const confirmEditDuration = () => {
 
   showEditDuration.value = false
   emit('toast', 'Durée modifiée')
+}
+
+// Generate prompt for AI modification
+const generateModifyPrompt = () => {
+  if (!props.session) return ''
+
+  const weekSessions = props.weekSessions || []
+  const doneSessions = weekSessions.filter(s => s.type === 'strava' || s.type === 'manual')
+  const plannedSessions = weekSessions.filter(s => s.type === 'planned' && s.id !== props.session?.id)
+
+  let prompt = `# [DEMANDE DE MODIFICATION DE SÉANCE]
+
+**Séance à modifier:**
+- Date: ${props.session.date}
+- Sport: ${props.session.sport}
+- Titre: ${props.session.title}
+- Durée: ${props.session.duration_min} min
+- Intensité: ${props.session.intensity ?? 'non définie'}/10
+- Description: ${props.session.description || 'Aucune'}
+`
+
+  if (doneSessions.length > 0) {
+    prompt += `\n**Ce qui a été fait cette semaine:**\n`
+    doneSessions.forEach(s => {
+      const sportEmoji = s.sport === 'cycling' ? '🚴' : s.sport === 'mtb' ? '🚵' : s.sport === 'running' ? '🏃' : '💪'
+      prompt += `- ${s.date}: ${s.title} ${sportEmoji} (${Math.round(s.duration_min)}min`
+      if (s.actual_km) prompt += `, ${s.actual_km.toFixed(1)}km`
+      prompt += `)\n`
+    })
+  }
+
+  if (plannedSessions.length > 0) {
+    prompt += `\n**Ce qui reste prévu cette semaine:**\n`
+    plannedSessions.forEach(s => {
+      const sportEmoji = s.sport === 'cycling' ? '🚴' : s.sport === 'mtb' ? '🚵' : s.sport === 'running' ? '🏃' : '💪'
+      prompt += `- ${s.date}: ${s.title} ${sportEmoji} (${s.duration_min}min, intensité ${s.intensity ?? '?'}/10)\n`
+    })
+  }
+
+  if (props.athleteProfile) {
+    prompt += `\n**Profil athlète:**\n`
+    if (props.athleteProfile.ftp) prompt += `- FTP: ${props.athleteProfile.ftp}W\n`
+    if (props.athleteProfile.max_hr) prompt += `- FC Max: ${props.athleteProfile.max_hr}bpm\n`
+  }
+
+  prompt += `
+---
+
+Modifie cette séance selon le contexte. Réponds UNIQUEMENT avec le JSON de la séance modifiée (pas de markdown).
+
+Format attendu:
+{
+  "title": "Nouveau titre fun pour Strava",
+  "duration_min": 60,
+  "intensity": 6,
+  "description": "🔥 Description avec emojis\\n\\nÉchauffement 10min\\nCorps de séance\\nRetour au calme"
+}
+
+⚠️ Garde le même sport et la même date. Modifie titre, durée, intensité et description.
+`
+
+  return prompt
+}
+
+const copyModifyPrompt = async () => {
+  const prompt = generateModifyPrompt()
+  if (!prompt) return
+
+  await navigator.clipboard.writeText(prompt)
+  modifyPromptCopied.value = true
+  setTimeout(() => {
+    modifyPromptCopied.value = false
+    showModifyAI.value = true
+  }, 1000)
+}
+
+const applyModifiedSession = () => {
+  if (!props.session) return
+  modifyError.value = ''
+
+  try {
+    let cleanText = modifyJsonInput.value.trim()
+    // Remove markdown code blocks if present
+    cleanText = cleanText.replace(/^```json?\s*/i, '').replace(/\s*```$/i, '')
+
+    // Extract JSON object
+    const jsonMatch = cleanText.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      cleanText = jsonMatch[0]
+    }
+
+    const data = JSON.parse(cleanText)
+
+    // Emit update with the modified fields
+    emit('update', props.session.id, {
+      title: data.title || props.session.title,
+      description: data.description || props.session.description,
+      duration_min: data.duration_min || props.session.duration_min,
+      intensity: data.intensity ?? props.session.intensity,
+      zwift_workout: data.zwift_workout || props.session.zwift_workout,
+    } as any)
+
+    // Reset state
+    showModifyAI.value = false
+    modifyJsonInput.value = ''
+    emit('toast', 'Séance modifiée ✓', 'success')
+  } catch (e) {
+    modifyError.value = e instanceof Error ? e.message : 'JSON invalide'
+  }
+}
+
+const cancelModifyAI = () => {
+  showModifyAI.value = false
+  modifyJsonInput.value = ''
+  modifyError.value = ''
 }
 </script>
 
@@ -794,15 +920,53 @@ Exemple:
         </div>
       </div>
 
+      <!-- Modify with AI form for planned sessions -->
+      <div v-if="showModifyAI && session.type === 'planned'" class="mt-4 p-4 bg-primary/10 border border-primary/30 rounded-lg flex-shrink-0">
+        <h4 class="font-semibold mb-3 text-primary">🤖 Colle la réponse du coach</h4>
+
+        <div class="form-control mb-3">
+          <textarea
+            v-model="modifyJsonInput"
+            class="textarea textarea-bordered w-full h-32 font-mono text-sm"
+            placeholder="Colle ici le JSON de la séance modifiée..."
+          ></textarea>
+        </div>
+
+        <div v-if="modifyError" class="alert alert-error text-sm mb-3">
+          {{ modifyError }}
+        </div>
+
+        <div class="flex gap-2 justify-end">
+          <button class="btn btn-sm btn-ghost" @click="cancelModifyAI">Annuler</button>
+          <button
+            class="btn btn-sm btn-primary"
+            :disabled="!modifyJsonInput.trim()"
+            @click="applyModifiedSession"
+          >
+            💾 Appliquer
+          </button>
+        </div>
+      </div>
+
       <!-- Actions footer (outside scrollable area to fix dropdown z-index) -->
       <div v-show="currentPage === 'details'" class="flex flex-wrap gap-2 pt-4 border-t border-base-300 flex-shrink-0">
         <!-- Mark as done button for planned sessions -->
         <button
-          v-if="session.type === 'planned' && !showMarkAsDone"
+          v-if="session.type === 'planned' && !showMarkAsDone && !showModifyAI"
           class="btn btn-sm btn-success"
           @click="openMarkAsDone"
         >
           ✅ Marquer comme fait
+        </button>
+
+        <!-- Modify with AI button for planned sessions -->
+        <button
+          v-if="session.type === 'planned' && !showMarkAsDone && !showModifyAI"
+          class="btn btn-sm btn-outline btn-primary"
+          :class="modifyPromptCopied ? 'btn-success' : ''"
+          @click="copyModifyPrompt"
+        >
+          {{ modifyPromptCopied ? '✓ Copié !' : '✏️ Modifier avec l\'IA' }}
         </button>
 
         <!-- Buttons for manual sessions -->

@@ -58,6 +58,20 @@ const getMonday = (d: Date): Date => {
 
 const weekStart = computed(() => getMonday(currentWeekDate.value))
 
+// Get sessions for the week of the selected session (for AI modify context)
+const selectedSessionWeekSessions = computed(() => {
+  if (!selectedSession.value) return []
+  const sessionDate = new Date(selectedSession.value.date)
+  const monday = getMonday(sessionDate)
+  const sunday = new Date(monday)
+  sunday.setDate(sunday.getDate() + 6)
+
+  const mondayStr = monday.toISOString().split('T')[0] ?? ''
+  const sundayStr = sunday.toISOString().split('T')[0] ?? ''
+
+  return sessions.value.filter(s => s.date >= mondayStr && s.date <= sundayStr)
+})
+
 const {
   isConnected: stravaConnected,
   isLoading: stravaLoading,
@@ -551,6 +565,7 @@ const handleReset = () => {
       ref="sessionDetailModalRef"
       :session="selectedSession"
       :athlete-profile="athleteProfile"
+      :week-sessions="selectedSessionWeekSessions"
       @close="selectedSession = null"
       @delete="handleDeleteSession"
       @update-feedback="handleUpdateFeedback"
