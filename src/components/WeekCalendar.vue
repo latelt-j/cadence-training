@@ -650,6 +650,7 @@ watch(forecast, () => {}, { deep: true })
   border-right: 2px dashed rgba(255, 255, 255, 0.6) !important;
   border-bottom: none !important;
   box-shadow: none !important;
+  padding-bottom: 0.5rem !important;
 }
 
 /* Sport color line for planned sessions */
