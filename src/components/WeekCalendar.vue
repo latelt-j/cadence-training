@@ -647,17 +647,16 @@ watch(forecast, () => {}, { deep: true })
   border-right: 2px dashed rgba(255, 255, 255, 0.6) !important;
   border-bottom: none !important;
   box-shadow: none !important;
-  margin-bottom: 10px !important;
+  overflow: hidden;
 }
 
 .session-planned::after {
   content: '';
   position: absolute;
-  bottom: -8px;
+  bottom: 0;
   left: 0;
   right: 0;
   height: 6px;
-  border-radius: var(--radius-sm);
 }
 
 /* Sport-specific underline colors for planned sessions */
