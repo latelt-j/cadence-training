@@ -302,26 +302,27 @@ const getIntensityColor = (intensity: number | undefined): string => {
             <!-- Modal wrapper with animated border -->
             <div class="modal-border-wrapper">
             <div class="modal-card rounded-3xl w-full max-h-[80vh] overflow-auto shadow-2xl relative">
-              <!-- Close button -->
+              <!-- Content area -->
+              <div class="capture-area p-6 md:p-8 rounded-3xl">
+            <!-- Header -->
+            <div class="flex items-start justify-between mb-8">
+              <div class="flex-1 text-center">
+                <div class="flex items-center justify-center gap-3 flex-wrap">
+                  <h2 class="text-2xl md:text-3xl font-bold break-words">
+                    {{ currentPhase ? `${currentPhase.emoji || getPhaseEmoji(currentPhase.name)} ${currentPhase.name.toUpperCase()}` : '📅 Ma semaine' }}
+                  </h2>
+                  <span v-if="phaseWeekInfo" class="badge badge-primary badge-lg font-bold shrink-0">
+                    S{{ phaseWeekInfo.current }}/{{ phaseWeekInfo.total }}
+                  </span>
+                </div>
+                <p class="text-base-content/60 mt-2">{{ weekRange }}</p>
+              </div>
               <button
-                class="btn btn-circle btn-sm btn-ghost absolute right-3 top-3 text-lg z-30 screenshot-hide"
+                class="btn btn-sm btn-circle btn-ghost screenshot-hide ml-2"
                 @click.stop="emit('close')"
               >
                 ✕
               </button>
-              <!-- Content area -->
-              <div class="capture-area p-6 md:p-8 rounded-3xl">
-            <!-- Header -->
-            <div class="text-center mb-8">
-              <div class="flex items-center justify-center gap-3 flex-wrap">
-                <h2 class="text-2xl md:text-3xl font-bold break-words">
-                  {{ currentPhase ? `${currentPhase.emoji || getPhaseEmoji(currentPhase.name)} ${currentPhase.name.toUpperCase()}` : '📅 Ma semaine' }}
-                </h2>
-                <span v-if="phaseWeekInfo" class="badge badge-primary badge-lg font-bold shrink-0">
-                  S{{ phaseWeekInfo.current }}/{{ phaseWeekInfo.total }}
-                </span>
-              </div>
-              <p class="text-base-content/60 mt-2">{{ weekRange }}</p>
             </div>
 
             <!-- Week Grid -->
