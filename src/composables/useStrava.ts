@@ -382,7 +382,7 @@ export function useStrava() {
     const cyclingTypes = ['Ride', 'VirtualRide', 'GravelRide', 'EBikeRide']
     const mtbTypes = ['MountainBikeRide']
     const runningTypes = ['Run', 'TrailRun', 'VirtualRun', 'Treadmill', 'Soccer', 'Football']
-    const strengthTypes = ['WeightTraining', 'Workout', 'Crossfit', 'Yoga', 'HIIT']
+    const strengthTypes = ['WeightTraining', 'Workout', 'Crossfit', 'Yoga', 'HIIT', 'HighIntensityIntervalTraining']
     const hikingTypes = ['Hike', 'Walk', 'RockClimbing']
 
     if (cyclingTypes.includes(type)) return 'cycling'
