@@ -25,6 +25,31 @@ onMounted(async () => {
   fetchTodayWellness()
 })
 
+// Fitness trend: compare current CTL to 15-day average
+const fitnessTrend = computed(() => {
+  if (currentCTL.value === null || wellnessHistory.value.length < 15) return null
+
+  // Get CTL values from last 15 days
+  const ctlValues: number[] = []
+  for (let i = 15; i >= 1; i--) {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const dayNum = String(d.getDate()).padStart(2, '0')
+    const dateStr = `${year}-${month}-${dayNum}`
+    const wellness = wellnessHistory.value.find(w => w.id === dateStr)
+    if (wellness?.ctl) {
+      ctlValues.push(wellness.ctl)
+    }
+  }
+
+  if (ctlValues.length < 5) return null // Not enough data
+
+  const avg = ctlValues.reduce((a, b) => a + b, 0) / ctlValues.length
+  return Math.round(currentCTL.value - avg)
+})
+
 const last7Days = computed(() => {
   const days = []
   for (let i = 6; i >= 0; i--) {
@@ -263,7 +288,16 @@ const chartOptions = computed(() => ({
         <div class="grid grid-cols-3 gap-2 mt-4">
           <div class="tooltip tooltip-bottom" data-tip="Ta forme physique accumulée sur ~6 semaines. Plus c'est haut, plus t'es entraîné.">
             <div class="text-center p-2 bg-pink-500/10 rounded-lg cursor-help">
-              <div class="text-lg font-bold text-pink-400">{{ currentCTL !== null ? Math.round(currentCTL) : '-' }}</div>
+              <div class="text-lg font-bold text-pink-400 flex items-center justify-center gap-1">
+                {{ currentCTL !== null ? Math.round(currentCTL) : '-' }}
+                <span
+                  v-if="fitnessTrend !== null"
+                  class="text-xs font-medium"
+                  :class="fitnessTrend >= 0 ? 'text-emerald-400' : 'text-rose-400'"
+                >
+                  {{ fitnessTrend >= 0 ? '+' : '' }}{{ fitnessTrend }}
+                </span>
+              </div>
               <div class="text-xs text-base-content/60">Fitness</div>
             </div>
           </div>
