@@ -650,7 +650,6 @@ watch(forecast, () => {}, { deep: true })
 .session-today {
   position: relative;
   margin-bottom: 10px !important;
-  animation: glow 2s ease-in-out infinite;
 }
 
 .session-today::after {
@@ -665,17 +664,54 @@ watch(forecast, () => {}, { deep: true })
 }
 
 .session-new {
+  animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+/* Sport-specific glow animations for new sessions */
+.session-new.session-cycling {
   animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards,
              glowEmerald 2s ease-in-out 0.5s infinite;
 }
 
-@keyframes glow {
-  0%, 100% {
-    box-shadow: 0 0 6px rgba(255, 215, 0, 0.3), 0 0 12px rgba(255, 215, 0, 0.15);
-  }
-  50% {
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.45), 0 0 20px rgba(255, 215, 0, 0.25);
-  }
+.session-new.session-running {
+  animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards,
+             glowWhite 2s ease-in-out 0.5s infinite;
+}
+
+.session-new.session-strength {
+  animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards,
+             glowViolet 2s ease-in-out 0.5s infinite;
+}
+
+.session-new.session-mtb {
+  animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards,
+             glowBrown 2s ease-in-out 0.5s infinite;
+}
+
+.session-new.session-hiking {
+  animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards,
+             glowLime 2s ease-in-out 0.5s infinite;
+}
+
+/* Sport-specific glow animations for today's sessions */
+.session-today.session-cycling {
+  animation: glowEmerald 2s ease-in-out infinite;
+}
+
+.session-today.session-running {
+  animation: glowWhite 2s ease-in-out infinite;
+}
+
+.session-today.session-strength {
+  animation: glowViolet 2s ease-in-out infinite;
+}
+
+.session-today.session-mtb {
+  animation: glowBrown 2s ease-in-out infinite;
+}
+
+.session-today.session-hiking {
+  animation: glowLime 2s ease-in-out infinite;
 }
 
 @keyframes glowEmerald {
@@ -684,6 +720,42 @@ watch(forecast, () => {}, { deep: true })
   }
   50% {
     box-shadow: 0 0 14px rgba(16, 185, 129, 0.6), 0 0 28px rgba(16, 185, 129, 0.3);
+  }
+}
+
+@keyframes glowWhite {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 16px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(255, 255, 255, 0.6), 0 0 28px rgba(255, 255, 255, 0.3);
+  }
+}
+
+@keyframes glowViolet {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(147, 51, 234, 0.4), 0 0 16px rgba(147, 51, 234, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(147, 51, 234, 0.6), 0 0 28px rgba(147, 51, 234, 0.3);
+  }
+}
+
+@keyframes glowBrown {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(146, 64, 14, 0.4), 0 0 16px rgba(146, 64, 14, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(146, 64, 14, 0.6), 0 0 28px rgba(146, 64, 14, 0.3);
+  }
+}
+
+@keyframes glowLime {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(101, 163, 13, 0.4), 0 0 16px rgba(101, 163, 13, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 14px rgba(101, 163, 13, 0.6), 0 0 28px rgba(101, 163, 13, 0.3);
   }
 }
 
