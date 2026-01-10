@@ -370,7 +370,7 @@ watch(forecast, () => {}, { deep: true })
 </script>
 
 <template>
-  <div class="card bg-base-100 shadow-xl overflow-hidden">
+  <div class="card bg-base-100 overflow-hidden">
     <!-- Header -->
     <div class="flex items-center justify-between p-4">
       <div class="flex items-center gap-1">
