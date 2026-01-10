@@ -614,7 +614,8 @@ watch(forecast, () => {}, { deep: true })
 /* Base session card - dark background */
 .session-card {
   background: #0a0f0c;
-  border-bottom: 3px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-radius: var(--radius-sm);
 }
 
 /* Sport border colors */
