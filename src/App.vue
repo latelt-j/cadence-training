@@ -449,7 +449,7 @@ const handleReset = () => {
 <template>
   <div class="min-h-screen app-bg pb-20 md:pb-0">
     <!-- Header - Desktop -->
-    <header class="sticky top-0 z-50 border-b border-base-300/50 bg-base-100/80 backdrop-blur-lg hidden md:block">
+    <header class="sticky top-0 z-50 border-b border-base-300/50 bg-emerald-950/70 backdrop-blur-lg hidden md:block">
       <div class="container mx-auto max-w-6xl px-4">
         <div class="flex h-16 items-center justify-between">
           <!-- Logo -->
@@ -518,7 +518,7 @@ const handleReset = () => {
     </header>
 
     <!-- Header - Mobile -->
-    <header class="sticky top-0 z-50 border-b border-base-300/50 bg-base-100/80 backdrop-blur-lg md:hidden">
+    <header class="sticky top-0 z-50 border-b border-base-300/50 bg-emerald-950/70 backdrop-blur-lg md:hidden">
       <div class="flex h-14 items-center justify-between px-4">
         <div class="flex items-center gap-2">
           <img src="/icon.svg" alt="Cadence" class="w-8 h-8 rounded-xl" />
