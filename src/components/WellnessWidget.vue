@@ -257,17 +257,23 @@ const chartOptions = computed(() => ({
 
         <!-- Stats row -->
         <div class="grid grid-cols-3 gap-2 mt-4">
-          <div class="text-center p-2 bg-pink-500/10 rounded-lg">
-            <div class="text-lg font-bold text-pink-400">{{ currentCTL !== null ? Math.round(currentCTL) : '-' }}</div>
-            <div class="text-xs text-base-content/60">Fitness</div>
+          <div class="tooltip tooltip-bottom" data-tip="Ta forme physique accumulée sur ~6 semaines. Plus c'est haut, plus t'es entraîné.">
+            <div class="text-center p-2 bg-pink-500/10 rounded-lg cursor-help">
+              <div class="text-lg font-bold text-pink-400">{{ currentCTL !== null ? Math.round(currentCTL) : '-' }}</div>
+              <div class="text-xs text-base-content/60">Fitness</div>
+            </div>
           </div>
-          <div class="text-center p-2 bg-amber-500/10 rounded-lg">
-            <div class="text-lg font-bold text-amber-400">{{ currentATL !== null ? Math.round(currentATL) : '-' }}</div>
-            <div class="text-xs text-base-content/60">Fatigue</div>
+          <div class="tooltip tooltip-bottom" data-tip="Ta fatigue récente sur ~7 jours. Élevée après des gros entraînements.">
+            <div class="text-center p-2 bg-amber-500/10 rounded-lg cursor-help">
+              <div class="text-lg font-bold text-amber-400">{{ currentATL !== null ? Math.round(currentATL) : '-' }}</div>
+              <div class="text-xs text-base-content/60">Fatigue</div>
+            </div>
           </div>
-          <div class="text-center p-2 bg-sky-500/10 rounded-lg">
-            <div class="text-lg font-bold text-sky-400">{{ currentHRV !== null ? Math.round(currentHRV) : '-' }}</div>
-            <div class="text-xs text-base-content/60">HRV</div>
+          <div class="tooltip tooltip-bottom" data-tip="Variabilité cardiaque = récupération. Plus c'est haut, mieux tu récupères.">
+            <div class="text-center p-2 bg-sky-500/10 rounded-lg cursor-help">
+              <div class="text-lg font-bold text-sky-400">{{ currentHRV !== null ? Math.round(currentHRV) : '-' }}</div>
+              <div class="text-xs text-base-content/60">HRV</div>
+            </div>
           </div>
         </div>
 
