@@ -645,10 +645,7 @@ watch(forecast, () => {}, { deep: true })
 
 .session-planned {
   opacity: 0.65 !important;
-  border-top: 2px dashed rgba(255, 255, 255, 0.6) !important;
-  border-left: 2px dashed rgba(255, 255, 255, 0.6) !important;
-  border-right: 2px dashed rgba(255, 255, 255, 0.6) !important;
-  border-bottom: none !important;
+  border: 2px dashed rgba(255, 255, 255, 0.6) !important;
   box-shadow: none !important;
   padding-bottom: 0.5rem !important;
 }
