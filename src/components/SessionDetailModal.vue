@@ -921,8 +921,8 @@ Exemple:
       </div>
 
       <!-- Modify with AI form for planned sessions -->
-      <div v-if="showModifyAI && session.type === 'planned'" class="mt-4 p-4 bg-primary/10 border border-primary/30 rounded-lg flex-shrink-0">
-        <h4 class="font-semibold mb-3 text-primary">🤖 Colle la réponse du coach</h4>
+      <div v-if="showModifyAI && session.type === 'planned'" class="mt-4 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-lg flex-shrink-0">
+        <h4 class="font-semibold mb-3 text-emerald-500">🤖 Colle la réponse du coach</h4>
 
         <div class="form-control mb-3">
           <textarea

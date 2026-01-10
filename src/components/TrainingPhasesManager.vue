@@ -531,7 +531,7 @@ const importCoachPhases = () => {
           <span class="text-lg">🏃</span>
         </div>
         <div class="flex justify-between text-sm mb-4">
-          <span class="font-bold text-primary">{{ formData.cycling_pct }}% Vélo</span>
+          <span class="font-bold text-emerald-500">{{ formData.cycling_pct }}% Vélo</span>
           <span class="text-base-content/60">{{ volumeHint }}</span>
           <span class="font-bold text-secondary">{{ running_pct }}% Run</span>
         </div>
@@ -593,7 +593,7 @@ const importCoachPhases = () => {
         :ref="el => { if (getPhaseStatus(phase) === 'current') currentPhaseRef = el as HTMLElement }"
       >
         <!-- Timeline connector (before) -->
-        <hr v-if="index > 0" :class="getPhaseStatus(phase) !== 'future' ? 'bg-primary' : ''" />
+        <hr v-if="index > 0" :class="getPhaseStatus(phase) !== 'future' ? 'bg-emerald-500' : ''" />
 
         <!-- Timeline start: dates -->
         <div class="timeline-start text-xs text-base-content/50 text-right pr-2 whitespace-nowrap">
@@ -605,8 +605,8 @@ const importCoachPhases = () => {
           <div
             class="w-8 h-8 rounded-full flex items-center justify-center text-lg"
             :class="{
-              'bg-primary text-primary-content': getPhaseStatus(phase) === 'current',
-              'bg-primary/30 text-primary': getPhaseStatus(phase) === 'past',
+              'bg-emerald-500 text-white': getPhaseStatus(phase) === 'current',
+              'bg-emerald-500/30 text-emerald-500': getPhaseStatus(phase) === 'past',
               'bg-base-300 text-base-content/30': getPhaseStatus(phase) === 'future'
             }"
           >
@@ -618,7 +618,7 @@ const importCoachPhases = () => {
         <div
           class="timeline-end timeline-box ml-2 flex-1"
           :class="{
-            'border-primary border-2 bg-primary/10': getPhaseStatus(phase) === 'current',
+            'border-emerald-500 border-2 bg-emerald-500/10': getPhaseStatus(phase) === 'current',
             'bg-base-200': getPhaseStatus(phase) !== 'current'
           }"
         >
@@ -652,7 +652,7 @@ const importCoachPhases = () => {
         </div>
 
         <!-- Timeline connector (after) -->
-        <hr v-if="index < sortedPhases.length - 1" :class="getPhaseStatus(phase) !== 'future' ? 'bg-primary' : ''" />
+        <hr v-if="index < sortedPhases.length - 1" :class="getPhaseStatus(phase) !== 'future' ? 'bg-emerald-500' : ''" />
       </li>
     </ul>
   </div>

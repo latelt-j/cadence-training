@@ -34,7 +34,7 @@ const getFtpLevel = computed(() => {
   if (ftp < 200) return { text: 'Intermediaire', color: 'text-success' }
   if (ftp < 250) return { text: 'Avance', color: 'text-warning' }
   if (ftp < 300) return { text: 'Tres avance', color: 'text-error' }
-  return { text: 'Elite', color: 'text-primary' }
+  return { text: 'Elite', color: 'text-emerald-500' }
 })
 
 // Calculate HR reserve
@@ -145,7 +145,7 @@ Trail/montagne possible uniquement le week-end
       <!-- HR Reserve info -->
       <div v-if="hrReserve" class="bg-base-200 rounded-lg p-3">
         <div class="text-sm font-medium">Reserve cardiaque</div>
-        <div class="text-2xl font-bold text-primary">{{ hrReserve }} bpm</div>
+        <div class="text-2xl font-bold text-emerald-500">{{ hrReserve }} bpm</div>
         <div class="text-xs text-base-content/60">FCmax - FCrepos</div>
       </div>
 

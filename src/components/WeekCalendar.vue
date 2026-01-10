@@ -384,11 +384,11 @@ watch(forecast, () => {}, { deep: true })
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
         </button>
-        <button class="btn btn-sm btn-ghost text-primary font-medium ml-1" @click="goToToday">Aujourd'hui</button>
+        <button class="btn btn-sm btn-ghost text-emerald-500 font-medium ml-1" @click="goToToday">Aujourd'hui</button>
       </div>
 
       <div class="flex items-center">
-        <h2 class="text-xl font-bold text-primary capitalize leading-none">{{ headerTitle }}</h2>
+        <h2 class="text-xl font-bold text-emerald-500 capitalize leading-none">{{ headerTitle }}</h2>
       </div>
 
       <div class="flex items-center gap-2">
@@ -445,7 +445,7 @@ watch(forecast, () => {}, { deep: true })
               </div>
               <div
                 class="text-4xl font-bold mt-1"
-                :class="currentDay.isToday ? 'text-primary' : 'text-base-content/80'"
+                :class="currentDay.isToday ? 'text-emerald-500' : 'text-base-content/80'"
               >
                 {{ currentDay.dayNumber }}
               </div>
@@ -513,7 +513,7 @@ watch(forecast, () => {}, { deep: true })
           v-for="(day, i) in weekDays"
           :key="day.date"
           class="w-2.5 h-2.5 rounded-full transition-all"
-          :class="i === currentDayIndex ? 'bg-primary scale-125' : 'bg-base-300'"
+          :class="i === currentDayIndex ? 'bg-emerald-500 scale-125' : 'bg-base-300'"
           @click.stop="currentDayIndex = i"
         />
       </div>
@@ -541,7 +541,7 @@ watch(forecast, () => {}, { deep: true })
               <div class="text-xs uppercase text-base-content/50 font-medium tracking-wide">{{ day.dayName }}</div>
               <div
                 class="text-xl font-bold mt-0.5"
-                :class="day.isToday ? 'text-primary' : 'text-base-content/80'"
+                :class="day.isToday ? 'text-emerald-500' : 'text-base-content/80'"
               >
                 {{ day.dayNumber }}
               </div>
