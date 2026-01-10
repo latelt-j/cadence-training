@@ -650,6 +650,7 @@ watch(forecast, () => {}, { deep: true })
 .session-today {
   position: relative;
   margin-bottom: 10px !important;
+  animation: glow 2s ease-in-out infinite;
 }
 
 .session-today::after {
