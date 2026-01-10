@@ -649,38 +649,6 @@ watch(forecast, () => {}, { deep: true })
 
 .session-today {
   position: relative;
-  margin-bottom: 10px !important;
-}
-
-.session-today::after {
-  content: '';
-  position: absolute;
-  bottom: -8px;
-  left: 0;
-  right: 0;
-  height: 6px;
-  border-radius: var(--radius-sm);
-}
-
-/* Sport-specific underline colors for today's sessions */
-.session-today.session-cycling::after {
-  background: rgba(16, 185, 129, 0.6);
-}
-
-.session-today.session-running::after {
-  background: rgba(255, 255, 255, 0.6);
-}
-
-.session-today.session-strength::after {
-  background: rgba(147, 51, 234, 0.6);
-}
-
-.session-today.session-mtb::after {
-  background: rgba(146, 64, 14, 0.6);
-}
-
-.session-today.session-hiking::after {
-  background: rgba(101, 163, 13, 0.6);
 }
 
 .session-new {
