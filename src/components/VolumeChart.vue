@@ -158,7 +158,7 @@ const chartOptions = computed(() => ({
 </script>
 
 <template>
-  <div class="card bg-base-100">
+  <div class="card bg-base-200">
     <div class="card-body">
       <div class="flex justify-between items-center mb-4">
         <h2 class="card-title text-lg">Volume d'entraînement</h2>
