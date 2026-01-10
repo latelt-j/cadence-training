@@ -562,9 +562,24 @@ const importCoachPhases = () => {
     </div>
 
     <!-- Cycles Timeline -->
-    <div v-if="sortedPhases.length === 0 && !isEditing" class="text-center py-8 text-base-content/50">
-      <p>Aucun cycle défini</p>
-      <p class="text-sm">Clique sur "+ Ajouter" pour créer ton premier cycle</p>
+    <div v-if="sortedPhases.length === 0 && !isEditing" class="space-y-3">
+      <!-- Alerts for missing info -->
+      <div v-if="!athleteProfile?.ftp && !athleteProfile?.max_hr" class="alert alert-warning text-sm">
+        <span>⚠️ Configure ton <strong>profil athlète</strong> (FTP, FC) pour des cycles personnalisés</span>
+      </div>
+      <div v-if="!objectives?.length" class="alert alert-warning text-sm">
+        <span>⚠️ Ajoute au moins un <strong>objectif</strong> (course cible) pour planifier tes cycles</span>
+      </div>
+
+      <!-- Empty state -->
+      <div class="text-center py-6 text-base-content/50">
+        <p class="text-lg">Aucun cycle défini</p>
+        <p class="text-sm mt-1">Crée tes cycles manuellement ou demande à l'IA</p>
+        <div class="flex justify-center gap-2 mt-4">
+          <button class="btn btn-sm btn-primary" @click="addPhase">+ Ajouter</button>
+          <button class="btn btn-sm btn-ghost" @click="showCoachImport = true">🤖 Générer avec l'IA</button>
+        </div>
+      </div>
     </div>
 
     <ul v-else class="timeline timeline-vertical timeline-compact">
