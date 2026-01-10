@@ -9,9 +9,11 @@
 }
 
 /* Override DaisyUI primary/secondary colors */
-:root {
-  --p: 0.696 0.17 162.48; /* emerald */
-  --s: 0.795 0.184 86.05; /* yellow */
+:root, [data-theme="dracula"] {
+  --p: 69.6% 0.17 162.48; /* emerald */
+  --pc: 100% 0 0; /* primary content - white */
+  --s: 79.5% 0.184 86.05; /* yellow */
+  --sc: 0% 0 0; /* secondary content - black */
 }
 
 body {
