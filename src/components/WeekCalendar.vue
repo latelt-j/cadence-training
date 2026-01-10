@@ -653,7 +653,6 @@ watch(forecast, () => {}, { deep: true })
 .session-new {
   animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards,
              glowEmerald 2s ease-in-out 0.5s infinite;
-  border: 2px solid rgba(16, 185, 129, 0.7) !important;
 }
 
 @keyframes glow {
