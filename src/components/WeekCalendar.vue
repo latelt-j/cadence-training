@@ -426,8 +426,8 @@ watch(forecast, () => {}, { deep: true })
         v-if="currentDay"
         class="flex flex-col rounded-2xl min-h-[350px] transition-all duration-200 ease-out"
         :class="{
-          'bg-[#0a0f0c] ring-2 ring-emerald-400/40': currentDay.isToday,
-          'bg-[#0a0f0c]': !currentDay.isToday
+          'bg-primary/10 ring-2 ring-primary/30': currentDay.isToday,
+          'bg-base-200/50': !currentDay.isToday
         }"
         :style="{
           transform: slideDirection === 'left' ? 'translateX(-100%) scale(0.95)' :
@@ -526,9 +526,9 @@ watch(forecast, () => {}, { deep: true })
         :key="day.date"
         class="flex flex-col rounded-2xl transition-all duration-200 hover:shadow-md"
         :class="{
-          'bg-[#0a0f0c] ring-2 ring-emerald-400/40': day.isToday,
-          'bg-[#0a0f0c] hover:bg-[#0a0f0c]/80': !day.isToday,
-          'ring-2 ring-emerald-400/50': dragOverDate === day.date
+          'bg-primary/10 ring-2 ring-primary/30': day.isToday,
+          'bg-base-200/50 hover:bg-base-200/80': !day.isToday,
+          'ring-2 ring-primary/50 bg-primary/5': dragOverDate === day.date
         }"
         @dragover="onDragOver($event, day.date)"
         @dragleave="onDragLeave"
