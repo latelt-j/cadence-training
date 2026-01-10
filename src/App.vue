@@ -101,6 +101,22 @@ const toastMessage = ref<string | null>(null)
 const toastType = ref<'success' | 'error'>('success')
 const spotlightCardRef = ref<HTMLElement | null>(null)
 
+// Fun messages for new sessions
+const funMessages = [
+  "C'est parti, on va en baver ! 💪",
+  "Les jambes vont parler... 🔥",
+  "Pas de repos pour les guerriers !",
+  "La douleur est temporaire, la fierté est éternelle 🏆",
+  "Allez, on envoie du lourd ! 🚀",
+  "Mode bête activé 🦁",
+  "Ça va piquer un peu... beaucoup 😅",
+  "Les watts n'attendent pas !",
+  "Prêt à tout donner ? 💥",
+  "La sueur, c'est juste la graisse qui pleure 😂",
+]
+
+const pickRandomMessage = (): string => funMessages[Math.floor(Math.random() * funMessages.length)] ?? funMessages[0] ?? "C'est parti !"
+
 // Spotlight comment modal
 const showSpotlightComment = ref(false)
 const spotlightComment = ref('')
@@ -310,7 +326,29 @@ document.documentElement.setAttribute('data-theme', 'dracula')
 
 // Handlers
 const handleImport = async (data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean, _phase?: ImportedPhase) => {
+  // Track session count before import to find new ones
+  const existingIds = new Set(sessions.value.map(s => s.id))
+
   await loadFromJson(data, replaceExisting)
+
+  // Find newly added sessions
+  const newIds = sessions.value
+    .filter(s => !existingIds.has(s.id))
+    .map(s => s.id)
+
+  if (newIds.length > 0) {
+    // Animate new sessions
+    newSessionIds.value = new Set(newIds)
+
+    // Show fun message
+    showToast(pickRandomMessage())
+
+    // Clear animation after 5 seconds
+    setTimeout(() => {
+      newSessionIds.value = new Set()
+    }, 5000)
+  }
+
   // Note: phases are now managed manually via TrainingPhasesManager, not auto-created from import
   showImportModal.value = false
 }

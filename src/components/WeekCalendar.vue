@@ -472,7 +472,8 @@ watch(forecast, () => {}, { deep: true })
             :class="[
               `session-${session.sport}`,
               session.type === 'planned' ? 'session-planned' : '',
-              newSessionIds?.has(session.id) || ((session.type === 'strava' || session.type === 'manual') && session.date === today) ? 'session-today' : ''
+              newSessionIds?.has(session.id) ? 'session-new' : '',
+              ((session.type === 'strava' || session.type === 'manual') && session.date === today && !newSessionIds?.has(session.id)) ? 'session-today' : ''
             ]"
             @click.stop="emit('selectSession', session)"
           >
@@ -564,7 +565,8 @@ watch(forecast, () => {}, { deep: true })
             :class="[
               `session-${session.sport}`,
               session.type === 'planned' ? 'session-planned' : '',
-              newSessionIds?.has(session.id) || ((session.type === 'strava' || session.type === 'manual') && session.date === today) ? 'session-today' : '',
+              newSessionIds?.has(session.id) ? 'session-new' : '',
+              ((session.type === 'strava' || session.type === 'manual') && session.date === today && !newSessionIds?.has(session.id)) ? 'session-today' : '',
               (session.type === 'strava' || session.type === 'manual') ? 'cursor-default' : 'cursor-grab'
             ]"
             :style="{ opacity: draggedSession?.id === session.id ? 0.3 : 1 }"
@@ -642,7 +644,8 @@ watch(forecast, () => {}, { deep: true })
 }
 
 .session-new {
-  animation: glow 2s ease-in-out infinite;
+  animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards,
+             glow 2s ease-in-out 0.5s infinite;
   border: 2px solid rgba(255, 215, 0, 0.7) !important;
 }
 
@@ -652,6 +655,20 @@ watch(forecast, () => {}, { deep: true })
   }
   50% {
     box-shadow: 0 0 10px rgba(255, 215, 0, 0.45), 0 0 20px rgba(255, 215, 0, 0.25);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) translateY(-20px);
+  }
+  50% {
+    transform: scale(1.1) translateY(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
   }
 }
 </style>
