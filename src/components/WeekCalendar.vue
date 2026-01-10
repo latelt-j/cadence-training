@@ -641,13 +641,17 @@ watch(forecast, () => {}, { deep: true })
 
 .session-planned {
   opacity: 0.65 !important;
-  border: 2px dashed rgba(255, 255, 255, 0.6) !important;
+  border-top: 2px dashed rgba(255, 255, 255, 0.6) !important;
+  border-left: 2px dashed rgba(255, 255, 255, 0.6) !important;
+  border-right: 2px dashed rgba(255, 255, 255, 0.6) !important;
   box-shadow: none !important;
 }
 
 .session-today {
   animation: glow 2s ease-in-out infinite;
-  border: 2px solid rgba(255, 215, 0, 0.6) !important;
+  border-top: 2px solid rgba(255, 215, 0, 0.6) !important;
+  border-left: 2px solid rgba(255, 215, 0, 0.6) !important;
+  border-right: 2px solid rgba(255, 215, 0, 0.6) !important;
 }
 
 .session-new {
