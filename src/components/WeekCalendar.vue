@@ -388,7 +388,7 @@ watch(forecast, () => {}, { deep: true })
       </div>
 
       <div class="flex items-center">
-        <h2 class="text-xl font-bold text-emerald-500 capitalize leading-none">{{ headerTitle }}</h2>
+        <h2 class="text-xl font-bold text-white capitalize leading-none">{{ headerTitle }}</h2>
       </div>
 
       <div class="flex items-center gap-2">
