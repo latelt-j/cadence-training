@@ -493,6 +493,8 @@ watch(forecast, () => {}, { deep: true })
                 ></div>
               </div>
             </div>
+            <!-- Sport color line for planned sessions -->
+            <div v-if="session.type === 'planned'" class="planned-sport-line" :class="`line-${session.sport}`"></div>
           </div>
 
           <!-- Empty state -->
@@ -591,6 +593,8 @@ watch(forecast, () => {}, { deep: true })
                 ></div>
               </div>
             </div>
+            <!-- Sport color line for planned sessions -->
+            <div v-if="session.type === 'planned'" class="planned-sport-line" :class="`line-${session.sport}`"></div>
           </div>
         </div>
       </div>
@@ -640,43 +644,38 @@ watch(forecast, () => {}, { deep: true })
 }
 
 .session-planned {
-  position: relative;
   opacity: 0.65 !important;
   border-top: 2px dashed rgba(255, 255, 255, 0.6) !important;
   border-left: 2px dashed rgba(255, 255, 255, 0.6) !important;
   border-right: 2px dashed rgba(255, 255, 255, 0.6) !important;
   border-bottom: none !important;
   box-shadow: none !important;
-  overflow: hidden;
 }
 
-.session-planned::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+/* Sport color line for planned sessions */
+.planned-sport-line {
   height: 6px;
+  border-radius: 3px;
+  margin-top: 8px;
 }
 
-/* Sport-specific underline colors for planned sessions */
-.session-planned.session-cycling::after {
+.planned-sport-line.line-cycling {
   background: rgba(16, 185, 129, 0.6);
 }
 
-.session-planned.session-running::after {
+.planned-sport-line.line-running {
   background: rgba(255, 255, 255, 0.6);
 }
 
-.session-planned.session-strength::after {
+.planned-sport-line.line-strength {
   background: rgba(147, 51, 234, 0.6);
 }
 
-.session-planned.session-mtb::after {
+.planned-sport-line.line-mtb {
   background: rgba(146, 64, 14, 0.6);
 }
 
-.session-planned.session-hiking::after {
+.planned-sport-line.line-hiking {
   background: rgba(101, 163, 13, 0.6);
 }
 
