@@ -168,7 +168,7 @@ const chartOptions = computed(() => ({
       speed: 500,
     },
   },
-  colors: ['#22c55e', '#ec4899', '#fbbf24'], // TSB green, Fitness pink, Fatigue yellow
+  colors: ['#22c55e', '#10b981', '#fbbf24'], // TSB green, Fitness emerald, Fatigue yellow
   stroke: {
     width: [3, 2, 2],
     curve: 'smooth' as const,
@@ -288,8 +288,8 @@ const chartOptions = computed(() => ({
         <!-- Stats row -->
         <div class="grid grid-cols-3 gap-2 mt-4">
           <div class="tooltip tooltip-bottom" data-tip="Ta forme physique accumulée sur ~6 semaines. Plus c'est haut, plus t'es entraîné.">
-            <div class="text-center p-2 bg-pink-500/10 rounded-lg cursor-help">
-              <div class="text-lg font-bold text-pink-400 flex items-center justify-center gap-1">
+            <div class="text-center p-2 bg-emerald-500/10 rounded-lg cursor-help">
+              <div class="text-lg font-bold text-emerald-400 flex items-center justify-center gap-1">
                 {{ currentCTL !== null ? Math.round(currentCTL) : '-' }}
                 <span
                   v-if="fitnessTrend !== null"

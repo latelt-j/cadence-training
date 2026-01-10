@@ -387,7 +387,7 @@ const getIntensityColor = (intensity: number | undefined): string => {
 
             <!-- Tagline -->
             <div class="py-6 text-center px-2">
-              <p class="text-xl md:text-2xl font-bold bg-gradient-to-r from-pink-400 via-pink-500 to-rose-500 bg-clip-text text-transparent drop-shadow-lg break-words">
+              <p class="text-xl md:text-2xl font-bold bg-gradient-to-r from-emerald-400 via-emerald-500 to-emerald-600 bg-clip-text text-transparent drop-shadow-lg break-words">
                 "{{ smartTagline }}"
               </p>
             </div>
@@ -398,7 +398,7 @@ const getIntensityColor = (intensity: number | undefined): string => {
             <!-- Download button -->
             <div class="flex justify-center pt-4 pb-2 screenshot-hide">
               <button
-                class="btn btn-lg border-0 shadow-lg text-white px-8 bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 shadow-pink-500/40 gap-2"
+                class="btn btn-lg border-0 shadow-lg text-white px-8 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 shadow-emerald-500/40 gap-2"
                 :disabled="isDownloading"
                 @click="downloadScreenshot"
               >
@@ -470,11 +470,11 @@ const getIntensityColor = (intensity: number | undefined): string => {
 }
 
 /* PLANNED sessions - Sport colors with dashed border */
-/* Cycling - Pink vif */
+/* Cycling - Emerald */
 .session-cycling-share,
 .session-mtb-share {
-  background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
-  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
 /* Running - Blue électrique */

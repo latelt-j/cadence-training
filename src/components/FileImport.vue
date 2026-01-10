@@ -612,7 +612,7 @@ const saveCoachResponse = () => {
         <!-- Ask coach button -->
         <button
           class="btn w-full text-white font-semibold border-0 shadow-lg"
-          :class="copied ? 'btn-success' : 'bg-pink-500 hover:bg-pink-600 shadow-pink-500/40'"
+          :class="copied ? 'btn-success' : 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/40'"
           @click="copyCoachPrompt"
         >
           {{ copied ? '✓ Copié !' : '🤖 Demander au coach (copier le prompt)' }}
@@ -633,7 +633,7 @@ const saveCoachResponse = () => {
         ></textarea>
 
         <button
-          class="btn w-full text-white font-semibold border-0 shadow-lg bg-pink-500 hover:bg-pink-600 shadow-pink-500/40"
+          class="btn w-full text-white font-semibold border-0 shadow-lg bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/40"
           :disabled="!coachResponse.trim()"
           @click="saveCoachResponse"
         >

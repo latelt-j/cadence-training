@@ -637,7 +637,7 @@ const importCoachPhases = () => {
               <div v-if="phase.keywords" class="text-xs text-base-content/50 mt-1">
                 {{ phase.keywords }}
               </div>
-              <div v-if="phase.volume_distribution" class="text-xs text-pink-400 mt-1">
+              <div v-if="phase.volume_distribution" class="text-xs text-emerald-400 mt-1">
                 {{ phase.volume_distribution.replace(/\s*\([^)]*\)/, '') }}
               </div>
               <div v-if="phase.challenge" class="text-xs text-base-content/60 mt-1">

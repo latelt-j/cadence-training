@@ -406,7 +406,7 @@ watch(forecast, () => {}, { deep: true })
           📤 Partager
         </button>
         <button
-          class="btn btn-sm border-0 text-white bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600"
+          class="btn btn-sm border-0 text-white bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
           @click="emit('openImportModal')"
         >
           ✨ Planifier
@@ -601,7 +601,7 @@ watch(forecast, () => {}, { deep: true })
       <span>{{ currentPhase.emoji || getPhaseEmoji(currentPhase.name) }}</span>
       <span class="font-medium">{{ currentPhase.name }}</span>
       <span class="text-base-content/30">•</span>
-      <span class="badge badge-xs bg-pink-500 text-white border-0">S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}</span>
+      <span class="badge badge-xs bg-emerald-500 text-white border-0">S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}</span>
     </div>
   </div>
 </template>
@@ -611,9 +611,9 @@ watch(forecast, () => {}, { deep: true })
   cursor: grabbing;
 }
 
-/* Base session card - pink background */
+/* Base session card - emerald background */
 .session-card {
-  background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
   border-bottom: 3px solid transparent;
 }
 
@@ -651,8 +651,8 @@ watch(forecast, () => {}, { deep: true })
 
 .session-new {
   animation: popIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards,
-             glowPink 2s ease-in-out 0.5s infinite;
-  border: 2px solid rgba(236, 72, 153, 0.7) !important;
+             glowEmerald 2s ease-in-out 0.5s infinite;
+  border: 2px solid rgba(16, 185, 129, 0.7) !important;
 }
 
 @keyframes glow {
@@ -664,12 +664,12 @@ watch(forecast, () => {}, { deep: true })
   }
 }
 
-@keyframes glowPink {
+@keyframes glowEmerald {
   0%, 100% {
-    box-shadow: 0 0 8px rgba(236, 72, 153, 0.4), 0 0 16px rgba(236, 72, 153, 0.2);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4), 0 0 16px rgba(16, 185, 129, 0.2);
   }
   50% {
-    box-shadow: 0 0 14px rgba(236, 72, 153, 0.6), 0 0 28px rgba(236, 72, 153, 0.3);
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.6), 0 0 28px rgba(16, 185, 129, 0.3);
   }
 }
 

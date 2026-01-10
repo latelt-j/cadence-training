@@ -30,19 +30,19 @@ const progressPercent = computed(() => {
 })
 
 const batteryColor = computed(() => {
-  if (progressPercent.value >= 90) return 'bg-pink-400'
-  if (progressPercent.value >= 70) return 'bg-pink-500'
-  if (progressPercent.value >= 50) return 'bg-pink-600'
-  if (progressPercent.value >= 30) return 'bg-pink-700'
-  return 'bg-pink-800'
+  if (progressPercent.value >= 90) return 'bg-emerald-400'
+  if (progressPercent.value >= 70) return 'bg-emerald-500'
+  if (progressPercent.value >= 50) return 'bg-emerald-600'
+  if (progressPercent.value >= 30) return 'bg-emerald-700'
+  return 'bg-emerald-800'
 })
 
 const batteryTextColor = computed(() => {
-  if (progressPercent.value >= 90) return 'text-pink-400'
-  if (progressPercent.value >= 70) return 'text-pink-500'
-  if (progressPercent.value >= 50) return 'text-pink-600'
-  if (progressPercent.value >= 30) return 'text-pink-700'
-  return 'text-pink-800'
+  if (progressPercent.value >= 90) return 'text-emerald-400'
+  if (progressPercent.value >= 70) return 'text-emerald-500'
+  if (progressPercent.value >= 50) return 'text-emerald-600'
+  if (progressPercent.value >= 30) return 'text-emerald-700'
+  return 'text-emerald-800'
 })
 
 // Per-sport progress
@@ -95,10 +95,10 @@ const strengthProgress = computed(() => getSportProgress(props.stats.strength.pl
 
       <div class="grid grid-cols-3 gap-4 mt-4">
         <!-- Cycling Stats - PINK -->
-        <div class="bg-pink-500/10 rounded-box relative overflow-hidden h-[120px]">
+        <div class="bg-emerald-500/10 rounded-box relative overflow-hidden h-[120px]">
           <!-- Progress background -->
           <div
-            class="absolute inset-0 bg-pink-500/20 transition-all duration-500"
+            class="absolute inset-0 bg-emerald-500/20 transition-all duration-500"
             :style="{ width: `${cyclingProgress}%` }"
           ></div>
           <div class="relative flex flex-col h-full p-3">
@@ -106,11 +106,11 @@ const strengthProgress = computed(() => getSportProgress(props.stats.strength.pl
               <span class="text-xs opacity-70">Vélo</span>
               <span class="text-2xl">🚴</span>
             </div>
-            <div class="text-pink-400 text-2xl font-bold">{{ formatHours(stats.cycling.hours) }}</div>
+            <div class="text-emerald-400 text-2xl font-bold">{{ formatHours(stats.cycling.hours) }}</div>
             <div class="text-xs opacity-70">
               ~{{ formatKm(stats.cycling.km) }} km • {{ formatElevation(stats.cycling.elevation) }} D+
             </div>
-            <div v-if="stats.cycling.planned + stats.cycling.accomplished > 0" class="text-xs text-pink-400/70 mt-auto pt-1">
+            <div v-if="stats.cycling.planned + stats.cycling.accomplished > 0" class="text-xs text-emerald-400/70 mt-auto pt-1">
               {{ cyclingProgress }}% accompli
             </div>
           </div>

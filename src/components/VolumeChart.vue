@@ -91,14 +91,14 @@ const chartData = computed(() => {
       {
         label: 'Vélo (fait)',
         data: sortedWeeks.map(w => Math.round(w.cyclingDone * 10) / 10),
-        backgroundColor: 'rgba(236, 72, 153, 0.9)', // pink-500
+        backgroundColor: 'rgba(16, 185, 129, 0.9)', // emerald-500
         borderRadius: 4,
         stack: 'cycling',
       },
       {
         label: 'Vélo (prévu)',
         data: sortedWeeks.map(w => Math.round(w.cyclingPlanned * 10) / 10),
-        backgroundColor: 'rgba(236, 72, 153, 0.35)', // pink-500/35
+        backgroundColor: 'rgba(16, 185, 129, 0.35)', // emerald-500/35
         borderRadius: 4,
         stack: 'cycling',
       },
