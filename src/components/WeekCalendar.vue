@@ -611,25 +611,31 @@ watch(forecast, () => {}, { deep: true })
   cursor: grabbing;
 }
 
-/* Sport colors */
-.session-cycling {
+/* Base session card - pink background */
+.session-card {
   background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+  border-bottom: 3px solid transparent;
+}
+
+/* Sport border colors */
+.session-cycling {
+  border-bottom-color: #ffffff;
 }
 
 .session-mtb {
-  background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+  border-bottom-color: #92400e;
 }
 
 .session-running {
-  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+  border-bottom-color: #0ea5e9;
 }
 
 .session-strength {
-  background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+  border-bottom-color: #9333ea;
 }
 
 .session-hiking {
-  background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%);
+  border-bottom-color: #65a30d;
 }
 
 .session-planned {
