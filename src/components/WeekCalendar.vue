@@ -384,7 +384,7 @@ watch(forecast, () => {}, { deep: true })
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
         </button>
-        <button class="btn btn-sm btn-ghost text-emerald-500 font-medium ml-1" @click="goToToday">Aujourd'hui</button>
+        <button class="btn btn-sm btn-ghost text-white font-medium ml-1" @click="goToToday">Aujourd'hui</button>
       </div>
 
       <div class="flex items-center">
