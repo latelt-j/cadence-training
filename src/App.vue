@@ -67,12 +67,29 @@ Je veux un texte markdown qui explique :
 - La répartition des sports et des intensités
 - Les points clés à retenir
 
-Format attendu (JSON avec un seul champ) :
-{
-  "guidelines": "## 🎯 Objectif de la semaine\\n\\n[Texte]\\n\\n### Philosophie\\n\\n[Texte]\\n\\n### Répartition\\n\\n[Liste]\\n\\n### Points clés\\n\\n- [Point 1]\\n- [Point 2]"
-}
+Format attendu (markdown brut) :
 
-Réponds UNIQUEMENT avec le JSON brut, pas de markdown autour.`
+## 🎯 Objectif de la semaine
+
+[Explication de l'objectif principal]
+
+### Philosophie
+
+[Pourquoi ces séances, dans cet ordre, logique d'entraînement]
+
+### Répartition
+
+- [Sport 1] : X séances
+- [Sport 2] : Y séances
+- Repos : Z jours
+
+### Points clés
+
+- [Point important 1]
+- [Point important 2]
+- [Point important 3]
+
+Réponds UNIQUEMENT avec le markdown, rien d'autre.`
 
   await navigator.clipboard.writeText(prompt)
   guidelinesPromptCopied.value = true
