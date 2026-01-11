@@ -47,6 +47,9 @@ const showStravaDisconnectModal = ref(false)
 // Share week modal
 const showShareModal = ref(false)
 
+// Supabase (must be before watch that uses it)
+const { fetchSettings, updateSettings, fetchWeeklyGuidelines, upsertWeeklyGuidelines } = useSupabase()
+
 // Guidelines modal
 const showGuidelinesModal = ref(false)
 const weeklyGuidelines = ref('')
@@ -180,7 +183,6 @@ const {
 
 
 // Training phases & objectives & athlete profile
-const { fetchSettings, updateSettings, fetchWeeklyGuidelines, upsertWeeklyGuidelines } = useSupabase()
 const trainingPhases = ref<TrainingPhase[]>([])
 const trainingObjectives = ref<TrainingObjective[]>([])
 const showObjectivesModal = ref(false)
