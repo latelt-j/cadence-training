@@ -644,7 +644,7 @@ watch(forecast, () => {}, { deep: true })
 }
 
 .session-planned {
-  opacity: 0.65 !important;
+  opacity: 0.95 !important;
   border: 2px dashed rgba(255, 255, 255, 0.6) !important;
   box-shadow: none !important;
   padding-bottom: 0.5rem !important;
