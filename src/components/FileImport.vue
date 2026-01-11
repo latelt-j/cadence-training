@@ -11,7 +11,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  import: [data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean, phase?: ImportedPhase, navigateToDate?: string]
+  import: [data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean, phase?: ImportedPhase, navigateToDate?: string, guidelines?: string]
 }>()
 
 // Reset form to defaults
@@ -354,6 +354,7 @@ Réponds UNIQUEMENT avec le code JSON brut (pas de markdown, pas de \`\`\`). Je 
 
 Format attendu :
 {
+  "guidelines": "## 🎯 Objectif de la semaine\\n\\n[Explication]\\n\\n### Philosophie\\n\\n[Pourquoi ces séances]\\n\\n### Répartition\\n\\n[Distribution]\\n\\n### Points clés\\n\\n- [Point 1]\\n- [Point 2]",
   "phase": {
     "name": "Base",
     "week": 2,
@@ -373,6 +374,13 @@ Format attendu :
     }
   ]
 }
+
+⚠️ GUIDELINES & PHILOSOPHIE (OBLIGATOIRE) :
+Ajoute un champ "guidelines" avec un texte markdown expliquant :
+- L'objectif principal de la semaine (pourquoi cette orientation)
+- La philosophie d'entraînement (pourquoi ces séances, dans cet ordre)
+- La répartition des sports et des intensités
+- Les points clés à retenir pour l'athlète
 
 ⚠️ SPORTS VALIDES : "cycling", "mtb", "running", "strength", "hiking"
 - Pour une journée de repos, ne pas créer de séance
@@ -488,15 +496,16 @@ const saveCoachResponse = () => {
 
     const data = JSON.parse(cleanText)
 
-    // New format with phase: { phase: {...}, sessions: [...] }
+    // New format with phase and guidelines: { guidelines: "...", phase: {...}, sessions: [...] }
     if (data && typeof data === 'object' && !Array.isArray(data) && data.sessions) {
       const phase = data.phase as ImportedPhase | undefined
+      const guidelines = data.guidelines as string | undefined
       const sessions = Array.isArray(data.sessions) ? data.sessions : [data.sessions]
-      emit('import', sessions, true, phase, planStartDate.value)
+      emit('import', sessions, true, phase, planStartDate.value, guidelines)
     } else {
       // Old format: array of sessions or single session
       const sessions = Array.isArray(data) ? data : [data]
-      emit('import', sessions, true, undefined, planStartDate.value)
+      emit('import', sessions, true, undefined, planStartDate.value, undefined)
     }
 
     // Reset after successful import

@@ -18,6 +18,7 @@ const emit = defineEmits<{
   weekChange: [date: Date]
   openShareModal: []
   openImportModal: []
+  openGuidelinesModal: []
 }>()
 
 // Mobile detection
@@ -412,6 +413,12 @@ watch(forecast, () => {}, { deep: true })
           @click="emit('openShareModal')"
         >
           📤 Partager
+        </button>
+        <button
+          class="btn btn-sm btn-ghost"
+          @click="emit('openGuidelinesModal')"
+        >
+          📖 Directives
         </button>
         <button
           class="btn btn-sm border-0 text-white bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"

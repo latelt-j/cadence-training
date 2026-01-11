@@ -15,6 +15,7 @@ import AthleteProfileComponent from './components/AthleteProfile.vue'
 import TrainingPhasesManager from './components/TrainingPhasesManager.vue'
 import ShareWeekModal from './components/ShareWeekModal.vue'
 import { copySessionForCoach } from './utils/coach'
+import { marked } from 'marked'
 
 const {
   sessions,
@@ -45,6 +46,45 @@ const showStravaDisconnectModal = ref(false)
 
 // Share week modal
 const showShareModal = ref(false)
+
+// Guidelines modal
+const showGuidelinesModal = ref(false)
+const weeklyGuidelines = ref('')
+const guidelinesEditMode = ref(false)
+const guidelinesPromptCopied = ref(false)
+
+const renderedGuidelines = computed(() => {
+  if (!weeklyGuidelines.value) return ''
+  return marked(weeklyGuidelines.value) as string
+})
+
+const copyGuidelinesPrompt = async () => {
+  const prompt = `Génère uniquement les GUIDELINES / DIRECTIVES pour ma semaine d'entraînement.
+
+Je veux un texte markdown qui explique :
+- L'objectif principal de la semaine
+- La philosophie d'entraînement (pourquoi ces types de séances)
+- La répartition des sports et des intensités
+- Les points clés à retenir
+
+Format attendu (JSON avec un seul champ) :
+{
+  "guidelines": "## 🎯 Objectif de la semaine\\n\\n[Texte]\\n\\n### Philosophie\\n\\n[Texte]\\n\\n### Répartition\\n\\n[Liste]\\n\\n### Points clés\\n\\n- [Point 1]\\n- [Point 2]"
+}
+
+Réponds UNIQUEMENT avec le JSON brut, pas de markdown autour.`
+
+  await navigator.clipboard.writeText(prompt)
+  guidelinesPromptCopied.value = true
+  setTimeout(() => {
+    guidelinesPromptCopied.value = false
+  }, 2000)
+}
+
+const saveGuidelines = () => {
+  guidelinesEditMode.value = false
+  // Guidelines are already in weeklyGuidelines.value via v-model
+}
 
 // Compute week start from currentWeekDate
 const getMonday = (d: Date): Date => {
@@ -326,7 +366,7 @@ const weekCalendarRef = ref<{ goToDate: (date: Date | string) => void } | null>(
 document.documentElement.setAttribute('data-theme', 'dracula')
 
 // Handlers
-const handleImport = async (data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean, _phase?: ImportedPhase, navigateToDate?: string) => {
+const handleImport = async (data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean, _phase?: ImportedPhase, navigateToDate?: string, guidelines?: string) => {
   // Track session count before import to find new ones
   const existingIds = new Set(sessions.value.map(s => s.id))
 
@@ -348,6 +388,11 @@ const handleImport = async (data: (SessionTemplate | ScheduledSession)[], replac
     setTimeout(() => {
       newSessionIds.value = new Set()
     }, 5000)
+  }
+
+  // Store guidelines if provided
+  if (guidelines) {
+    weeklyGuidelines.value = guidelines
   }
 
   // Navigate to the week of the imported sessions
@@ -592,6 +637,7 @@ const handleReset = () => {
           @week-change="setCurrentWeek"
           @open-share-modal="showShareModal = true"
           @open-import-modal="showImportModal = true"
+          @open-guidelines-modal="showGuidelinesModal = true"
         />
 
         <WeeklyStats :stats="weeklyStats" />
@@ -711,6 +757,80 @@ const handleReset = () => {
       :training-phases="trainingPhases"
       @close="showShareModal = false"
     />
+
+    <!-- Guidelines Modal -->
+    <dialog :class="['modal', { 'modal-open': showGuidelinesModal }]">
+      <div class="modal-box max-w-2xl">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+          📖 Directives de la semaine
+          <button
+            v-if="weeklyGuidelines && !guidelinesEditMode"
+            class="btn btn-xs btn-ghost"
+            @click="guidelinesEditMode = true"
+          >
+            ✏️ Modifier
+          </button>
+        </h3>
+
+        <!-- Empty state -->
+        <div v-if="!weeklyGuidelines && !guidelinesEditMode" class="text-center py-8">
+          <div class="text-4xl mb-4">📋</div>
+          <p class="text-base-content/70 mb-4">Pas encore de directives pour cette semaine</p>
+          <div class="flex gap-2 justify-center">
+            <button
+              class="btn btn-sm"
+              :class="guidelinesPromptCopied ? 'btn-success' : 'btn-primary'"
+              @click="copyGuidelinesPrompt"
+            >
+              {{ guidelinesPromptCopied ? '✓ Copié !' : '🤖 Copier le prompt' }}
+            </button>
+            <button
+              class="btn btn-sm btn-ghost"
+              @click="guidelinesEditMode = true"
+            >
+              ✏️ Écrire manuellement
+            </button>
+          </div>
+        </div>
+
+        <!-- Edit mode -->
+        <div v-else-if="guidelinesEditMode" class="space-y-4">
+          <textarea
+            v-model="weeklyGuidelines"
+            class="textarea textarea-bordered w-full h-64 font-mono text-sm"
+            placeholder="## 🎯 Objectif de la semaine&#10;&#10;Cette semaine...&#10;&#10;### Philosophie&#10;&#10;...&#10;&#10;### Répartition&#10;&#10;- ...&#10;&#10;### Points clés&#10;&#10;- ..."
+          ></textarea>
+          <div class="flex justify-end gap-2">
+            <button class="btn btn-sm btn-ghost" @click="guidelinesEditMode = false">
+              Annuler
+            </button>
+            <button class="btn btn-sm btn-primary" @click="saveGuidelines">
+              💾 Sauvegarder
+            </button>
+          </div>
+        </div>
+
+        <!-- Display mode -->
+        <div v-else class="prose prose-sm max-w-none" v-html="renderedGuidelines"></div>
+
+        <div class="modal-action">
+          <button
+            v-if="weeklyGuidelines && !guidelinesEditMode"
+            class="btn btn-sm btn-ghost"
+            :class="guidelinesPromptCopied ? 'text-success' : ''"
+            @click="copyGuidelinesPrompt"
+          >
+            {{ guidelinesPromptCopied ? '✓ Copié !' : '🤖 Regénérer (copier prompt)' }}
+          </button>
+          <button class="btn" @click="showGuidelinesModal = false; guidelinesEditMode = false">
+            Fermer
+          </button>
+        </div>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button @click="showGuidelinesModal = false; guidelinesEditMode = false">close</button>
+      </form>
+    </dialog>
 
     <!-- New Activity Spotlight -->
     <Teleport to="body">
