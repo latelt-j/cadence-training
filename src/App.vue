@@ -142,10 +142,10 @@ const weekStartString = computed(() => {
 })
 
 // Load guidelines when week changes
-watch(weekStartString, async (newWeekStart) => {
-  console.log('Loading guidelines for week:', newWeekStart)
+const loadGuidelines = async (weekStart: string) => {
+  console.log('Loading guidelines for week:', weekStart)
   try {
-    const guidelines = await fetchWeeklyGuidelines(newWeekStart)
+    const guidelines = await fetchWeeklyGuidelines(weekStart)
     console.log('Loaded guidelines:', guidelines ? 'found' : 'none')
     weeklyGuidelines.value = guidelines || ''
     guidelinesEditMode.value = false
@@ -153,7 +153,11 @@ watch(weekStartString, async (newWeekStart) => {
     console.error('Error loading weekly guidelines:', e)
     weeklyGuidelines.value = ''
   }
-}, { immediate: true })
+}
+
+watch(weekStartString, (newWeekStart) => {
+  loadGuidelines(newWeekStart)
+})
 
 // Get sessions for the week of the selected session (for AI modify context)
 const selectedSessionWeekSessions = computed(() => {
@@ -304,6 +308,9 @@ onMounted(async () => {
   } catch (e) {
     console.error('Error loading settings:', e)
   }
+
+  // Load guidelines for current week
+  await loadGuidelines(weekStartString.value)
 
   const urlParams = new URLSearchParams(window.location.search)
   const code = urlParams.get('code')
