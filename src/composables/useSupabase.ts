@@ -68,6 +68,14 @@ interface DbOAuthTokens {
   updated_at: string
 }
 
+interface DbWeeklyGuidelines {
+  id: number
+  week_start: string
+  guidelines: string
+  created_at: string
+  updated_at: string
+}
+
 // Singleton client
 let supabase: SupabaseClient | null = null
 
@@ -291,6 +299,37 @@ export function useSupabase() {
     }
   }
 
+  // Weekly Guidelines
+  const fetchWeeklyGuidelines = async (weekStart: string): Promise<string | null> => {
+    const { data, error } = await getClient()
+      .from('weekly_guidelines')
+      .select('guidelines')
+      .eq('week_start', weekStart)
+      .single()
+
+    if (error) {
+      if (error.code === 'PGRST116') return null // No rows
+      console.error('Error fetching weekly guidelines:', error)
+      throw error
+    }
+
+    return (data as DbWeeklyGuidelines)?.guidelines || null
+  }
+
+  const upsertWeeklyGuidelines = async (weekStart: string, guidelines: string): Promise<void> => {
+    const { error } = await getClient()
+      .from('weekly_guidelines')
+      .upsert({
+        week_start: weekStart,
+        guidelines
+      }, { onConflict: 'week_start' })
+
+    if (error) {
+      console.error('Error upserting weekly guidelines:', error)
+      throw error
+    }
+  }
+
   // Helpers
   const dbToSession = (db: DbSession): ScheduledSession => ({
     id: db.id,
@@ -387,5 +426,8 @@ export function useSupabase() {
     fetchOAuthTokens,
     upsertOAuthTokens,
     deleteOAuthTokens,
+    // Weekly Guidelines
+    fetchWeeklyGuidelines,
+    upsertWeeklyGuidelines,
   }
 }

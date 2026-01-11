@@ -154,3 +154,24 @@ ALTER TABLE oauth_tokens DISABLE ROW LEVEL SECURITY;
 -- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS zwift_workout TEXT;
 -- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS planned_title TEXT;
 -- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS planned_description TEXT;
+
+-- =============================================
+-- Weekly Guidelines table
+-- Stores coach guidelines/directives per week
+-- =============================================
+CREATE TABLE IF NOT EXISTS weekly_guidelines (
+  id SERIAL PRIMARY KEY,
+  week_start DATE NOT NULL UNIQUE,
+  guidelines TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_weekly_guidelines_week ON weekly_guidelines(week_start);
+
+CREATE TRIGGER weekly_guidelines_updated_at
+  BEFORE UPDATE ON weekly_guidelines
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at();
+
+ALTER TABLE weekly_guidelines DISABLE ROW LEVEL SECURITY;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useSessions } from './composables/useSessions'
 import { useStrava } from './composables/useStrava'
 import { useSupabase } from './composables/useSupabase'
@@ -98,9 +98,15 @@ Réponds UNIQUEMENT avec le markdown, rien d'autre.`
   }, 2000)
 }
 
-const saveGuidelines = () => {
+const saveGuidelines = async () => {
   guidelinesEditMode.value = false
-  // Guidelines are already in weeklyGuidelines.value via v-model
+  try {
+    await upsertWeeklyGuidelines(weekStartString.value, weeklyGuidelines.value)
+    showToast('Directives sauvegardées')
+  } catch (e) {
+    console.error('Error saving guidelines:', e)
+    showToast('Erreur de sauvegarde', 'error')
+  }
 }
 
 // Compute week start from currentWeekDate
@@ -114,6 +120,24 @@ const getMonday = (d: Date): Date => {
 }
 
 const weekStart = computed(() => getMonday(currentWeekDate.value))
+
+// Format week start as YYYY-MM-DD for database
+const weekStartString = computed(() => {
+  const d = weekStart.value
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+})
+
+// Load guidelines when week changes
+watch(weekStartString, async (newWeekStart) => {
+  try {
+    const guidelines = await fetchWeeklyGuidelines(newWeekStart)
+    weeklyGuidelines.value = guidelines || ''
+    guidelinesEditMode.value = false
+  } catch (e) {
+    console.error('Error loading weekly guidelines:', e)
+    weeklyGuidelines.value = ''
+  }
+}, { immediate: true })
 
 // Get sessions for the week of the selected session (for AI modify context)
 const selectedSessionWeekSessions = computed(() => {
@@ -143,7 +167,7 @@ const {
 
 
 // Training phases & objectives & athlete profile
-const { fetchSettings, updateSettings } = useSupabase()
+const { fetchSettings, updateSettings, fetchWeeklyGuidelines, upsertWeeklyGuidelines } = useSupabase()
 const trainingPhases = ref<TrainingPhase[]>([])
 const trainingObjectives = ref<TrainingObjective[]>([])
 const showObjectivesModal = ref(false)
@@ -408,7 +432,20 @@ const handleImport = async (data: (SessionTemplate | ScheduledSession)[], replac
   }
 
   // Store guidelines if provided
-  if (guidelines) {
+  if (guidelines && navigateToDate) {
+    // Calculate the week start for the imported week
+    const importDate = new Date(navigateToDate)
+    const importWeekStart = getMonday(importDate)
+    const importWeekStartStr = `${importWeekStart.getFullYear()}-${String(importWeekStart.getMonth() + 1).padStart(2, '0')}-${String(importWeekStart.getDate()).padStart(2, '0')}`
+
+    // Also persist to database
+    try {
+      await upsertWeeklyGuidelines(importWeekStartStr, guidelines)
+    } catch (e) {
+      console.error('Error saving guidelines from import:', e)
+    }
+
+    // Update local state (will be refreshed when navigating)
     weeklyGuidelines.value = guidelines
   }
 
