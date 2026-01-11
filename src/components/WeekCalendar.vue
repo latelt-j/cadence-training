@@ -483,7 +483,7 @@ watch(forecast, () => {}, { deep: true })
         </div>
 
         <!-- Sessions - Mobile -->
-        <div class="flex-1 px-4 pb-4 space-y-3 overflow-y-auto">
+        <div class="flex-1 px-4 pb-4 pt-4 space-y-3 overflow-y-auto border-t border-base-content/10">
           <div
             v-for="session in currentDaySessions"
             :key="session.id"
