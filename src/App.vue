@@ -100,8 +100,19 @@ Réponds UNIQUEMENT avec le markdown, rien d'autre.`
 
 const saveGuidelines = async () => {
   guidelinesEditMode.value = false
+
+  // Don't save empty guidelines
+  if (!weeklyGuidelines.value.trim()) {
+    showToast('Les directives ne peuvent pas être vides', 'error')
+    return
+  }
+
+  console.log('Saving guidelines for week:', weekStartString.value)
+  console.log('Guidelines content:', weeklyGuidelines.value.substring(0, 100) + '...')
+
   try {
     await upsertWeeklyGuidelines(weekStartString.value, weeklyGuidelines.value)
+    console.log('Guidelines saved successfully')
     showToast('Directives sauvegardées')
   } catch (e) {
     console.error('Error saving guidelines:', e)
@@ -129,8 +140,10 @@ const weekStartString = computed(() => {
 
 // Load guidelines when week changes
 watch(weekStartString, async (newWeekStart) => {
+  console.log('Loading guidelines for week:', newWeekStart)
   try {
     const guidelines = await fetchWeeklyGuidelines(newWeekStart)
+    console.log('Loaded guidelines:', guidelines ? 'found' : 'none')
     weeklyGuidelines.value = guidelines || ''
     guidelinesEditMode.value = false
   } catch (e) {
