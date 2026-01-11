@@ -865,7 +865,7 @@ const handleReset = () => {
         </div>
 
         <!-- Display mode -->
-        <div v-else class="prose prose-sm max-w-none" v-html="renderedGuidelines"></div>
+        <div v-else class="feedback-markdown" v-html="renderedGuidelines"></div>
 
         <div class="modal-action">
           <button

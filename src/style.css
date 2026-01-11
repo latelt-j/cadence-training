@@ -284,23 +284,41 @@ html {
   line-height: 1.6;
 }
 
+.feedback-markdown h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  margin-top: 0;
+  color: oklch(var(--bc));
+}
+
 .feedback-markdown h2 {
   font-size: 1.25rem;
   font-weight: 700;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
+  margin-top: 1.5rem;
   color: oklch(var(--bc));
   border-bottom: 1px solid oklch(var(--bc) / 0.2);
   padding-bottom: 0.5rem;
 }
 
 .feedback-markdown h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: oklch(var(--bc) / 0.9);
+}
+
+.feedback-markdown h4 {
   font-size: 0.9rem;
   font-weight: 600;
   margin-top: 1rem;
   margin-bottom: 0.25rem;
-  color: oklch(var(--bc) / 0.9);
+  color: oklch(var(--bc) / 0.85);
 }
 
+.feedback-markdown h1:first-child,
 .feedback-markdown h2:first-child,
 .feedback-markdown h3:first-child {
   margin-top: 0;
