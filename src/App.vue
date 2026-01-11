@@ -320,12 +320,13 @@ const syncStrava = async () => {
 // Modal states
 const selectedSession = ref<ScheduledSession | null>(null)
 const sessionDetailModalRef = ref<{ onResyncComplete: () => void } | null>(null)
+const weekCalendarRef = ref<{ goToDate: (date: Date | string) => void } | null>(null)
 
 // Dark mode only
 document.documentElement.setAttribute('data-theme', 'dracula')
 
 // Handlers
-const handleImport = async (data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean, _phase?: ImportedPhase) => {
+const handleImport = async (data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean, _phase?: ImportedPhase, navigateToDate?: string) => {
   // Track session count before import to find new ones
   const existingIds = new Set(sessions.value.map(s => s.id))
 
@@ -347,6 +348,11 @@ const handleImport = async (data: (SessionTemplate | ScheduledSession)[], replac
     setTimeout(() => {
       newSessionIds.value = new Set()
     }, 5000)
+  }
+
+  // Navigate to the week of the imported sessions
+  if (navigateToDate && weekCalendarRef.value) {
+    weekCalendarRef.value.goToDate(navigateToDate)
   }
 
   // Note: phases are now managed manually via TrainingPhasesManager, not auto-created from import
@@ -577,6 +583,7 @@ const handleReset = () => {
     <div class="container mx-auto p-4 max-w-6xl">
       <div class="space-y-6">
         <WeekCalendar
+          ref="weekCalendarRef"
           :sessions="sessions"
           :new-session-ids="newSessionIds"
           :training-phases="trainingPhases"

@@ -215,6 +215,14 @@ const goToToday = () => {
   emit('weekChange', currentWeekStart.value)
 }
 
+const goToDate = (date: Date | string) => {
+  const targetDate = typeof date === 'string' ? new Date(date) : date
+  currentWeekStart.value = getMonday(targetDate)
+  emit('weekChange', currentWeekStart.value)
+}
+
+defineExpose({ goToDate })
+
 // Week export for coach
 const weekExportCopied = ref(false)
 

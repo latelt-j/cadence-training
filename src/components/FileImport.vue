@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import 'cally'
 import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective, ImportedPhase, AthleteProfile } from '../types/session'
 
 const props = defineProps<{
@@ -10,7 +11,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  import: [data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean, phase?: ImportedPhase]
+  import: [data: (SessionTemplate | ScheduledSession)[], replaceExisting: boolean, phase?: ImportedPhase, navigateToDate?: string]
 }>()
 
 // Reset form to defaults
@@ -63,6 +64,27 @@ const getDefaultPlanDates = () => {
 const defaultDates = getDefaultPlanDates()
 const planStartDate = ref(defaultDates.start)
 const planEndDate = ref(defaultDates.end)
+
+// Date picker
+const showDatePicker = ref(false)
+
+const handleDateChange = (e: Event) => {
+  const range = (e.target as HTMLElement).getAttribute('value')
+  if (range) {
+    const [start, end] = range.split('/')
+    if (start && end) {
+      planStartDate.value = start
+      planEndDate.value = end
+    }
+  }
+  showDatePicker.value = false
+}
+
+const formatDateRange = computed(() => {
+  const start = new Date(planStartDate.value).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+  const end = new Date(planEndDate.value).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+  return `${start} → ${end}`
+})
 
 // Format date as YYYY-MM-DD in LOCAL timezone (not UTC!)
 const formatLocalDate = (date: Date) => {
@@ -470,11 +492,11 @@ const saveCoachResponse = () => {
     if (data && typeof data === 'object' && !Array.isArray(data) && data.sessions) {
       const phase = data.phase as ImportedPhase | undefined
       const sessions = Array.isArray(data.sessions) ? data.sessions : [data.sessions]
-      emit('import', sessions, true, phase)
+      emit('import', sessions, true, phase, planStartDate.value)
     } else {
       // Old format: array of sessions or single session
       const sessions = Array.isArray(data) ? data : [data]
-      emit('import', sessions, true)
+      emit('import', sessions, true, undefined, planStartDate.value)
     }
 
     // Reset after successful import
@@ -494,24 +516,31 @@ const saveCoachResponse = () => {
       <!-- Step 1: Form -->
       <div v-if="step === 'form'" key="form" class="space-y-4">
         <!-- Date range picker -->
-        <div class="form-control">
+        <div class="form-control relative">
           <label class="label pb-1">
             <span class="label-text text-xs text-base-content/60">📅 Période à planifier</span>
           </label>
-          <div class="flex gap-2 items-center">
-            <input
-              v-model="planStartDate"
-              type="date"
-              class="input input-bordered input-sm flex-1"
-            />
-            <span class="text-base-content/60">→</span>
-            <input
-              v-model="planEndDate"
-              type="date"
-              class="input input-bordered input-sm flex-1"
-            />
+          <button
+            type="button"
+            class="btn btn-sm btn-ghost w-full justify-between border border-base-content/20"
+            @click="showDatePicker = !showDatePicker"
+          >
+            <span>{{ formatDateRange }}</span>
+            <span class="text-base-content/50">{{ planDatesRange.length }} jours</span>
+          </button>
+          <div
+            v-if="showDatePicker"
+            class="absolute z-50 top-full left-0 mt-1 bg-base-200 rounded-lg shadow-xl p-3 border border-base-content/10"
+          >
+            <calendar-range
+              :value="`${planStartDate}/${planEndDate}`"
+              first-day-of-week="1"
+              locale="fr-FR"
+              @change="handleDateChange"
+            >
+              <calendar-month></calendar-month>
+            </calendar-range>
           </div>
-          <div class="text-xs text-base-content/50 mt-1">{{ planDatesRange.length }} jours</div>
         </div>
 
         <!-- Fatigue slider -->
@@ -658,5 +687,19 @@ const saveCoachResponse = () => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* Cally calendar styling */
+calendar-range {
+  --color-accent: oklch(var(--p));
+  --color-text-on-accent: oklch(var(--pc));
+}
+
+calendar-range::part(button) {
+  color: oklch(var(--bc));
+}
+
+calendar-range::part(range-inner) {
+  background: oklch(var(--p) / 0.2);
 }
 </style>
