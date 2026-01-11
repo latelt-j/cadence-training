@@ -304,24 +304,55 @@ onMounted(async () => {
     window.history.replaceState({}, document.title, window.location.pathname)
   }
 
-  // Global escape key handler for modals
-  document.addEventListener('keydown', handleGlobalEscape)
+  // Global keyboard handler
+  document.addEventListener('keydown', handleGlobalKeydown)
 })
 
-// Close any open modal on Escape
-const handleGlobalEscape = (e: KeyboardEvent) => {
+// Check if any modal is open
+const isAnyModalOpen = () => {
+  return showImportModal.value ||
+    showStravaDisconnectModal.value ||
+    showObjectivesModal.value ||
+    showPhasesModal.value ||
+    showAthleteProfileModal.value ||
+    showGuidelinesModal.value ||
+    showShareModal.value ||
+    selectedSession.value !== null ||
+    spotlightSession.value !== null
+}
+
+// Global keyboard handler
+const handleGlobalKeydown = (e: KeyboardEvent) => {
+  // Don't handle if user is typing in an input or textarea
+  const target = e.target as HTMLElement
+  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
+    return
+  }
+
   if (e.key === 'Escape') {
     if (showImportModal.value) closeImportModal()
     else if (showStravaDisconnectModal.value) showStravaDisconnectModal.value = false
     else if (showObjectivesModal.value) showObjectivesModal.value = false
     else if (showPhasesModal.value) showPhasesModal.value = false
     else if (showAthleteProfileModal.value) showAthleteProfileModal.value = false
+    else if (showGuidelinesModal.value) { showGuidelinesModal.value = false; guidelinesEditMode.value = false }
     else if (selectedSession.value) selectedSession.value = null
+  }
+
+  // Arrow keys for week navigation (only when no modal is open)
+  if (!isAnyModalOpen() && weekCalendarRef.value) {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      weekCalendarRef.value.prevWeek()
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      weekCalendarRef.value.nextWeek()
+    }
   }
 }
 
 onUnmounted(() => {
-  document.removeEventListener('keydown', handleGlobalEscape)
+  document.removeEventListener('keydown', handleGlobalKeydown)
 })
 
 // Strava sync - only fetch details for NEW activities
@@ -401,7 +432,7 @@ const syncStrava = async () => {
 // Modal states
 const selectedSession = ref<ScheduledSession | null>(null)
 const sessionDetailModalRef = ref<{ onResyncComplete: () => void } | null>(null)
-const weekCalendarRef = ref<{ goToDate: (date: Date | string) => void } | null>(null)
+const weekCalendarRef = ref<{ goToDate: (date: Date | string) => void; prevWeek: () => void; nextWeek: () => void } | null>(null)
 
 // Dark mode only
 document.documentElement.setAttribute('data-theme', 'dracula')

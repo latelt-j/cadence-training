@@ -222,7 +222,7 @@ const goToDate = (date: Date | string) => {
   emit('weekChange', currentWeekStart.value)
 }
 
-defineExpose({ goToDate })
+defineExpose({ goToDate, prevWeek, nextWeek })
 
 // Week export for coach
 const weekExportCopied = ref(false)
