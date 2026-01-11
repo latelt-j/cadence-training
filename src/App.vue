@@ -350,12 +350,10 @@ const isAnyModalOpen = () => {
 
 // Global keyboard handler
 const handleGlobalKeydown = (e: KeyboardEvent) => {
-  // Don't handle if user is typing in an input or textarea
   const target = e.target as HTMLElement
-  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) {
-    return
-  }
+  const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable
 
+  // Escape always works to close modals
   if (e.key === 'Escape') {
     if (showImportModal.value) closeImportModal()
     else if (showStravaDisconnectModal.value) showStravaDisconnectModal.value = false
@@ -363,8 +361,13 @@ const handleGlobalKeydown = (e: KeyboardEvent) => {
     else if (showPhasesModal.value) showPhasesModal.value = false
     else if (showAthleteProfileModal.value) showAthleteProfileModal.value = false
     else if (showGuidelinesModal.value) { showGuidelinesModal.value = false; guidelinesEditMode.value = false }
+    else if (showShareModal.value) showShareModal.value = false
     else if (selectedSession.value) selectedSession.value = null
+    return
   }
+
+  // Don't handle other keys if user is typing
+  if (isTyping) return
 
   // Arrow keys for week navigation (only when no modal is open)
   if (!isAnyModalOpen() && weekCalendarRef.value) {
