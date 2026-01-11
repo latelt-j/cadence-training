@@ -617,7 +617,7 @@ watch(forecast, () => {}, { deep: true })
 
 /* Base session card - dark background */
 .session-card {
-  background: rgba(10, 15, 12, 0.85);
+  background-color: rgba(10, 15, 12, 0.5);
   border-bottom: 6px solid transparent;
   border-radius: var(--radius-sm);
 }
