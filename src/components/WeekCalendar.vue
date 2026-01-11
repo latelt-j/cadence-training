@@ -381,26 +381,30 @@ watch(forecast, () => {}, { deep: true })
 <template>
   <div class="card bg-base-100 overflow-hidden">
     <!-- Header -->
-    <div class="flex items-center justify-between p-4">
-      <div class="flex items-center gap-1">
-        <button class="btn btn-sm btn-ghost btn-circle" @click="prevWeek">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <button class="btn btn-sm btn-ghost btn-circle" @click="nextWeek">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-        <button class="btn btn-sm btn-ghost text-white font-medium ml-1" @click="goToToday">Aujourd'hui</button>
+    <div class="p-4 space-y-3">
+      <!-- Row 1: Navigation + Title -->
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-1">
+          <button class="btn btn-sm btn-ghost btn-circle" @click="prevWeek">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button class="btn btn-sm btn-ghost btn-circle" @click="nextWeek">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+          <button class="btn btn-sm btn-ghost text-white font-medium ml-1" @click="goToToday">Aujourd'hui</button>
+        </div>
+
+        <div class="flex items-center">
+          <h2 class="text-xl font-bold text-white capitalize leading-none">{{ headerTitle }}</h2>
+        </div>
       </div>
 
-      <div class="flex items-center">
-        <h2 class="text-xl font-bold text-white capitalize leading-none">{{ headerTitle }}</h2>
-      </div>
-
-      <div class="flex items-center gap-2">
+      <!-- Row 2: Action buttons -->
+      <div class="flex items-center justify-end gap-2">
         <button
           class="btn btn-sm btn-ghost hidden md:flex"
           :class="weekExportCopied ? 'text-success' : ''"
