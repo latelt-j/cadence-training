@@ -867,8 +867,9 @@ const handleReset = () => {
 
     <!-- Guidelines Modal -->
     <dialog :class="['modal', { 'modal-open': showGuidelinesModal }]">
-      <div class="modal-box w-full h-full max-h-full md:max-w-3xl md:h-auto md:max-h-[85vh] rounded-none md:rounded-2xl overflow-y-auto">
-        <div class="flex items-center justify-between mb-4">
+      <div class="modal-box w-full h-full max-h-full md:max-w-3xl md:h-auto md:max-h-[85vh] rounded-none md:rounded-2xl flex flex-col overflow-hidden">
+        <!-- Header (fixed) -->
+        <div class="flex items-center justify-between pb-4 border-b border-base-300 flex-shrink-0">
           <h3 class="font-bold text-lg flex items-center gap-2">
             📖 Directives de la semaine
             <button
@@ -882,48 +883,58 @@ const handleReset = () => {
           <button class="btn btn-sm btn-circle btn-ghost" @click="showGuidelinesModal = false; guidelinesEditMode = false">✕</button>
         </div>
 
-        <!-- Empty state -->
-        <div v-if="!weeklyGuidelines && !guidelinesEditMode" class="text-center py-8">
-          <div class="text-4xl mb-4">📋</div>
-          <p class="text-base-content/70 mb-4">Pas encore de directives pour cette semaine</p>
-          <div class="flex gap-2 justify-center">
-            <button
-              class="btn btn-sm"
-              :class="guidelinesPromptCopied ? 'btn-success' : 'btn-primary'"
-              @click="copyGuidelinesPrompt"
-            >
-              {{ guidelinesPromptCopied ? '✓ Copié !' : '🤖 Copier le prompt' }}
-            </button>
-            <button
-              class="btn btn-sm btn-ghost"
-              @click="guidelinesEditMode = true"
-            >
-              ✏️ Écrire manuellement
-            </button>
+        <!-- Content (scrollable) -->
+        <div class="flex-1 overflow-y-auto py-4">
+          <!-- Empty state -->
+          <div v-if="!weeklyGuidelines && !guidelinesEditMode" class="text-center py-8">
+            <div class="text-4xl mb-4">📋</div>
+            <p class="text-base-content/70 mb-4">Pas encore de directives pour cette semaine</p>
+            <div class="flex gap-2 justify-center">
+              <button
+                class="btn btn-sm"
+                :class="guidelinesPromptCopied ? 'btn-success' : 'btn-primary'"
+                @click="copyGuidelinesPrompt"
+              >
+                {{ guidelinesPromptCopied ? '✓ Copié !' : '🤖 Copier le prompt' }}
+              </button>
+              <button
+                class="btn btn-sm btn-ghost"
+                @click="guidelinesEditMode = true"
+              >
+                ✏️ Écrire manuellement
+              </button>
+            </div>
           </div>
+
+          <!-- Edit mode -->
+          <div v-else-if="guidelinesEditMode" class="space-y-4">
+            <textarea
+              v-model="weeklyGuidelines"
+              class="textarea textarea-bordered w-full h-64 font-mono text-sm"
+              placeholder="## 🎯 Objectif de la semaine&#10;&#10;Cette semaine...&#10;&#10;### Philosophie&#10;&#10;...&#10;&#10;### Répartition&#10;&#10;- ...&#10;&#10;### Points clés&#10;&#10;- ..."
+            ></textarea>
+          </div>
+
+          <!-- Display mode -->
+          <div v-else class="feedback-markdown" v-html="renderedGuidelines"></div>
         </div>
 
-        <!-- Edit mode -->
-        <div v-else-if="guidelinesEditMode" class="space-y-4">
-          <textarea
-            v-model="weeklyGuidelines"
-            class="textarea textarea-bordered w-full h-64 font-mono text-sm"
-            placeholder="## 🎯 Objectif de la semaine&#10;&#10;Cette semaine...&#10;&#10;### Philosophie&#10;&#10;...&#10;&#10;### Répartition&#10;&#10;- ...&#10;&#10;### Points clés&#10;&#10;- ..."
-          ></textarea>
-          <div class="flex justify-end gap-2">
-            <button class="btn btn-sm btn-ghost" @click="guidelinesEditMode = false">
-              Annuler
-            </button>
-            <button class="btn btn-sm btn-primary" @click="saveGuidelines">
-              💾 Sauvegarder
-            </button>
-          </div>
-        </div>
-
-        <!-- Display mode -->
-        <div v-else class="feedback-markdown" v-html="renderedGuidelines"></div>
-
-        <div class="modal-action">
+        <!-- Footer (fixed) -->
+        <div class="flex justify-end gap-2 pt-4 border-t border-base-300 flex-shrink-0">
+          <button
+            v-if="guidelinesEditMode"
+            class="btn btn-sm btn-ghost"
+            @click="guidelinesEditMode = false"
+          >
+            Annuler
+          </button>
+          <button
+            v-if="guidelinesEditMode"
+            class="btn btn-sm btn-primary"
+            @click="saveGuidelines"
+          >
+            💾 Sauvegarder
+          </button>
           <button
             v-if="weeklyGuidelines && !guidelinesEditMode"
             class="btn btn-sm btn-ghost"
