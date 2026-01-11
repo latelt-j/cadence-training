@@ -814,17 +814,20 @@ const handleReset = () => {
 
     <!-- Guidelines Modal -->
     <dialog :class="['modal', { 'modal-open': showGuidelinesModal }]">
-      <div class="modal-box max-w-2xl">
-        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-          📖 Directives de la semaine
-          <button
-            v-if="weeklyGuidelines && !guidelinesEditMode"
-            class="btn btn-xs btn-ghost"
-            @click="guidelinesEditMode = true"
-          >
-            ✏️ Modifier
-          </button>
-        </h3>
+      <div class="modal-box w-full h-full max-h-full md:max-w-3xl md:h-auto md:max-h-[85vh] rounded-none md:rounded-2xl overflow-y-auto">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-bold text-lg flex items-center gap-2">
+            📖 Directives de la semaine
+            <button
+              v-if="weeklyGuidelines && !guidelinesEditMode"
+              class="btn btn-xs btn-ghost"
+              @click="guidelinesEditMode = true"
+            >
+              ✏️ Modifier
+            </button>
+          </h3>
+          <button class="btn btn-sm btn-circle btn-ghost" @click="showGuidelinesModal = false; guidelinesEditMode = false">✕</button>
+        </div>
 
         <!-- Empty state -->
         <div v-if="!weeklyGuidelines && !guidelinesEditMode" class="text-center py-8">
