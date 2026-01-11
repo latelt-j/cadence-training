@@ -159,6 +159,11 @@ watch(weekStartString, (newWeekStart) => {
   loadGuidelines(newWeekStart)
 })
 
+// Modal states (must be before computed that uses selectedSession)
+const selectedSession = ref<ScheduledSession | null>(null)
+const sessionDetailModalRef = ref<{ onResyncComplete: () => void } | null>(null)
+const weekCalendarRef = ref<{ goToDate: (date: Date | string) => void; prevWeek: () => void; nextWeek: () => void } | null>(null)
+
 // Get sessions for the week of the selected session (for AI modify context)
 const selectedSessionWeekSessions = computed(() => {
   if (!selectedSession.value) return []
@@ -450,11 +455,6 @@ const syncStrava = async () => {
     alert(`Strava : ${msg.join(', ')}`)
   }
 }
-
-// Modal states
-const selectedSession = ref<ScheduledSession | null>(null)
-const sessionDetailModalRef = ref<{ onResyncComplete: () => void } | null>(null)
-const weekCalendarRef = ref<{ goToDate: (date: Date | string) => void; prevWeek: () => void; nextWeek: () => void } | null>(null)
 
 // Dark mode only
 document.documentElement.setAttribute('data-theme', 'dracula')
