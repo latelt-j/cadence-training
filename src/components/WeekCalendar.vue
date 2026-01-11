@@ -401,14 +401,14 @@ watch(forecast, () => {}, { deep: true })
 
       <div class="flex items-center gap-2">
         <button
-          class="btn btn-sm btn-ghost"
+          class="btn btn-sm btn-ghost hidden md:flex"
           :class="weekExportCopied ? 'text-success' : ''"
           @click="copyWeekForCoach"
         >
           {{ weekExportCopied ? '✓ Copié !' : '📋 Bilan' }}
         </button>
         <button
-          class="btn btn-sm btn-ghost"
+          class="btn btn-sm btn-ghost hidden md:flex"
           @click="emit('openShareModal')"
         >
           📤 Partager
