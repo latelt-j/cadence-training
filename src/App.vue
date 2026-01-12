@@ -26,7 +26,6 @@ const {
   updateSessionFeedback,
   updateSession,
   removeSession,
-  reset,
   weeklyStats,
   setCurrentWeek,
   currentWeekDate,
@@ -40,9 +39,6 @@ const closeImportModal = () => {
   showImportModal.value = false
   fileImportRef.value?.resetForm()
 }
-
-// Strava disconnect modal
-const showStravaDisconnectModal = ref(false)
 
 // Share week modal
 const showShareModal = ref(false)
@@ -192,7 +188,6 @@ const {
   fetchActivitiesWithMetrics,
   convertToSessions,
   resyncActivity,
-  disconnect: stravaDisconnect,
   logout: stravaLogout,
 } = useStrava()
 
@@ -383,7 +378,6 @@ onMounted(async () => {
 // Check if any modal is open
 const isAnyModalOpen = () => {
   return showImportModal.value ||
-    showStravaDisconnectModal.value ||
     showObjectivesModal.value ||
     showPhasesModal.value ||
     showAthleteProfileModal.value ||
@@ -401,7 +395,6 @@ const handleGlobalKeydown = (e: KeyboardEvent) => {
   // Escape always works to close modals
   if (e.key === 'Escape') {
     if (showImportModal.value) closeImportModal()
-    else if (showStravaDisconnectModal.value) showStravaDisconnectModal.value = false
     else if (showObjectivesModal.value) showObjectivesModal.value = false
     else if (showPhasesModal.value) showPhasesModal.value = false
     else if (showAthleteProfileModal.value) showAthleteProfileModal.value = false
@@ -645,12 +638,6 @@ const handleResyncSession = async (sessionId: string, stravaId: number) => {
   sessionDetailModalRef.value?.onResyncComplete()
 }
 
-const handleReset = () => {
-  if (confirm('Réinitialiser toutes les données ?')) {
-    reset()
-  }
-}
-
 const handleLogout = () => {
   stravaLogout()
   setCurrentUser(null)
@@ -751,9 +738,7 @@ const handleLogout = () => {
                 </svg>
               </button>
               <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-52 p-2 shadow-xl mt-2 border border-base-300">
-                <li v-if="stravaConnected"><a class="rounded-lg" @click="showStravaDisconnectModal = true">Déconnecter Strava</a></li>
-                <li><a class="rounded-lg" @click="handleReset">🗑️ Réinitialiser</a></li>
-                <li class="border-t border-base-300 mt-1 pt-1">
+                <li>
                   <a class="text-error rounded-lg" @click="handleLogout">🚪 Déconnexion</a>
                 </li>
               </ul>
@@ -830,7 +815,6 @@ const handleLogout = () => {
           </button>
           <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-xl mb-2 border border-base-300">
             <li><a @click="showPhasesModal = true" class="rounded-lg">📊 Cycles</a></li>
-            <li v-if="stravaConnected"><a class="text-error rounded-lg" @click="showStravaDisconnectModal = true">Déconnecter Strava</a></li>
           </ul>
         </div>
       </div>
@@ -895,24 +879,6 @@ const handleLogout = () => {
         </div>
       </div>
       <form method="dialog" class="modal-backdrop" @click="closeImportModal">
-        <button>close</button>
-      </form>
-    </dialog>
-
-    <!-- Strava Disconnect Modal -->
-    <dialog class="modal" :class="{ 'modal-open': showStravaDisconnectModal }">
-      <div class="modal-box w-full h-full max-h-full md:max-w-sm md:h-auto md:max-h-[90vh] rounded-none md:rounded-2xl">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-bold text-lg">Déconnecter Strava ?</h3>
-          <button class="btn btn-sm btn-circle btn-ghost" @click="showStravaDisconnectModal = false">✕</button>
-        </div>
-        <p class="py-4 text-base-content/70">Tu devras te reconnecter pour synchroniser tes activités.</p>
-        <div class="modal-action">
-          <button class="btn btn-ghost" @click="showStravaDisconnectModal = false">Annuler</button>
-          <button class="btn btn-error" @click="stravaDisconnect(); showStravaDisconnectModal = false">Déconnecter</button>
-        </div>
-      </div>
-      <form method="dialog" class="modal-backdrop" @click="showStravaDisconnectModal = false">
         <button>close</button>
       </form>
     </dialog>
