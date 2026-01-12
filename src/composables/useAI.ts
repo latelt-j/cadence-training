@@ -2,8 +2,6 @@ import { ref } from 'vue'
 import type { ScheduledSession, AthleteProfile, ImportedPhase } from '../types/session'
 import { generateAnalysisText } from '../utils/coach'
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
-
 // Response types
 export interface WeeklyPlanResponse {
   guidelines?: string
@@ -24,58 +22,20 @@ export interface SessionModification {
   zwift_workout?: string
 }
 
+// Store userId for Edge Function calls
+let currentUserId: number | null = null
+
 export function useAI() {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
-  // Get API key with priority: localStorage > env
-  const getApiKey = (): string | null => {
-    return localStorage.getItem('gemini-api-key')
-      || import.meta.env.VITE_GEMINI_API_KEY
-      || null
+  // Set the current user ID (call this when user logs in)
+  const setUserId = (userId: number | null) => {
+    currentUserId = userId
   }
 
-  // Check if AI is configured (either API key or Edge Function available)
-  const isConfigured = (): boolean => {
-    // Always configured - fallback to Edge Function if no API key
-    return true
-  }
-
-  // Direct call to Gemini API
-  const callGeminiDirect = async (prompt: string, jsonMode: boolean, apiKey: string): Promise<string> => {
-    const requestBody: Record<string, unknown> = {
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 8192,
-      }
-    }
-
-    if (jsonMode) {
-      requestBody.generationConfig = {
-        ...requestBody.generationConfig as Record<string, unknown>,
-        responseMimeType: 'application/json',
-      }
-    }
-
-    const response = await fetch(`${GEMINI_API_URL}?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    })
-
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Gemini API error:', errorText)
-      throw new Error(`Erreur Gemini API: ${response.status}`)
-    }
-
-    const data = await response.json()
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || ''
-  }
-
-  // Call via Edge Function (fallback)
-  const callGeminiProxy = async (prompt: string, jsonMode: boolean): Promise<string> => {
+  // All calls go through the secure Edge Function
+  const chat = async (prompt: string, jsonMode = false): Promise<string> => {
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
     const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
@@ -89,7 +49,11 @@ export function useAI() {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${supabaseAnonKey}`,
       },
-      body: JSON.stringify({ prompt, jsonMode }),
+      body: JSON.stringify({
+        prompt,
+        jsonMode,
+        userId: currentUserId
+      }),
     })
 
     if (!response.ok) {
@@ -99,17 +63,6 @@ export function useAI() {
 
     const data = await response.json()
     return data.content || ''
-  }
-
-  // Main chat function - routes to direct or proxy
-  const chat = async (prompt: string, jsonMode = false): Promise<string> => {
-    const apiKey = getApiKey()
-
-    if (apiKey) {
-      return await callGeminiDirect(prompt, jsonMode, apiKey)
-    } else {
-      return await callGeminiProxy(prompt, jsonMode)
-    }
   }
 
   // Generate weekly training plan
@@ -310,8 +263,7 @@ Réponds en JSON :
   return {
     isLoading,
     error,
-    isConfigured,
-    getApiKey,
+    setUserId,
     chat,
     generateWeeklyPlan,
     analyzeSession,

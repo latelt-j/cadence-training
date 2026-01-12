@@ -148,6 +148,12 @@ ALTER TABLE oauth_tokens DISABLE ROW LEVEL SECURITY;
 -- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS intensity INTEGER;
 
 -- =============================================
+-- MIGRATION: Add Gemini API key to user_settings
+-- Run this if you already have the user_settings table
+-- =============================================
+-- ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS gemini_api_key TEXT;
+
+-- =============================================
 -- MIGRATION: Add Zwift workout and planned session info
 -- Run this if you already have the sessions table
 -- =============================================

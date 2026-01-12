@@ -18,7 +18,7 @@ import { copySessionForCoach } from './utils/coach'
 import { marked } from 'marked'
 import { useAI } from './composables/useAI'
 
-const { isLoading: aiLoading, generateGuidelines: generateGuidelinesAI } = useAI()
+const { isLoading: aiLoading, generateGuidelines: generateGuidelinesAI, setUserId: setAIUserId } = useAI()
 
 const {
   sessions,
@@ -245,6 +245,7 @@ const trainingObjectives = ref<TrainingObjective[]>([])
 const showObjectivesModal = ref(false)
 const showPhasesModal = ref(false)
 const athleteProfile = ref<AthleteProfile>({})
+const geminiApiKey = ref<string | undefined>(undefined)
 const showAthleteProfileModal = ref(false)
 
 // Track new sessions for animation
@@ -350,8 +351,9 @@ const migrateOrphanData = async (userId: number) => {
 
 // Initialize app data when authenticated
 const initAppData = async () => {
-  // Set the current user for Supabase RLS
+  // Set the current user for Supabase RLS and AI
   setCurrentUser(athleteId.value)
+  setAIUserId(athleteId.value)
 
   // Init sessions from Supabase
   await initSessions()
@@ -377,6 +379,10 @@ const initAppData = async () => {
         resting_hr: settings.resting_hr ?? undefined,
         environment: settings.environment ?? undefined,
       }
+    }
+    // Load Gemini API key
+    if (settings?.gemini_api_key) {
+      geminiApiKey.value = settings.gemini_api_key
     }
   } catch (e) {
     console.error('Error loading settings:', e)
@@ -629,6 +635,18 @@ const handleSaveAthleteProfile = async (profile: AthleteProfile) => {
   }
 }
 
+const handleSaveApiKey = async (apiKey: string | null) => {
+  geminiApiKey.value = apiKey ?? undefined
+  try {
+    await updateSettings({
+      gemini_api_key: apiKey,
+    } as any)
+  } catch (e) {
+    console.error('Error saving API key:', e)
+    showToast('Erreur de sauvegarde de la cle API', 'error')
+  }
+}
+
 const handleSavePhases = async (phases: TrainingPhase[]) => {
   trainingPhases.value = phases
   try {
@@ -685,6 +703,7 @@ const handleResyncSession = async (sessionId: string, stravaId: number) => {
 const handleLogout = () => {
   stravaLogout()
   setCurrentUser(null)
+  setAIUserId(null)
   // Reset local state
   sessions.value = []
   trainingPhases.value = []
@@ -946,7 +965,9 @@ const handleLogout = () => {
       <div class="modal-box w-full h-full max-h-full md:max-w-md md:h-auto md:max-h-[90vh] rounded-none md:rounded-2xl">
         <AthleteProfileComponent
           :profile="athleteProfile"
+          :gemini-api-key="geminiApiKey"
           @save="handleSaveAthleteProfile"
+          @save-api-key="handleSaveApiKey"
           @close="showAthleteProfileModal = false"
         />
       </div>

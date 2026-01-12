@@ -57,6 +57,8 @@ interface DbUserSettings {
   max_hr: number | null
   resting_hr: number | null
   environment: string | null
+  // AI API key (stored securely in DB)
+  gemini_api_key: string | null
   updated_at: string
 }
 
@@ -92,6 +94,10 @@ export function useSupabase() {
       currentUserId = userId
       supabase = null // Force recreation with new headers
     }
+  }
+
+  const getCurrentUserId = (): number | null => {
+    return currentUserId
   }
 
   const getClient = (): SupabaseClient => {
@@ -445,6 +451,7 @@ export function useSupabase() {
   return {
     getClient,
     setCurrentUser,
+    getCurrentUserId,
     isInitialized,
     initError,
     // Sessions

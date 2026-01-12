@@ -1,32 +1,20 @@
 <script setup lang="ts">
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, watch, computed } from 'vue'
 import type { AthleteProfile } from '../types/session'
-
-// Gemini API key (stored in localStorage, not in profile)
-const geminiApiKey = ref('')
-
-onMounted(() => {
-  geminiApiKey.value = localStorage.getItem('gemini-api-key') || ''
-})
-
-const saveGeminiApiKey = () => {
-  if (geminiApiKey.value.trim()) {
-    localStorage.setItem('gemini-api-key', geminiApiKey.value.trim())
-  } else {
-    localStorage.removeItem('gemini-api-key')
-  }
-}
 
 const props = defineProps<{
   profile: AthleteProfile
+  geminiApiKey?: string
 }>()
 
 const emit = defineEmits<{
   save: [profile: AthleteProfile]
+  saveApiKey: [apiKey: string | null]
   close: []
 }>()
 
 const localProfile = ref<AthleteProfile>({ ...props.profile })
+const localGeminiApiKey = ref(props.geminiApiKey || '')
 
 watch(
   () => props.profile,
@@ -36,9 +24,16 @@ watch(
   { deep: true }
 )
 
+watch(
+  () => props.geminiApiKey,
+  (newKey) => {
+    localGeminiApiKey.value = newKey || ''
+  }
+)
+
 const saveProfile = () => {
-  saveGeminiApiKey()
   emit('save', localProfile.value)
+  emit('saveApiKey', localGeminiApiKey.value.trim() || null)
   emit('close')
 }
 
@@ -165,13 +160,13 @@ Trail/montagne possible uniquement le week-end
       <div>
         <label class="text-sm font-medium mb-1 block">Cle API Gemini (optionnel)</label>
         <input
-          v-model="geminiApiKey"
+          v-model="localGeminiApiKey"
           type="password"
           class="input input-bordered w-full"
           placeholder="AIza..."
         />
         <p class="text-xs text-base-content/50 mt-1">
-          Pour utiliser ton propre quota Gemini. Sans cle, l'API partagee est utilisee.
+          Pour utiliser ton propre quota Gemini. Stockee de maniere securisee en base de donnees.
         </p>
       </div>
 
