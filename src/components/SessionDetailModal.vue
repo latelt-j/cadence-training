@@ -1041,7 +1041,7 @@ Exemple:
         </button>
 
         <!-- Dropdown pour analyser avec commentaire (only for completed sessions) -->
-        <details v-if="session.strava_id || session.actual_km" ref="dropdownRef" class="dropdown dropdown-top dropdown-end">
+        <details v-if="session.strava_id || session.actual_km" ref="dropdownRef" class="dropdown dropdown-top">
           <summary
             class="btn btn-sm"
             :class="copied ? 'btn-success' : aiLoading ? 'btn-disabled' : 'bg-emerald-500 text-white hover:bg-emerald-600 border-0'"
