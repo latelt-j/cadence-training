@@ -35,7 +35,7 @@ ALTER TABLE oauth_tokens ENABLE ROW LEVEL SECURITY;
 ALTER TABLE weekly_guidelines ENABLE ROW LEVEL SECURITY;
 
 -- 6. Create function to get user_id from request header
-CREATE OR REPLACE FUNCTION auth.user_id() RETURNS BIGINT AS $$
+CREATE OR REPLACE FUNCTION public.get_user_id() RETURNS BIGINT AS $$
 BEGIN
   RETURN NULLIF(current_setting('request.headers', true)::json->>'x-user-id', '')::BIGINT;
 END;
@@ -46,37 +46,37 @@ DROP POLICY IF EXISTS "sessions_select" ON sessions;
 DROP POLICY IF EXISTS "sessions_insert" ON sessions;
 DROP POLICY IF EXISTS "sessions_update" ON sessions;
 DROP POLICY IF EXISTS "sessions_delete" ON sessions;
-CREATE POLICY "sessions_select" ON sessions FOR SELECT USING (user_id = auth.user_id());
-CREATE POLICY "sessions_insert" ON sessions FOR INSERT WITH CHECK (user_id = auth.user_id());
-CREATE POLICY "sessions_update" ON sessions FOR UPDATE USING (user_id = auth.user_id());
-CREATE POLICY "sessions_delete" ON sessions FOR DELETE USING (user_id = auth.user_id());
+CREATE POLICY "sessions_select" ON sessions FOR SELECT USING (user_id = public.get_user_id());
+CREATE POLICY "sessions_insert" ON sessions FOR INSERT WITH CHECK (user_id = public.get_user_id());
+CREATE POLICY "sessions_update" ON sessions FOR UPDATE USING (user_id = public.get_user_id());
+CREATE POLICY "sessions_delete" ON sessions FOR DELETE USING (user_id = public.get_user_id());
 
 -- 8. Create RLS policies for user_settings
 DROP POLICY IF EXISTS "user_settings_select" ON user_settings;
 DROP POLICY IF EXISTS "user_settings_insert" ON user_settings;
 DROP POLICY IF EXISTS "user_settings_update" ON user_settings;
 DROP POLICY IF EXISTS "user_settings_delete" ON user_settings;
-CREATE POLICY "user_settings_select" ON user_settings FOR SELECT USING (user_id = auth.user_id());
-CREATE POLICY "user_settings_insert" ON user_settings FOR INSERT WITH CHECK (user_id = auth.user_id());
-CREATE POLICY "user_settings_update" ON user_settings FOR UPDATE USING (user_id = auth.user_id());
-CREATE POLICY "user_settings_delete" ON user_settings FOR DELETE USING (user_id = auth.user_id());
+CREATE POLICY "user_settings_select" ON user_settings FOR SELECT USING (user_id = public.get_user_id());
+CREATE POLICY "user_settings_insert" ON user_settings FOR INSERT WITH CHECK (user_id = public.get_user_id());
+CREATE POLICY "user_settings_update" ON user_settings FOR UPDATE USING (user_id = public.get_user_id());
+CREATE POLICY "user_settings_delete" ON user_settings FOR DELETE USING (user_id = public.get_user_id());
 
 -- 9. Create RLS policies for oauth_tokens
 DROP POLICY IF EXISTS "oauth_tokens_select" ON oauth_tokens;
 DROP POLICY IF EXISTS "oauth_tokens_insert" ON oauth_tokens;
 DROP POLICY IF EXISTS "oauth_tokens_update" ON oauth_tokens;
 DROP POLICY IF EXISTS "oauth_tokens_delete" ON oauth_tokens;
-CREATE POLICY "oauth_tokens_select" ON oauth_tokens FOR SELECT USING (user_id = auth.user_id());
-CREATE POLICY "oauth_tokens_insert" ON oauth_tokens FOR INSERT WITH CHECK (user_id = auth.user_id());
-CREATE POLICY "oauth_tokens_update" ON oauth_tokens FOR UPDATE USING (user_id = auth.user_id());
-CREATE POLICY "oauth_tokens_delete" ON oauth_tokens FOR DELETE USING (user_id = auth.user_id());
+CREATE POLICY "oauth_tokens_select" ON oauth_tokens FOR SELECT USING (user_id = public.get_user_id());
+CREATE POLICY "oauth_tokens_insert" ON oauth_tokens FOR INSERT WITH CHECK (user_id = public.get_user_id());
+CREATE POLICY "oauth_tokens_update" ON oauth_tokens FOR UPDATE USING (user_id = public.get_user_id());
+CREATE POLICY "oauth_tokens_delete" ON oauth_tokens FOR DELETE USING (user_id = public.get_user_id());
 
 -- 10. Create RLS policies for weekly_guidelines
 DROP POLICY IF EXISTS "weekly_guidelines_select" ON weekly_guidelines;
 DROP POLICY IF EXISTS "weekly_guidelines_insert" ON weekly_guidelines;
 DROP POLICY IF EXISTS "weekly_guidelines_update" ON weekly_guidelines;
 DROP POLICY IF EXISTS "weekly_guidelines_delete" ON weekly_guidelines;
-CREATE POLICY "weekly_guidelines_select" ON weekly_guidelines FOR SELECT USING (user_id = auth.user_id());
-CREATE POLICY "weekly_guidelines_insert" ON weekly_guidelines FOR INSERT WITH CHECK (user_id = auth.user_id());
-CREATE POLICY "weekly_guidelines_update" ON weekly_guidelines FOR UPDATE USING (user_id = auth.user_id());
-CREATE POLICY "weekly_guidelines_delete" ON weekly_guidelines FOR DELETE USING (user_id = auth.user_id());
+CREATE POLICY "weekly_guidelines_select" ON weekly_guidelines FOR SELECT USING (user_id = public.get_user_id());
+CREATE POLICY "weekly_guidelines_insert" ON weekly_guidelines FOR INSERT WITH CHECK (user_id = public.get_user_id());
+CREATE POLICY "weekly_guidelines_update" ON weekly_guidelines FOR UPDATE USING (user_id = public.get_user_id());
+CREATE POLICY "weekly_guidelines_delete" ON weekly_guidelines FOR DELETE USING (user_id = public.get_user_id());
