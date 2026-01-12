@@ -1041,7 +1041,7 @@ Exemple:
         </button>
 
         <!-- Dropdown pour analyser avec commentaire (only for completed sessions) -->
-        <details v-if="session.strava_id || session.actual_km" ref="dropdownRef" class="dropdown dropdown-top">
+        <details v-if="session.strava_id || session.actual_km" ref="dropdownRef" class="dropdown dropdown-top dropdown-end">
           <summary
             class="btn btn-sm"
             :class="copied ? 'btn-success' : aiLoading ? 'btn-disabled' : 'bg-emerald-500 text-white hover:bg-emerald-600 border-0'"
@@ -1049,7 +1049,7 @@ Exemple:
             <span v-if="aiLoading" class="loading loading-spinner loading-xs"></span>
             {{ copied ? '✓ Copie !' : aiLoading ? 'Analyse...' : '🤖 Analyser' }}
           </summary>
-          <div class="dropdown-content bg-base-200 rounded-box p-4 shadow-xl w-72 mb-2 right-1">
+          <div class="dropdown-content bg-base-200 rounded-box p-4 shadow-xl w-72 mb-2">
             <p class="text-sm font-medium mb-2">💬 Un commentaire ?</p>
             <textarea
               v-model="coachComment"
