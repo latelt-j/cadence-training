@@ -1,8 +1,9 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-user-id',
 }
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
@@ -14,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt, jsonMode } = await req.json()
+    const { prompt, jsonMode, userId } = await req.json()
 
     if (!prompt) {
       return new Response(
@@ -23,12 +24,34 @@ serve(async (req) => {
       )
     }
 
-    // Get API key from secrets
-    const apiKey = Deno.env.get('GEMINI_API_KEY')
+    // Try to get user's personal API key from database
+    let apiKey: string | null = null
+
+    if (userId) {
+      const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+      const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+
+      const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('gemini_api_key')
+        .eq('user_id', userId)
+        .single()
+
+      if (settings?.gemini_api_key) {
+        apiKey = settings.gemini_api_key
+      }
+    }
+
+    // Fallback to default API key (if configured)
+    if (!apiKey) {
+      apiKey = Deno.env.get('GEMINI_API_KEY') || null
+    }
 
     if (!apiKey) {
       return new Response(
-        JSON.stringify({ error: 'Gemini API key not configured' }),
+        JSON.stringify({ error: 'Gemini API key not configured. Please add your API key in Configuration.' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
