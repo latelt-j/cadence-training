@@ -16,6 +16,9 @@ import TrainingPhasesManager from './components/TrainingPhasesManager.vue'
 import ShareWeekModal from './components/ShareWeekModal.vue'
 import { copySessionForCoach } from './utils/coach'
 import { marked } from 'marked'
+import { useAI } from './composables/useAI'
+
+const { isLoading: aiLoading, generateGuidelines: generateGuidelinesAI } = useAI()
 
 const {
   sessions,
@@ -59,10 +62,33 @@ const renderedGuidelines = computed(() => {
   return marked(weeklyGuidelines.value) as string
 })
 
-const copyGuidelinesPrompt = async () => {
-  const prompt = `Génère uniquement les GUIDELINES / DIRECTIVES pour ma semaine d'entraînement.
+const getGuidelinesPrompt = () => {
+  // Get sessions for current week
+  const weekSessions = sessions.value.filter(s => {
+    const sessionDate = new Date(s.date)
+    const monday = weekStart.value
+    const sunday = new Date(monday)
+    sunday.setDate(monday.getDate() + 6)
+    return sessionDate >= monday && sessionDate <= sunday
+  })
 
-Je veux un texte markdown qui explique :
+  let prompt = `Génère uniquement les GUIDELINES / DIRECTIVES pour ma semaine d'entraînement.
+
+`
+
+  if (weekSessions.length > 0) {
+    prompt += `Séances de la semaine :
+`
+    weekSessions.forEach(s => {
+      const sportEmoji = s.sport === 'cycling' ? '🚴' : s.sport === 'mtb' ? '🚵' : s.sport === 'running' ? '🏃' : '💪'
+      prompt += `- ${s.date} : ${s.title} ${sportEmoji} (${s.duration_min}min)
+`
+    })
+    prompt += `
+`
+  }
+
+  prompt += `Je veux un texte markdown qui explique :
 - L'objectif principal de la semaine
 - La philosophie d'entraînement (pourquoi ces types de séances)
 - La répartition des sports et des intensités
@@ -92,11 +118,29 @@ Format attendu (markdown brut) :
 
 Réponds UNIQUEMENT avec le markdown, rien d'autre.`
 
-  await navigator.clipboard.writeText(prompt)
+  return prompt
+}
+
+const copyGuidelinesPrompt = async () => {
+  await navigator.clipboard.writeText(getGuidelinesPrompt())
   guidelinesPromptCopied.value = true
   setTimeout(() => {
     guidelinesPromptCopied.value = false
   }, 2000)
+}
+
+const generateGuidelinesWithAI = async () => {
+  try {
+    const prompt = getGuidelinesPrompt()
+    const result = await generateGuidelinesAI(prompt)
+    weeklyGuidelines.value = result
+    guidelinesEditMode.value = false
+    // Auto-save
+    await upsertWeeklyGuidelines(weekStartString.value, result)
+    showToast('Directives générées et sauvegardées')
+  } catch (e) {
+    showToast('Erreur lors de la génération', 'error')
+  }
 }
 
 const saveGuidelines = async () => {
@@ -960,20 +1004,30 @@ const handleLogout = () => {
           <div v-if="!weeklyGuidelines && !guidelinesEditMode" class="text-center py-8">
             <div class="text-4xl mb-4">📋</div>
             <p class="text-base-content/70 mb-4">Pas encore de directives pour cette semaine</p>
-            <div class="flex gap-2 justify-center">
+            <div class="flex flex-col gap-2 items-center">
               <button
-                class="btn btn-sm"
-                :class="guidelinesPromptCopied ? 'btn-success' : 'btn-primary'"
-                @click="copyGuidelinesPrompt"
+                class="btn btn-sm btn-primary"
+                :disabled="aiLoading"
+                @click="generateGuidelinesWithAI"
               >
-                {{ guidelinesPromptCopied ? '✓ Copié !' : '🤖 Copier le prompt' }}
+                <span v-if="aiLoading" class="loading loading-spinner loading-xs"></span>
+                {{ aiLoading ? 'Generation...' : '🤖 Generer avec Gemini' }}
               </button>
-              <button
-                class="btn btn-sm btn-ghost"
-                @click="guidelinesEditMode = true"
-              >
-                ✏️ Écrire manuellement
-              </button>
+              <div class="flex gap-2">
+                <button
+                  class="btn btn-xs btn-ghost"
+                  :class="guidelinesPromptCopied ? 'btn-success' : ''"
+                  @click="copyGuidelinesPrompt"
+                >
+                  {{ guidelinesPromptCopied ? '✓ Copie !' : '📋 Copier prompt' }}
+                </button>
+                <button
+                  class="btn btn-xs btn-ghost"
+                  @click="guidelinesEditMode = true"
+                >
+                  ✏️ Ecrire manuellement
+                </button>
+              </div>
             </div>
           </div>
 
@@ -1009,10 +1063,11 @@ const handleLogout = () => {
           <button
             v-if="weeklyGuidelines && !guidelinesEditMode"
             class="btn btn-sm btn-ghost"
-            :class="guidelinesPromptCopied ? 'text-success' : ''"
-            @click="copyGuidelinesPrompt"
+            :disabled="aiLoading"
+            @click="generateGuidelinesWithAI"
           >
-            {{ guidelinesPromptCopied ? '✓ Copié !' : '🤖 Regénérer (copier prompt)' }}
+            <span v-if="aiLoading" class="loading loading-spinner loading-xs"></span>
+            {{ aiLoading ? 'Generation...' : '🤖 Regenerer' }}
           </button>
           <button class="btn" @click="showGuidelinesModal = false; guidelinesEditMode = false">
             Fermer

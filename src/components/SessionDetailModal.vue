@@ -3,10 +3,12 @@ import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { marked } from 'marked'
 import type { ScheduledSession, AthleteProfile } from '../types/session'
 import { SPORT_CONFIG } from '../types/session'
-import { generateAnalysisText, generateTitleSuggestionPrompt } from '../utils/coach'
+import { generateAnalysisText } from '../utils/coach'
 import { useStrava } from '../composables/useStrava'
+import { useAI, type TitleSuggestion } from '../composables/useAI'
 
 const { updateActivity } = useStrava()
+const { isLoading: aiLoading, analyzeSession: analyzeSessionAI, suggestTitle: suggestTitleAI } = useAI()
 
 // Configure marked for inline rendering (no <p> tags)
 marked.setOptions({
@@ -60,7 +62,6 @@ const dropdownRef = ref<HTMLDetailsElement | null>(null)
 const isEditingStrava = ref(false)
 const editTitle = ref('')
 const editDescription = ref('')
-const suggestionCopied = ref(false)
 const isSaving = ref(false)
 const isResyncing = ref(false)
 
@@ -94,15 +95,6 @@ const onResyncComplete = () => {
 
 defineExpose({ onResyncComplete })
 
-const copyTitleSuggestion = async () => {
-  if (!props.session) return
-  const text = generateTitleSuggestionPrompt(props.session)
-  await navigator.clipboard.writeText(text)
-  suggestionCopied.value = true
-  setTimeout(() => {
-    suggestionCopied.value = false
-  }, 2000)
-}
 
 // Sync state when session changes
 watch(() => props.session, (newSession, oldSession) => {
@@ -119,7 +111,8 @@ watch(() => props.session, (newSession, oldSession) => {
     currentPage.value = 'details'
     // Reset Strava editing
     isEditingStrava.value = false
-    suggestionCopied.value = false
+    showTitleSuggestions.value = false
+    titleSuggestions.value = []
     // Reset mark as done / edit duration
     showMarkAsDone.value = false
     showEditDuration.value = false
@@ -227,6 +220,48 @@ const copyForAnalysis = async (withComment: boolean = false) => {
   setTimeout(() => {
     copied.value = false
   }, 2000)
+}
+
+// Title suggestions
+const titleSuggestions = ref<TitleSuggestion[]>([])
+const showTitleSuggestions = ref(false)
+
+// Analyze with Gemini AI
+const analyzeWithAI = async () => {
+  if (!props.session) return
+  const comment = coachComment.value || undefined
+  try {
+    const result = await analyzeSessionAI(props.session, comment, props.athleteProfile)
+    feedbackText.value = result
+    coachComment.value = ''
+    // Fermer le dropdown
+    if (dropdownRef.value) {
+      dropdownRef.value.open = false
+    }
+    // Switch to coach page to show results
+    currentPage.value = 'coach'
+  } catch {
+    emit('toast', 'Erreur lors de l\'analyse', 'error')
+  }
+}
+
+// Generate title suggestions with Gemini AI
+const generateTitleSuggestions = async () => {
+  if (!props.session) return
+  try {
+    titleSuggestions.value = await suggestTitleAI(props.session)
+    showTitleSuggestions.value = true
+  } catch {
+    emit('toast', 'Erreur lors de la generation des titres', 'error')
+  }
+}
+
+// Apply a suggested title
+const applySuggestedTitle = (suggestion: TitleSuggestion) => {
+  editTitle.value = suggestion.title
+  editDescription.value = suggestion.description
+  showTitleSuggestions.value = false
+  isEditingStrava.value = true
 }
 
 const handleDelete = () => {
@@ -607,13 +642,33 @@ const cancelModifyAI = () => {
             class="textarea textarea-bordered w-full h-24"
             placeholder="Description de la séance..."
           ></textarea>
+
+          <!-- Title suggestions from AI -->
+          <div v-if="showTitleSuggestions && titleSuggestions.length > 0" class="space-y-2">
+            <p class="text-sm font-medium">🎭 Suggestions :</p>
+            <div class="grid gap-2">
+              <button
+                v-for="(suggestion, index) in titleSuggestions"
+                :key="index"
+                class="btn btn-sm btn-ghost justify-start text-left h-auto py-2 normal-case"
+                @click="applySuggestedTitle(suggestion)"
+              >
+                <div class="flex flex-col items-start gap-1">
+                  <span class="font-medium">{{ suggestion.title }}</span>
+                  <span class="text-xs text-base-content/60 line-clamp-1">{{ suggestion.description }}</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
           <div class="flex justify-between items-center">
             <button
               class="btn btn-sm btn-outline"
-              :class="suggestionCopied ? 'btn-success' : ''"
-              @click="copyTitleSuggestion"
+              :disabled="aiLoading"
+              @click="generateTitleSuggestions"
             >
-              {{ suggestionCopied ? '✓ Copié !' : '🤖 Suggérer titre' }}
+              <span v-if="aiLoading" class="loading loading-spinner loading-xs"></span>
+              {{ aiLoading ? 'Generation...' : '🤖 Suggerer titres' }}
             </button>
             <div class="flex gap-2">
               <button class="btn btn-sm btn-ghost" @click="cancelEditStrava" :disabled="isSaving">Annuler</button>
@@ -985,13 +1040,14 @@ Exemple:
           ⏱️ Modifier durée
         </button>
 
-        <!-- Dropdown pour copier avec commentaire (only for completed sessions) -->
+        <!-- Dropdown pour analyser avec commentaire (only for completed sessions) -->
         <details v-if="session.strava_id || session.actual_km" ref="dropdownRef" class="dropdown dropdown-top">
           <summary
-            class="btn btn-sm btn-outline"
-            :class="copied ? 'btn-success' : 'bg-emerald-500 text-white hover:bg-emerald-600 border-0'"
+            class="btn btn-sm"
+            :class="copied ? 'btn-success' : aiLoading ? 'btn-disabled' : 'bg-emerald-500 text-white hover:bg-emerald-600 border-0'"
           >
-            {{ copied ? '✓ Copié !' : '📋 Copier pour coach' }}
+            <span v-if="aiLoading" class="loading loading-spinner loading-xs"></span>
+            {{ copied ? '✓ Copie !' : aiLoading ? 'Analyse...' : '🤖 Analyser' }}
           </summary>
           <div class="dropdown-content bg-base-200 rounded-box p-4 shadow-xl w-72 mb-2 right-1">
             <p class="text-sm font-medium mb-2">💬 Un commentaire ?</p>
@@ -1000,9 +1056,18 @@ Exemple:
               class="textarea textarea-bordered w-full h-20 text-sm"
               placeholder="Jambes lourdes, super sensations, objectif atteint..."
             ></textarea>
-            <div class="flex justify-end gap-2 mt-2">
-              <button class="btn btn-sm btn-ghost" @click="copyForAnalysis(false)">Passer</button>
-              <button class="btn btn-sm bg-emerald-500 text-white hover:bg-emerald-600 border-0" @click="copyForAnalysis(true)">📋 Copier</button>
+            <div class="flex flex-col gap-2 mt-2">
+              <button
+                class="btn btn-sm bg-emerald-500 text-white hover:bg-emerald-600 border-0"
+                :disabled="aiLoading"
+                @click="analyzeWithAI"
+              >
+                <span v-if="aiLoading" class="loading loading-spinner loading-xs"></span>
+                🤖 Analyser avec Gemini
+              </button>
+              <div class="flex justify-end gap-2">
+                <button class="btn btn-xs btn-ghost" @click="copyForAnalysis(false)">📋 Copier prompt</button>
+              </div>
             </div>
           </div>
         </details>

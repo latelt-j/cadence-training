@@ -2,6 +2,9 @@
 import { ref, computed } from 'vue'
 import 'cally'
 import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective, ImportedPhase, AthleteProfile } from '../types/session'
+import { useAI } from '../composables/useAI'
+
+const { isLoading: aiLoading, error: aiError, generateWeeklyPlan } = useAI()
 
 const props = defineProps<{
   sessions?: ScheduledSession[]
@@ -470,6 +473,24 @@ const copyCoachPrompt = async () => {
   }, 1000)
 }
 
+// Generate with Gemini AI
+const generateWithAI = async () => {
+  error.value = ''
+  try {
+    const prompt = generateCoachPrompt()
+    const result = await generateWeeklyPlan(prompt)
+
+    // Emit the imported sessions
+    emit('import', result.sessions, true, result.phase, planStartDate.value, result.guidelines)
+
+    // Reset form
+    coachResponse.value = ''
+    step.value = 'form'
+  } catch (e) {
+    error.value = aiError.value || (e instanceof Error ? e.message : 'Erreur lors de la generation')
+  }
+}
+
 // Parse and save coach response
 const saveCoachResponse = () => {
   error.value = ''
@@ -647,14 +668,25 @@ const saveCoachResponse = () => {
           />
         </div>
 
-        <!-- Ask coach button -->
-        <button
-          class="btn w-full text-white font-semibold border-0 shadow-lg"
-          :class="copied ? 'btn-success' : 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/40'"
-          @click="copyCoachPrompt"
-        >
-          {{ copied ? '✓ Copié !' : '🤖 Demander au coach (copier le prompt)' }}
-        </button>
+        <!-- AI Generate buttons -->
+        <div class="space-y-2">
+          <button
+            class="btn w-full text-white font-semibold border-0 shadow-lg bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/40"
+            :disabled="aiLoading"
+            @click="generateWithAI"
+          >
+            <span v-if="aiLoading" class="loading loading-spinner loading-sm"></span>
+            {{ aiLoading ? 'Generation en cours...' : '🤖 Generer avec Gemini' }}
+          </button>
+          <button
+            class="btn btn-ghost btn-sm w-full text-base-content/60"
+            :class="{ 'btn-success text-white': copied }"
+            :disabled="aiLoading"
+            @click="copyCoachPrompt"
+          >
+            {{ copied ? '✓ Copie !' : '📋 Copier le prompt (manuel)' }}
+          </button>
+        </div>
       </div>
 
       <!-- Step 2: Paste coach response -->

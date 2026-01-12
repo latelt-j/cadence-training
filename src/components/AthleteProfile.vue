@@ -1,6 +1,21 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import type { AthleteProfile } from '../types/session'
+
+// Gemini API key (stored in localStorage, not in profile)
+const geminiApiKey = ref('')
+
+onMounted(() => {
+  geminiApiKey.value = localStorage.getItem('gemini-api-key') || ''
+})
+
+const saveGeminiApiKey = () => {
+  if (geminiApiKey.value.trim()) {
+    localStorage.setItem('gemini-api-key', geminiApiKey.value.trim())
+  } else {
+    localStorage.removeItem('gemini-api-key')
+  }
+}
 
 const props = defineProps<{
   profile: AthleteProfile
@@ -22,6 +37,7 @@ watch(
 )
 
 const saveProfile = () => {
+  saveGeminiApiKey()
   emit('save', localProfile.value)
   emit('close')
 }
@@ -140,6 +156,23 @@ Trail/montagne possible uniquement le week-end
 (Monts d'Or a 30min, moyenne montagne a 1h en voiture)."
         ></textarea>
         <p class="text-xs text-base-content/50 mt-1">Inclus dans le prompt coach pour adapter les seances</p>
+      </div>
+
+      <!-- Divider -->
+      <div class="divider text-xs text-base-content/50">Intelligence artificielle</div>
+
+      <!-- Gemini API Key -->
+      <div>
+        <label class="text-sm font-medium mb-1 block">Cle API Gemini (optionnel)</label>
+        <input
+          v-model="geminiApiKey"
+          type="password"
+          class="input input-bordered w-full"
+          placeholder="AIza..."
+        />
+        <p class="text-xs text-base-content/50 mt-1">
+          Pour utiliser ton propre quota Gemini. Sans cle, l'API partagee est utilisee.
+        </p>
       </div>
 
       <!-- HR Reserve info -->
