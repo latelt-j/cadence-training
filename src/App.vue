@@ -12,6 +12,7 @@ import VolumeChart from './components/VolumeChart.vue'
 import WellnessWidget from './components/WellnessWidget.vue'
 import ObjectiveSettings from './components/ObjectiveSettings.vue'
 import AthleteProfileComponent from './components/AthleteProfile.vue'
+import ConfigModal from './components/ConfigModal.vue'
 import TrainingPhasesManager from './components/TrainingPhasesManager.vue'
 import ShareWeekModal from './components/ShareWeekModal.vue'
 import { copySessionForCoach } from './utils/coach'
@@ -247,6 +248,7 @@ const showPhasesModal = ref(false)
 const athleteProfile = ref<AthleteProfile>({})
 const geminiApiKey = ref<string | undefined>(undefined)
 const showAthleteProfileModal = ref(false)
+const showConfigModal = ref(false)
 
 // Track new sessions for animation
 const newSessionIds = ref<Set<string>>(new Set())
@@ -802,6 +804,9 @@ const handleLogout = () => {
               </button>
               <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-52 p-2 shadow-xl mt-2 border border-base-300">
                 <li>
+                  <a class="rounded-lg" @click="showConfigModal = true">⚙️ Configuration</a>
+                </li>
+                <li class="border-t border-base-300 mt-1 pt-1">
                   <a class="text-error rounded-lg" @click="handleLogout">Déconnexion</a>
                 </li>
               </ul>
@@ -830,7 +835,10 @@ const handleLogout = () => {
           </button>
           <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-52 p-2 shadow-xl mt-2 border border-base-300">
             <li><span class="font-medium px-4 py-2">{{ athlete?.firstname }} {{ athlete?.lastname }}</span></li>
-            <li class="border-t border-base-300">
+            <li>
+              <a class="rounded-lg" @click="showConfigModal = true">⚙️ Configuration</a>
+            </li>
+            <li class="border-t border-base-300 mt-1 pt-1">
               <a class="text-error rounded-lg" @click="handleLogout">Déconnexion</a>
             </li>
           </ul>
@@ -965,13 +973,25 @@ const handleLogout = () => {
       <div class="modal-box w-full h-full max-h-full md:max-w-md md:h-auto md:max-h-[90vh] rounded-none md:rounded-2xl">
         <AthleteProfileComponent
           :profile="athleteProfile"
-          :gemini-api-key="geminiApiKey"
           @save="handleSaveAthleteProfile"
-          @save-api-key="handleSaveApiKey"
           @close="showAthleteProfileModal = false"
         />
       </div>
       <form method="dialog" class="modal-backdrop" @click="showAthleteProfileModal = false">
+        <button>close</button>
+      </form>
+    </dialog>
+
+    <!-- Config Modal -->
+    <dialog class="modal" :class="{ 'modal-open': showConfigModal }">
+      <div class="modal-box w-full h-auto max-w-md rounded-none md:rounded-2xl">
+        <ConfigModal
+          :gemini-api-key="geminiApiKey"
+          @save-api-key="handleSaveApiKey"
+          @close="showConfigModal = false"
+        />
+      </div>
+      <form method="dialog" class="modal-backdrop" @click="showConfigModal = false">
         <button>close</button>
       </form>
     </dialog>

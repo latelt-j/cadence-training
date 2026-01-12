@@ -4,17 +4,14 @@ import type { AthleteProfile } from '../types/session'
 
 const props = defineProps<{
   profile: AthleteProfile
-  geminiApiKey?: string
 }>()
 
 const emit = defineEmits<{
   save: [profile: AthleteProfile]
-  saveApiKey: [apiKey: string | null]
   close: []
 }>()
 
 const localProfile = ref<AthleteProfile>({ ...props.profile })
-const localGeminiApiKey = ref(props.geminiApiKey || '')
 
 watch(
   () => props.profile,
@@ -24,16 +21,8 @@ watch(
   { deep: true }
 )
 
-watch(
-  () => props.geminiApiKey,
-  (newKey) => {
-    localGeminiApiKey.value = newKey || ''
-  }
-)
-
 const saveProfile = () => {
   emit('save', localProfile.value)
-  emit('saveApiKey', localGeminiApiKey.value.trim() || null)
   emit('close')
 }
 
@@ -151,23 +140,6 @@ Trail/montagne possible uniquement le week-end
 (Monts d'Or a 30min, moyenne montagne a 1h en voiture)."
         ></textarea>
         <p class="text-xs text-base-content/50 mt-1">Inclus dans le prompt coach pour adapter les seances</p>
-      </div>
-
-      <!-- Divider -->
-      <div class="divider text-xs text-base-content/50">Intelligence artificielle</div>
-
-      <!-- Gemini API Key -->
-      <div>
-        <label class="text-sm font-medium mb-1 block">Cle API Gemini (optionnel)</label>
-        <input
-          v-model="localGeminiApiKey"
-          type="password"
-          class="input input-bordered w-full"
-          placeholder="AIza..."
-        />
-        <p class="text-xs text-base-content/50 mt-1">
-          Pour utiliser ton propre quota Gemini. Stockee de maniere securisee en base de donnees.
-        </p>
       </div>
 
       <!-- HR Reserve info -->
