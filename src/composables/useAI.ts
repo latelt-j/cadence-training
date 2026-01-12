@@ -22,17 +22,9 @@ export interface SessionModification {
   zwift_workout?: string
 }
 
-// Store userId for Edge Function calls
-let currentUserId: number | null = null
-
 export function useAI() {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
-
-  // Set the current user ID (call this when user logs in)
-  const setUserId = (userId: number | null) => {
-    currentUserId = userId
-  }
 
   // All calls go through the secure Edge Function
   const chat = async (prompt: string, jsonMode = false): Promise<string> => {
@@ -52,7 +44,6 @@ export function useAI() {
       body: JSON.stringify({
         prompt,
         jsonMode,
-        userId: currentUserId
       }),
     })
 
@@ -263,7 +254,6 @@ Réponds en JSON :
   return {
     isLoading,
     error,
-    setUserId,
     chat,
     generateWeeklyPlan,
     analyzeSession,
