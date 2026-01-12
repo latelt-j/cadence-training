@@ -739,7 +739,7 @@ const handleLogout = () => {
               </button>
               <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-52 p-2 shadow-xl mt-2 border border-base-300">
                 <li>
-                  <a class="text-error rounded-lg" @click="handleLogout">🚪 Déconnexion</a>
+                  <a class="text-error rounded-lg" @click="handleLogout">Déconnexion</a>
                 </li>
               </ul>
             </div>
@@ -768,7 +768,7 @@ const handleLogout = () => {
           <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-52 p-2 shadow-xl mt-2 border border-base-300">
             <li><span class="font-medium px-4 py-2">{{ athlete?.firstname }} {{ athlete?.lastname }}</span></li>
             <li class="border-t border-base-300">
-              <a class="text-error rounded-lg" @click="handleLogout">🚪 Déconnexion</a>
+              <a class="text-error rounded-lg" @click="handleLogout">Déconnexion</a>
             </li>
           </ul>
         </div>
