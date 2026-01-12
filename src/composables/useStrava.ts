@@ -14,6 +14,13 @@ interface StravaTokens {
   expires_at: number
 }
 
+interface StravaAthlete {
+  id: number
+  firstname: string
+  lastname: string
+  profile: string // avatar URL
+}
+
 interface StravaActivity {
   id: number
   name: string
@@ -77,8 +84,11 @@ interface StravaStreamsResponse {
 }
 
 const tokens = ref<StravaTokens | null>(null)
+const athlete = ref<StravaAthlete | null>(null)
 const isLoading = ref(false)
 const error = ref<string | null>(null)
+
+const ATHLETE_STORAGE_KEY = 'strava-athlete'
 
 // Load tokens from localStorage
 const savedTokens = localStorage.getItem(STORAGE_KEY)
@@ -86,8 +96,16 @@ if (savedTokens) {
   tokens.value = JSON.parse(savedTokens)
 }
 
+// Load athlete from localStorage
+const savedAthlete = localStorage.getItem(ATHLETE_STORAGE_KEY)
+if (savedAthlete) {
+  athlete.value = JSON.parse(savedAthlete)
+}
+
 export function useStrava() {
   const isConnected = computed(() => tokens.value !== null)
+  const isAuthenticated = computed(() => athlete.value !== null)
+  const athleteId = computed(() => athlete.value?.id ?? null)
 
   const saveTokens = (newTokens: StravaTokens) => {
     tokens.value = newTokens
@@ -97,6 +115,16 @@ export function useStrava() {
   const clearTokens = () => {
     tokens.value = null
     localStorage.removeItem(STORAGE_KEY)
+  }
+
+  const saveAthlete = (newAthlete: StravaAthlete) => {
+    athlete.value = newAthlete
+    localStorage.setItem(ATHLETE_STORAGE_KEY, JSON.stringify(newAthlete))
+  }
+
+  const clearAthlete = () => {
+    athlete.value = null
+    localStorage.removeItem(ATHLETE_STORAGE_KEY)
   }
 
   const authorize = () => {
@@ -134,6 +162,16 @@ export function useStrava() {
         refresh_token: data.refresh_token,
         expires_at: data.expires_at,
       })
+
+      // Save athlete info for user identification
+      if (data.athlete) {
+        saveAthlete({
+          id: data.athlete.id,
+          firstname: data.athlete.firstname,
+          lastname: data.athlete.lastname,
+          profile: data.athlete.profile,
+        })
+      }
 
       return true
     } catch (e) {
@@ -495,6 +533,14 @@ export function useStrava() {
     clearTokens()
   }
 
+  // Full logout - clears both tokens and athlete
+  const logout = () => {
+    clearTokens()
+    clearAthlete()
+    // Clear session cache
+    localStorage.removeItem('training-planner-sessions')
+  }
+
   // Re-sync a single activity with full metrics (for existing activities)
   const resyncActivity = async (
     stravaId: number,
@@ -560,8 +606,11 @@ export function useStrava() {
 
   return {
     isConnected,
+    isAuthenticated,
     isLoading,
     error,
+    athlete,
+    athleteId,
     authorize,
     handleCallback,
     fetchActivities,
@@ -572,5 +621,6 @@ export function useStrava() {
     updateActivity,
     resyncActivity,
     disconnect,
+    logout,
   }
 }

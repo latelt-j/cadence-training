@@ -60,6 +60,7 @@ serve(async (req) => {
         access_token: data.access_token,
         refresh_token: data.refresh_token,
         expires_at: data.expires_at,
+        athlete: data.athlete, // Include athlete info for user identification
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )

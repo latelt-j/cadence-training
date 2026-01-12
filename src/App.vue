@@ -48,7 +48,9 @@ const showStravaDisconnectModal = ref(false)
 const showShareModal = ref(false)
 
 // Supabase (must be before watch that uses it)
-const { fetchSettings, updateSettings, fetchWeeklyGuidelines, upsertWeeklyGuidelines } = useSupabase()
+const { fetchSettings, updateSettings, fetchWeeklyGuidelines, upsertWeeklyGuidelines, setCurrentUser } = useSupabase()
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 
 // Guidelines modal
 const showGuidelinesModal = ref(false)
@@ -180,7 +182,10 @@ const selectedSessionWeekSessions = computed(() => {
 
 const {
   isConnected: stravaConnected,
+  isAuthenticated,
   isLoading: stravaLoading,
+  athlete,
+  athleteId,
   authorize: stravaAuthorize,
   handleCallback: stravaHandleCallback,
   fetchActivities,
@@ -188,7 +193,11 @@ const {
   convertToSessions,
   resyncActivity,
   disconnect: stravaDisconnect,
+  logout: stravaLogout,
 } = useStrava()
+
+// Check if we're still loading auth state
+const isCheckingAuth = ref(true)
 
 
 // Training phases & objectives & athlete profile
@@ -283,8 +292,28 @@ const showToast = (message: string, type: 'success' | 'error' = 'success') => {
 }
 
 
-// Handle OAuth callbacks and init
-onMounted(async () => {
+// Migrate orphan data to user on first login
+const migrateOrphanData = async (userId: number) => {
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/migrate-data`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user_id: userId }),
+    })
+    const result = await response.json()
+    if (result.migrated) {
+      console.log('Data migrated:', result.message)
+    }
+  } catch (e) {
+    console.error('Error migrating data:', e)
+  }
+}
+
+// Initialize app data when authenticated
+const initAppData = async () => {
+  // Set the current user for Supabase RLS
+  setCurrentUser(athleteId.value)
+
   // Init sessions from Supabase
   await initSessions()
 
@@ -316,19 +345,35 @@ onMounted(async () => {
 
   // Load guidelines for current week
   await loadGuidelines(weekStartString.value)
+}
 
+// Handle OAuth callbacks and init
+onMounted(async () => {
   const urlParams = new URLSearchParams(window.location.search)
   const code = urlParams.get('code')
   const state = urlParams.get('state')
 
+  // Handle Strava OAuth callback
   if (code && state !== 'google') {
     const success = await stravaHandleCallback(code)
-    // Auto-sync after successful Strava connection
-    if (success) {
-      await syncStrava()
-    }
     // Clean URL
     window.history.replaceState({}, document.title, window.location.pathname)
+
+    if (success && athleteId.value) {
+      // Migrate orphan data to this user
+      await migrateOrphanData(athleteId.value)
+      // Auto-sync after successful Strava connection
+      await initAppData()
+      await syncStrava()
+    }
+  }
+
+  // Done checking auth
+  isCheckingAuth.value = false
+
+  // Initialize data if already authenticated
+  if (isAuthenticated.value) {
+    await initAppData()
   }
 
   // Global keyboard handler
@@ -605,10 +650,43 @@ const handleReset = () => {
     reset()
   }
 }
+
+const handleLogout = () => {
+  stravaLogout()
+  setCurrentUser(null)
+  // Reset local state
+  sessions.value = []
+  trainingPhases.value = []
+  trainingObjectives.value = []
+  athleteProfile.value = {}
+  weeklyGuidelines.value = ''
+}
 </script>
 
 <template>
-  <div class="min-h-screen app-bg pb-20 md:pb-0">
+  <!-- Loading State -->
+  <div v-if="isCheckingAuth" class="min-h-screen app-bg flex items-center justify-center">
+    <span class="loading loading-spinner loading-lg text-emerald-400"></span>
+  </div>
+
+  <!-- Login Screen -->
+  <div v-else-if="!isAuthenticated" class="min-h-screen app-bg flex flex-col items-center justify-center p-4">
+    <img src="/icon.svg" alt="Cadence" class="w-24 h-24 rounded-2xl mb-6 shadow-lg" />
+    <h1 class="text-4xl font-bold mb-2">Cadence</h1>
+    <p class="text-base-content/70 mb-8 text-center">Planifie et suis ton entraînement</p>
+    <button
+      class="btn btn-lg gap-3 bg-[#fc4c02] hover:bg-[#e04402] border-0 text-white shadow-lg"
+      @click="stravaAuthorize"
+    >
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/>
+      </svg>
+      Connexion avec Strava
+    </button>
+  </div>
+
+  <!-- Authenticated App -->
+  <div v-else class="min-h-screen app-bg pb-20 md:pb-0">
     <!-- Header - Desktop -->
     <header class="sticky top-0 z-50 border-b border-base-300/50 bg-emerald-950/70 backdrop-blur-lg hidden md:block">
       <div class="container mx-auto max-w-6xl px-4">
@@ -658,18 +736,25 @@ const handleReset = () => {
             <!-- Divider -->
             <div class="w-px h-6 bg-base-300"></div>
 
-            <!-- Settings Menu -->
+            <!-- User Menu -->
             <div class="dropdown dropdown-end">
-              <button tabindex="0" class="btn btn-sm btn-ghost btn-square hover:bg-emerald-500/20 hover:text-emerald-400">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <button tabindex="0" class="btn btn-sm btn-ghost gap-2 hover:bg-emerald-500/20">
+                <img
+                  v-if="athlete?.profile"
+                  :src="athlete.profile"
+                  :alt="athlete.firstname"
+                  class="w-6 h-6 rounded-full"
+                />
+                <span class="hidden lg:inline">{{ athlete?.firstname }}</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
               <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-52 p-2 shadow-xl mt-2 border border-base-300">
-                <li v-if="stravaConnected"><a class="text-error rounded-lg" @click="showStravaDisconnectModal = true">Déconnecter Strava</a></li>
+                <li v-if="stravaConnected"><a class="rounded-lg" @click="showStravaDisconnectModal = true">Déconnecter Strava</a></li>
+                <li><a class="rounded-lg" @click="handleReset">🗑️ Réinitialiser</a></li>
                 <li class="border-t border-base-300 mt-1 pt-1">
-                  <a class="text-error rounded-lg" @click="handleReset">🗑️ Réinitialiser</a>
+                  <a class="text-error rounded-lg" @click="handleLogout">🚪 Déconnexion</a>
                 </li>
               </ul>
             </div>
@@ -684,6 +769,23 @@ const handleReset = () => {
         <div class="flex items-center gap-2">
           <img src="/icon.svg" alt="Cadence" class="w-8 h-8 rounded-xl" />
           <span class="text-lg font-bold tracking-tight">Cadence</span>
+        </div>
+        <!-- User avatar -->
+        <div class="dropdown dropdown-end">
+          <button tabindex="0" class="btn btn-sm btn-ghost btn-circle">
+            <img
+              v-if="athlete?.profile"
+              :src="athlete.profile"
+              :alt="athlete.firstname"
+              class="w-8 h-8 rounded-full"
+            />
+          </button>
+          <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-xl z-50 w-52 p-2 shadow-xl mt-2 border border-base-300">
+            <li><span class="font-medium px-4 py-2">{{ athlete?.firstname }} {{ athlete?.lastname }}</span></li>
+            <li class="border-t border-base-300">
+              <a class="text-error rounded-lg" @click="handleLogout">🚪 Déconnexion</a>
+            </li>
+          </ul>
         </div>
       </div>
     </header>

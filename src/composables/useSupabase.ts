@@ -5,6 +5,7 @@ import type { ScheduledSession, StructurePhase, StravaLap, TrainingPhase, Traini
 // Database types
 interface DbSession {
   id: string
+  user_id: number | null
   sport: Sport
   type: string
   title: string
@@ -45,7 +46,7 @@ interface DbSession {
 }
 
 interface DbUserSettings {
-  id: number
+  user_id: number
   theme: string
   intervals_athlete_id: string | null
   intervals_api_key: string | null
@@ -61,6 +62,7 @@ interface DbUserSettings {
 
 interface DbOAuthTokens {
   id: number
+  user_id: number | null
   provider: 'strava' | 'google'
   access_token: string
   refresh_token: string
@@ -70,6 +72,7 @@ interface DbOAuthTokens {
 
 interface DbWeeklyGuidelines {
   id: number
+  user_id: number | null
   week_start: string
   guidelines: string
   created_at: string
@@ -78,11 +81,19 @@ interface DbWeeklyGuidelines {
 
 // Singleton client
 let supabase: SupabaseClient | null = null
+let currentUserId: number | null = null
 
 const isInitialized = ref(false)
 const initError = ref<string | null>(null)
 
 export function useSupabase() {
+  const setCurrentUser = (userId: number | null) => {
+    if (currentUserId !== userId) {
+      currentUserId = userId
+      supabase = null // Force recreation with new headers
+    }
+  }
+
   const getClient = (): SupabaseClient => {
     if (!supabase) {
       const url = import.meta.env.VITE_SUPABASE_URL
@@ -92,7 +103,11 @@ export function useSupabase() {
         throw new Error('Supabase URL and Anon Key must be set in environment variables')
       }
 
-      supabase = createClient(url, anonKey)
+      supabase = createClient(url, anonKey, {
+        global: {
+          headers: currentUserId ? { 'x-user-id': currentUserId.toString() } : {},
+        },
+      })
       isInitialized.value = true
     }
     return supabase
@@ -217,10 +232,12 @@ export function useSupabase() {
 
   // User Settings
   const fetchSettings = async (): Promise<DbUserSettings | null> => {
+    if (!currentUserId) return null
+
     const { data, error } = await getClient()
       .from('user_settings')
       .select('*')
-      .eq('id', 1)
+      .eq('user_id', currentUserId)
       .single()
 
     if (error) {
@@ -233,10 +250,11 @@ export function useSupabase() {
   }
 
   const updateSettings = async (settings: Partial<DbUserSettings>): Promise<DbUserSettings> => {
+    if (!currentUserId) throw new Error('User not authenticated')
+
     const { data, error } = await getClient()
       .from('user_settings')
-      .update(settings)
-      .eq('id', 1)
+      .upsert({ ...settings, user_id: currentUserId }, { onConflict: 'user_id' })
       .select()
       .single()
 
@@ -250,9 +268,12 @@ export function useSupabase() {
 
   // OAuth Tokens
   const fetchOAuthTokens = async (provider: 'strava' | 'google'): Promise<DbOAuthTokens | null> => {
+    if (!currentUserId) return null
+
     const { data, error } = await getClient()
       .from('oauth_tokens')
       .select('*')
+      .eq('user_id', currentUserId)
       .eq('provider', provider)
       .single()
 
@@ -267,15 +288,19 @@ export function useSupabase() {
 
   const upsertOAuthTokens = async (
     provider: 'strava' | 'google',
-    tokens: { access_token: string; refresh_token: string; expires_at: number }
+    tokens: { access_token: string; refresh_token: string; expires_at: number },
+    userId?: number
   ): Promise<DbOAuthTokens> => {
+    const effectiveUserId = userId ?? currentUserId
+    if (!effectiveUserId) throw new Error('User not authenticated')
+
     const { data, error } = await getClient()
       .from('oauth_tokens')
       .upsert({
-        id: provider === 'strava' ? 1 : 2,
+        user_id: effectiveUserId,
         provider,
         ...tokens
-      }, { onConflict: 'provider' })
+      }, { onConflict: 'user_id,provider' })
       .select()
       .single()
 
@@ -288,9 +313,12 @@ export function useSupabase() {
   }
 
   const deleteOAuthTokens = async (provider: 'strava' | 'google'): Promise<void> => {
+    if (!currentUserId) return
+
     const { error } = await getClient()
       .from('oauth_tokens')
       .delete()
+      .eq('user_id', currentUserId)
       .eq('provider', provider)
 
     if (error) {
@@ -301,9 +329,12 @@ export function useSupabase() {
 
   // Weekly Guidelines
   const fetchWeeklyGuidelines = async (weekStart: string): Promise<string | null> => {
+    if (!currentUserId) return null
+
     const { data, error } = await getClient()
       .from('weekly_guidelines')
       .select('guidelines')
+      .eq('user_id', currentUserId)
       .eq('week_start', weekStart)
       .single()
 
@@ -317,12 +348,15 @@ export function useSupabase() {
   }
 
   const upsertWeeklyGuidelines = async (weekStart: string, guidelines: string): Promise<void> => {
+    if (!currentUserId) throw new Error('User not authenticated')
+
     const { error } = await getClient()
       .from('weekly_guidelines')
       .upsert({
+        user_id: currentUserId,
         week_start: weekStart,
         guidelines
-      }, { onConflict: 'week_start' })
+      }, { onConflict: 'user_id,week_start' })
 
     if (error) {
       console.error('Error upserting weekly guidelines:', error)
@@ -371,6 +405,7 @@ export function useSupabase() {
 
   const sessionToDb = (session: ScheduledSession): Omit<DbSession, 'created_at' | 'updated_at'> => ({
     id: session.id,
+    user_id: currentUserId,
     sport: session.sport,
     type: session.type,
     title: session.title,
@@ -409,6 +444,7 @@ export function useSupabase() {
 
   return {
     getClient,
+    setCurrentUser,
     isInitialized,
     initError,
     // Sessions
