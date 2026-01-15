@@ -232,6 +232,7 @@ const copyWeekForCoach = async () => {
     const sessionDate = new Date(s.date)
     const weekEnd = new Date(currentWeekStart.value)
     weekEnd.setDate(weekEnd.getDate() + 6)
+    weekEnd.setHours(23, 59, 59, 999)
     return sessionDate >= currentWeekStart.value && sessionDate <= weekEnd
   }).sort((a, b) => a.date.localeCompare(b.date))
 
