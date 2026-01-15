@@ -9,6 +9,7 @@ import WeekCalendar from './components/WeekCalendar.vue'
 import SessionDetailModal from './components/SessionDetailModal.vue'
 import WeeklyStats from './components/WeeklyStats.vue'
 import VolumeChart from './components/VolumeChart.vue'
+import ElevationChart from './components/ElevationChart.vue'
 import WellnessWidget from './components/WellnessWidget.vue'
 import ObjectiveSettings from './components/ObjectiveSettings.vue'
 import AthleteProfileComponent from './components/AthleteProfile.vue'
@@ -913,7 +914,8 @@ const handleLogout = () => {
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <VolumeChart :sessions="sessions" />
-          <WellnessWidget />
+          <ElevationChart :sessions="sessions" />
+          <WellnessWidget class="md:col-span-2" />
         </div>
       </div>
     </div>
