@@ -260,7 +260,7 @@ const savePhase = () => {
 
 // Delete phase
 const deletePhase = (phase: TrainingPhase) => {
-  if (!confirm(`Supprimer le cycle "${phase.name}" ?`)) return
+  if (!confirm(`Supprimer le bloc "${phase.name}" ?`)) return
   localPhases.value = localPhases.value.filter(p => p.id !== phase.id)
   emit('save', localPhases.value)
 }
@@ -282,7 +282,7 @@ const generateCoachPrompt = () => {
   const today = new Date()
   const todayStr = today.toISOString().split('T')[0]
 
-  let prompt = `Tu es un coach cycliste expert. Je veux que tu me génères un plan de cycles d'entraînement.
+  let prompt = `Tu es un coach de course à pied (route / trail) et de vélo expert. Je veux que tu me génères un plan de blocs d'entraînement.
 
 ## Date d'aujourd'hui
 ${todayStr}
@@ -309,7 +309,7 @@ ${todayStr}
   prompt += `
 
 ## Ta mission
-Génère-moi un plan de cycles d'entraînement qui mène à mes objectifs. Chaque cycle doit avoir:
+Génère-moi un plan de blocs d'entraînement qui mène à mes objectifs. Chaque bloc doit avoir:
 - Un nom clair (Base, Build, Peak, Taper, etc.)
 - Des dates de début et fin
 - Un objectif principal
@@ -362,7 +362,7 @@ const importCoachPhases = () => {
     // Validate and transform phases
     const newPhases: TrainingPhase[] = phasesArray.map((p: any) => ({
       id: uuidv4(),
-      name: p.name || 'Cycle',
+      name: p.name || 'Bloc',
       emoji: p.emoji,
       start_date: p.start_date,
       end_date: p.end_date,
@@ -389,7 +389,7 @@ const importCoachPhases = () => {
   <div class="space-y-4">
     <!-- Header with add button -->
     <div class="flex justify-between items-center mb-4">
-      <h3 class="font-bold text-lg">📊 Cycles d'entraînement</h3>
+      <h3 class="font-bold text-lg">📊 Blocs d'entraînement</h3>
       <div class="flex items-center gap-2">
         <template v-if="!isEditing && !showCoachImport">
           <button class="btn btn-sm btn-ghost" @click="showCoachImport = true">
@@ -437,14 +437,14 @@ const importCoachPhases = () => {
           :disabled="!coachJsonInput.trim()"
           @click="importCoachPhases"
         >
-          🔄 Remplacer les cycles
+          🔄 Remplacer les blocs
         </button>
       </div>
     </div>
 
     <!-- Edit form -->
     <div v-if="isEditing" ref="formRef" class="bg-base-200 rounded-lg p-4 space-y-3">
-      <h4 class="font-medium">{{ editingPhase ? '✏️ Modifier le cycle' : '➕ Nouveau cycle' }}</h4>
+      <h4 class="font-medium">{{ editingPhase ? '✏️ Modifier le bloc' : '➕ Nouveau bloc' }}</h4>
 
       <div class="grid grid-cols-[1fr_auto] gap-3">
         <div>
@@ -569,16 +569,16 @@ const importCoachPhases = () => {
     <div v-if="sortedPhases.length === 0 && !isEditing" class="space-y-3">
       <!-- Alerts for missing info -->
       <div v-if="!athleteProfile?.ftp && !athleteProfile?.max_hr" class="alert alert-warning text-sm">
-        <span>⚠️ Configure ton <strong>profil athlète</strong> (FTP, FC) pour des cycles personnalisés</span>
+        <span>⚠️ Configure ton <strong>profil athlète</strong> (FTP, FC) pour des blocs personnalisés</span>
       </div>
       <div v-if="!objectives?.length" class="alert alert-warning text-sm">
-        <span>⚠️ Ajoute au moins un <strong>objectif</strong> (course cible) pour planifier tes cycles</span>
+        <span>⚠️ Ajoute au moins un <strong>objectif</strong> (course cible) pour planifier tes blocs</span>
       </div>
 
       <!-- Empty state -->
       <div class="text-center py-6 text-base-content/50">
-        <p class="text-lg">Aucun cycle défini</p>
-        <p class="text-sm mt-1">Crée tes cycles manuellement ou demande à l'IA</p>
+        <p class="text-lg">Aucun bloc défini</p>
+        <p class="text-sm mt-1">Crée tes blocs manuellement ou demande à l'IA</p>
         <div class="flex justify-center gap-2 mt-4">
           <button class="btn btn-sm btn bg-emerald-500 text-white hover:bg-emerald-600 border-0" @click="startAdd">+ Ajouter</button>
           <button class="btn btn-sm btn-ghost" @click="showCoachImport = true">🤖 Générer avec l'IA</button>

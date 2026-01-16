@@ -620,7 +620,7 @@ watch(forecast, () => {}, { deep: true })
       </div>
     </div>
 
-    <!-- Footer - Desktop only: Current cycle info -->
+    <!-- Footer - Desktop only: Current bloc info -->
     <div v-if="currentPhase" class="px-4 py-2 hidden md:flex items-center justify-center gap-2 text-xs text-base-content/50">
       <span>{{ currentPhase.emoji || getPhaseEmoji(currentPhase.name) }}</span>
       <span class="font-medium">{{ currentPhase.name }}</span>
