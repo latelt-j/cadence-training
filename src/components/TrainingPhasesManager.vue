@@ -593,7 +593,7 @@ const importCoachPhases = () => {
         :ref="el => { if (getPhaseStatus(phase) === 'current') currentPhaseRef = el as HTMLElement }"
       >
         <!-- Timeline connector (before) -->
-        <hr v-if="index > 0" :class="getPhaseStatus(phase) !== 'future' ? 'bg-emerald-500' : ''" />
+        <hr v-if="index > 0" :class="getPhaseStatus(phase) !== 'future' ? 'bg-white' : ''" />
 
         <!-- Timeline start: dates -->
         <div class="timeline-start text-xs text-base-content/50 text-right pr-2 whitespace-nowrap">
@@ -605,8 +605,8 @@ const importCoachPhases = () => {
           <div
             class="w-8 h-8 rounded-full flex items-center justify-center text-lg"
             :class="{
-              'bg-emerald-500 text-white': getPhaseStatus(phase) === 'current',
-              'bg-emerald-500/30 text-emerald-500': getPhaseStatus(phase) === 'past',
+              'bg-white text-black': getPhaseStatus(phase) === 'current',
+              'bg-white/30 text-white': getPhaseStatus(phase) === 'past',
               'bg-base-300 text-base-content/30': getPhaseStatus(phase) === 'future'
             }"
           >
@@ -618,7 +618,7 @@ const importCoachPhases = () => {
         <div
           class="timeline-end timeline-box ml-2 flex-1"
           :class="{
-            'border-emerald-500 border-2 bg-emerald-500/10': getPhaseStatus(phase) === 'current',
+            'border-white border-2 bg-white/10': getPhaseStatus(phase) === 'current',
             'bg-base-200': getPhaseStatus(phase) !== 'current'
           }"
         >
@@ -627,7 +627,7 @@ const importCoachPhases = () => {
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="font-bold">{{ phase.name.toUpperCase() }}</span>
                 <span class="badge badge-xs badge-neutral">{{ getPhaseDuration(phase) }} sem</span>
-                <span v-if="getPhaseStatus(phase) === 'current'" class="badge badge-xs bg-emerald-500 text-white">
+                <span v-if="getPhaseStatus(phase) === 'current'" class="badge badge-xs bg-white text-black">
                   S{{ getCurrentWeek(phase) }}/{{ getPhaseDuration(phase) }}
                 </span>
               </div>
@@ -637,7 +637,7 @@ const importCoachPhases = () => {
               <div v-if="phase.keywords" class="text-xs text-base-content/50 mt-1">
                 {{ phase.keywords }}
               </div>
-              <div v-if="phase.volume_distribution" class="text-xs text-emerald-400 mt-1">
+              <div v-if="phase.volume_distribution" class="text-xs text-white/70 mt-1">
                 {{ phase.volume_distribution.replace(/\s*\([^)]*\)/, '') }}
               </div>
               <div v-if="phase.challenge" class="text-xs text-base-content/60 mt-1">
@@ -652,7 +652,7 @@ const importCoachPhases = () => {
         </div>
 
         <!-- Timeline connector (after) -->
-        <hr v-if="index < sortedPhases.length - 1" :class="getPhaseStatus(phase) !== 'future' ? 'bg-emerald-500' : ''" />
+        <hr v-if="index < sortedPhases.length - 1" :class="getPhaseStatus(phase) !== 'future' ? 'bg-white' : ''" />
       </li>
     </ul>
   </div>
