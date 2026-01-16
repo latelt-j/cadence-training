@@ -56,6 +56,37 @@ const ftpZones = computed(() => {
     { name: 'Z5 VO2max', min: Math.round(ftp * 1.2), max: Math.round(ftp * 1.5) },
   ]
 })
+
+// Calculate HR zones for running using Karvonen formula (based on HR reserve)
+// Target HR = ((max HR - resting HR) × %intensity) + resting HR
+const hrZones = computed(() => {
+  const maxHr = localProfile.value.max_hr
+  const restingHr = localProfile.value.resting_hr
+  if (!maxHr || !restingHr) return null
+  const reserve = maxHr - restingHr
+  const calcZone = (pct: number) => Math.round(reserve * pct + restingHr)
+  return [
+    { name: 'Z1 Recup', min: calcZone(0.50), max: calcZone(0.60) },
+    { name: 'Z2 Endurance', min: calcZone(0.60), max: calcZone(0.70) },
+    { name: 'Z3 Tempo', min: calcZone(0.70), max: calcZone(0.80) },
+    { name: 'Z4 Seuil', min: calcZone(0.80), max: calcZone(0.90) },
+    { name: 'Z5 VO2max', min: calcZone(0.90), max: maxHr },
+  ]
+})
+
+// Copy HR zones to clipboard
+const hrZonesCopied = ref(false)
+const copyHrZones = () => {
+  if (!hrZones.value) return
+  const text = hrZones.value
+    .map(z => `${z.name}: ${z.min}-${z.max} bpm`)
+    .join('\n')
+  navigator.clipboard.writeText(text)
+  hrZonesCopied.value = true
+  setTimeout(() => {
+    hrZonesCopied.value = false
+  }, 2000)
+}
 </script>
 
 <template>
@@ -158,6 +189,27 @@ Trail/montagne possible uniquement le week-end
             <span class="font-mono">{{ zone.min }}-{{ zone.max }}W</span>
           </div>
         </div>
+      </div>
+
+      <!-- HR Zones for Running -->
+      <div v-if="hrZones" class="bg-base-200 rounded-lg p-3">
+        <div class="flex items-center justify-between mb-2">
+          <div class="text-sm font-medium">Zones FC course</div>
+          <button
+            class="btn btn-xs btn-ghost"
+            :class="hrZonesCopied ? 'text-success' : ''"
+            @click="copyHrZones"
+          >
+            {{ hrZonesCopied ? '✓ Copie' : '📋 Copier' }}
+          </button>
+        </div>
+        <div class="grid grid-cols-1 gap-1 text-xs">
+          <div v-for="zone in hrZones" :key="zone.name" class="flex justify-between">
+            <span class="text-base-content/70">{{ zone.name }}</span>
+            <span class="font-mono">{{ zone.min }}-{{ zone.max }} bpm</span>
+          </div>
+        </div>
+        <p class="text-xs text-base-content/50 mt-2">Formule Karvonen (FC reserve)</p>
       </div>
     </div>
 
