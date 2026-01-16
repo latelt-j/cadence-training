@@ -603,11 +603,11 @@ const importCoachPhases = () => {
         <!-- Timeline middle: icon -->
         <div class="timeline-middle">
           <div
-            class="w-8 h-8 rounded-full flex items-center justify-center text-lg"
+            class="w-10 h-10 rounded-full flex items-center justify-center text-xl border-2"
             :class="{
-              'bg-white text-black': getPhaseStatus(phase) === 'current',
-              'bg-white/30 text-white': getPhaseStatus(phase) === 'past',
-              'bg-base-300 text-base-content/30': getPhaseStatus(phase) === 'future'
+              'border-white': getPhaseStatus(phase) === 'current',
+              'border-white/50': getPhaseStatus(phase) === 'past',
+              'border-base-300': getPhaseStatus(phase) === 'future'
             }"
           >
             {{ phase.emoji || getPhaseEmoji(phase.name) }}
