@@ -733,67 +733,67 @@ watch(forecast, () => {}, { deep: true })
 
 /* Sport-specific glow animations for today's sessions */
 .session-today.session-cycling {
-  animation: glowEmerald 2s ease-in-out infinite;
+  animation: glowEmerald 3s ease-in-out infinite;
 }
 
 .session-today.session-running {
-  animation: glowWhite 2s ease-in-out infinite;
+  animation: glowWhite 3s ease-in-out infinite;
 }
 
 .session-today.session-strength {
-  animation: glowViolet 2s ease-in-out infinite;
+  animation: glowViolet 3s ease-in-out infinite;
 }
 
 .session-today.session-mtb {
-  animation: glowBrown 2s ease-in-out infinite;
+  animation: glowBrown 3s ease-in-out infinite;
 }
 
 .session-today.session-hiking {
-  animation: glowLime 2s ease-in-out infinite;
+  animation: glowLime 3s ease-in-out infinite;
 }
 
 @keyframes glowEmerald {
   0%, 100% {
-    box-shadow: 0 0 8px rgba(16, 185, 129, 0.4), 0 0 16px rgba(16, 185, 129, 0.2);
+    box-shadow: 0 0 4px rgba(16, 185, 129, 0.2), 0 0 8px rgba(16, 185, 129, 0.1);
   }
   50% {
-    box-shadow: 0 0 14px rgba(16, 185, 129, 0.6), 0 0 28px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.3), 0 0 12px rgba(16, 185, 129, 0.15);
   }
 }
 
 @keyframes glowWhite {
   0%, 100% {
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4), 0 0 16px rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.2), 0 0 8px rgba(255, 255, 255, 0.1);
   }
   50% {
-    box-shadow: 0 0 14px rgba(255, 255, 255, 0.6), 0 0 28px rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.3), 0 0 12px rgba(255, 255, 255, 0.15);
   }
 }
 
 @keyframes glowViolet {
   0%, 100% {
-    box-shadow: 0 0 8px rgba(147, 51, 234, 0.4), 0 0 16px rgba(147, 51, 234, 0.2);
+    box-shadow: 0 0 4px rgba(147, 51, 234, 0.2), 0 0 8px rgba(147, 51, 234, 0.1);
   }
   50% {
-    box-shadow: 0 0 14px rgba(147, 51, 234, 0.6), 0 0 28px rgba(147, 51, 234, 0.3);
+    box-shadow: 0 0 6px rgba(147, 51, 234, 0.3), 0 0 12px rgba(147, 51, 234, 0.15);
   }
 }
 
 @keyframes glowBrown {
   0%, 100% {
-    box-shadow: 0 0 8px rgba(146, 64, 14, 0.4), 0 0 16px rgba(146, 64, 14, 0.2);
+    box-shadow: 0 0 4px rgba(146, 64, 14, 0.2), 0 0 8px rgba(146, 64, 14, 0.1);
   }
   50% {
-    box-shadow: 0 0 14px rgba(146, 64, 14, 0.6), 0 0 28px rgba(146, 64, 14, 0.3);
+    box-shadow: 0 0 6px rgba(146, 64, 14, 0.3), 0 0 12px rgba(146, 64, 14, 0.15);
   }
 }
 
 @keyframes glowLime {
   0%, 100% {
-    box-shadow: 0 0 8px rgba(101, 163, 13, 0.4), 0 0 16px rgba(101, 163, 13, 0.2);
+    box-shadow: 0 0 4px rgba(101, 163, 13, 0.2), 0 0 8px rgba(101, 163, 13, 0.1);
   }
   50% {
-    box-shadow: 0 0 14px rgba(101, 163, 13, 0.6), 0 0 28px rgba(101, 163, 13, 0.3);
+    box-shadow: 0 0 6px rgba(101, 163, 13, 0.3), 0 0 12px rgba(101, 163, 13, 0.15);
   }
 }
 
