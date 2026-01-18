@@ -296,8 +296,7 @@ const generateCoachPrompt = () => {
   if (props.trainingObjectives && props.trainingObjectives.length > 0) {
     props.trainingObjectives.forEach(obj => {
       const daysLeft = Math.ceil((new Date(obj.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
-      const dateFormatted = new Date(obj.date).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-      prompt += `- [${obj.priority}] ${obj.name} (${dateFormatted}) : ${obj.distance_km}km / ${obj.elevation_gain} D+ - J-${daysLeft}\n`
+      prompt += `- [${obj.priority}] ${obj.name} (${obj.date}) : ${obj.distance_km}km / ${obj.elevation_gain} D+ - J-${daysLeft}\n`
     })
   } else {
     prompt += `- Aucun objectif défini\n`
