@@ -154,6 +154,16 @@ const bilanStravaSessions = computed(() => {
   }).sort((a, b) => a.date.localeCompare(b.date))
 })
 
+// Filter planned sessions for the bilan week
+const bilanPlannedSessions = computed(() => {
+  if (!props.sessions) return []
+  const start = bilanWeekDates.value.start
+  const end = bilanWeekDates.value.end
+  return props.sessions.filter(s => {
+    return s.date >= start && s.date <= end && s.type === 'planned'
+  }).sort((a, b) => a.date.localeCompare(b.date))
+})
+
 // Current phase
 const currentPhase = computed(() => {
   if (!props.trainingPhases?.length) return null
@@ -329,8 +339,19 @@ const generateCoachPrompt = () => {
   // Bilan last week
   prompt += `\n**5. BILAN SEMAINE PASSÉE** (${bilanWeekDates.value.start} au ${bilanWeekDates.value.end})\n\n`
 
-  // Volume summary
-  prompt += `Volume total : ${formatHours(weekStats.value.totalHours)} (${bilanStravaSessions.value.length} séances)\n`
+  // Planned sessions
+  if (bilanPlannedSessions.value.length > 0) {
+    prompt += `Séances prévues :\n`
+    bilanPlannedSessions.value.forEach(s => {
+      const sportEmoji = s.sport === 'cycling' ? '🚴' : s.sport === 'mtb' ? '🚵' : s.sport === 'running' ? '🏃' : '💪'
+      const dateShort = new Date(s.date).toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: '2-digit' })
+      prompt += `- ${dateShort} : ${s.title} ${sportEmoji} - ${s.duration_min}min\n`
+    })
+    prompt += `\n`
+  }
+
+  // Volume summary (actual)
+  prompt += `Volume réalisé : ${formatHours(weekStats.value.totalHours)} (${bilanStravaSessions.value.length} séances)\n`
   if (weekStats.value.cycling.count > 0) {
     prompt += `- 🚴 Vélo : ${formatHours(weekStats.value.cycling.hours)} (${weekStats.value.cycling.count} séances, ${weekStats.value.cycling.km.toFixed(0)}km, ${Math.round(weekStats.value.cycling.elevation)} D+)\n`
   }
@@ -344,9 +365,9 @@ const generateCoachPrompt = () => {
     prompt += `- 💪 Renfo : ${formatHours(weekStats.value.strength.hours)} (${weekStats.value.strength.count} séances)\n`
   }
 
-  // Session details
+  // Session details (actual)
   if (bilanStravaSessions.value.length > 0) {
-    prompt += `\nDétail :\n`
+    prompt += `\nDétail réalisé :\n`
     bilanStravaSessions.value.forEach(s => {
       const sportEmoji = s.sport === 'cycling' ? '🚴' : s.sport === 'mtb' ? '🚵' : s.sport === 'running' ? '🏃' : '💪'
       const dateShort = new Date(s.date).toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: '2-digit' })
@@ -381,6 +402,12 @@ const generateCoachPrompt = () => {
 ---
 
 En te basant sur le contexte ci-dessus, génère-moi un plan d'entraînement.
+
+⚠️ ANALYSE PRÉVU VS RÉALISÉ :
+- Compare les séances prévues avec ce qui a été réellement fait
+- Si surcharge (plus fait que prévu) : réduire légèrement le volume/intensité de la semaine à venir
+- Si sous-charge (moins fait que prévu) : maintenir ou légèrement augmenter selon la raison
+- Mentionner cette analyse dans les guidelines
 
 Réponds UNIQUEMENT avec le code JSON brut (pas de markdown, pas de \`\`\`). Je vais copier-coller directement.
 
