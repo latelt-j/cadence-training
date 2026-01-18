@@ -22,6 +22,7 @@ const props = defineProps<{
 
 const period = ref<3 | 6>(3)
 const selectedSport = ref<'cycling' | 'running'>('cycling')
+const selectedMetric = ref<'elevation' | 'distance'>('elevation')
 
 const getStartOfWeek = (date: Date): Date => {
   const d = new Date(date)
@@ -59,7 +60,7 @@ const chartData = computed(() => {
   startDate.setMonth(startDate.getMonth() - period.value)
 
   // Get all weeks in the period
-  const weeks: Map<string, { label: string; elevation: number }> = new Map()
+  const weeks: Map<string, { label: string; value: number }> = new Map()
 
   // Start from the Monday of the start week
   const current = getStartOfWeek(startDate)
@@ -67,22 +68,26 @@ const chartData = computed(() => {
 
   while (current <= endWeek) {
     const key = getWeekKey(current)
-    weeks.set(key, { label: getWeekLabel(current), elevation: 0 })
+    weeks.set(key, { label: getWeekLabel(current), value: 0 })
     current.setDate(current.getDate() + 7)
   }
 
-  // Fill with session data (only completed sessions with elevation)
+  // Fill with session data (only completed sessions)
   props.sessions.forEach(session => {
     const sessionDate = new Date(session.date)
     const key = getWeekKey(sessionDate)
     const week = weeks.get(key)
-    if (week && session.actual_elevation) {
+    if (week) {
       const isDone = session.type === 'strava' || session.type === 'manual'
       const matchesSport = selectedSport.value === 'cycling'
         ? (session.sport === 'cycling' || session.sport === 'mtb')
         : session.sport === 'running'
       if (isDone && matchesSport) {
-        week.elevation += session.actual_elevation
+        if (selectedMetric.value === 'elevation' && session.actual_elevation) {
+          week.value += session.actual_elevation
+        } else if (selectedMetric.value === 'distance' && session.actual_km) {
+          week.value += session.actual_km
+        }
       }
     }
   })
@@ -92,13 +97,15 @@ const chartData = computed(() => {
     .map(([, data]) => data)
 
   const colors = sportColors[selectedSport.value]
+  const sportLabel = selectedSport.value === 'cycling' ? 'Velo' : 'Course'
+  const metricLabel = selectedMetric.value === 'elevation' ? 'D+' : 'km'
 
   return {
     labels: sortedWeeks.map(w => w.label),
     datasets: [
       {
-        label: selectedSport.value === 'cycling' ? 'Velo D+' : 'Course D+',
-        data: sortedWeeks.map(w => Math.round(w.elevation)),
+        label: `${sportLabel} ${metricLabel}`,
+        data: sortedWeeks.map(w => selectedMetric.value === 'elevation' ? Math.round(w.value) : Math.round(w.value * 10) / 10),
         borderColor: colors.border,
         backgroundColor: colors.background,
         fill: true,
@@ -125,7 +132,7 @@ const chartOptions = computed(() => ({
     y: {
       beginAtZero: true,
       ticks: {
-        callback: (value: string | number) => `${value}m`,
+        callback: (value: string | number) => selectedMetric.value === 'elevation' ? `${value}m` : `${value}km`,
       },
     },
   },
@@ -135,16 +142,17 @@ const chartOptions = computed(() => ({
     },
     tooltip: {
       callbacks: {
-        label: (ctx: any) => `${ctx.raw} m D+`,
+        label: (ctx: any) => selectedMetric.value === 'elevation' ? `${ctx.raw} m D+` : `${ctx.raw} km`,
       },
     },
   },
 }))
 
-// Compute total elevation for the period
-const totalElevation = computed(() => {
+// Compute total value for the period
+const totalValue = computed(() => {
   const data = chartData.value.datasets[0]?.data as number[] ?? []
-  return data.reduce((sum, val) => sum + val, 0)
+  const total = data.reduce((sum, val) => sum + val, 0)
+  return selectedMetric.value === 'elevation' ? Math.round(total) : Math.round(total * 10) / 10
 })
 </script>
 
@@ -153,9 +161,25 @@ const totalElevation = computed(() => {
     <div class="card-body">
       <div class="flex justify-between items-center mb-2">
         <div class="flex items-center gap-3">
-          <h2 class="card-title text-lg">Denivele</h2>
+          <!-- Metric toggle (title) -->
+          <div class="join">
+            <button
+              class="join-item btn btn-sm"
+              :class="selectedMetric === 'elevation' ? 'bg-base-300 font-bold' : 'btn-ghost'"
+              @click="selectedMetric = 'elevation'"
+            >
+              Denivele
+            </button>
+            <button
+              class="join-item btn btn-sm"
+              :class="selectedMetric === 'distance' ? 'bg-base-300 font-bold' : 'btn-ghost'"
+              @click="selectedMetric = 'distance'"
+            >
+              Distance
+            </button>
+          </div>
           <span class="text-lg font-bold" :class="selectedSport === 'cycling' ? 'text-emerald-500' : 'text-sky-500'">
-            {{ totalElevation.toLocaleString() }} m
+            {{ totalValue.toLocaleString() }} {{ selectedMetric === 'elevation' ? 'm' : 'km' }}
           </span>
         </div>
         <!-- Sport toggle -->
