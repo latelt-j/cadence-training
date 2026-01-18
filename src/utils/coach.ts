@@ -194,20 +194,21 @@ export const generateAnalysisText = (
 
 **PARTIE 2 - Suggestions pour Strava (texte simple, PAS de markdown) :**
 
-🎭 IMPORTANT : Sois DRÔLE et CRÉATIF ! Je partage sur Strava avec beaucoup de followers.
-Les titres/descriptions doivent faire sourire : autodérision, jeux de mots, références pop culture, humour sur la souffrance...
+Propose 3 variantes de titre + description, chacune avec un style DIFFÉRENT.
+Pas de chiffres dans les titres. Descriptions courtes (1 phrase max).
 
-Propose 3 variantes de titre + description :
-
-1. **Sobre mais malin** (sans emoji, humour subtil)
+1. **Zen/minimaliste** (moment présent, lâcher-prise, gratitude)
+   Ex: "Juste là", "Merci les jambes", "Avec le vent"
 Titre:
 Description:
 
-2. **Fun et décalé** (1-2 emojis, ton léger)
+2. **Humour/autodérision** (drôle, décalé, référence pop culture)
+   Ex: "Mission survie matinale", "Les mollets ont dit non", "Powered by café"
 Titre:
 Description:
 
-3. **Full entertainment** (plusieurs emojis, assumé drôle)
+3. **Poétique/inspirant** (nature, liberté, sensation)
+   Ex: "Dialogue avec l'asphalte", "Le ciel comme témoin", "Respirer l'horizon"
 Titre:
 Description:`
 
