@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted } from 'vue'
-import type { TrainingPhase, TrainingObjective, AthleteProfile } from '../types/session'
+import type { TrainingPhase, TrainingObjective, AthleteProfile, WeekType } from '../types/session'
 import { v4 as uuidv4 } from 'uuid'
 
 const props = defineProps<{
@@ -180,6 +180,7 @@ const startAdd = () => {
     volume_note: '',
     challenge: '',
   }
+  formWeekTypes.value = {} // Reset week types (will use defaults)
   isEditing.value = true
 }
 
@@ -205,6 +206,7 @@ const startEdit = (phase: TrainingPhase) => {
     volume_note: volumeParsed.note,
     challenge: phase.challenge || '',
   }
+  formWeekTypes.value = phase.week_types ? { ...phase.week_types } : {}
   isEditing.value = true
   scrollToForm()
 }
@@ -221,6 +223,9 @@ const savePhase = () => {
 
   const volumeDistribution = formatVolumeDistribution(formData.value.cycling_pct, formData.value.volume_note)
 
+  // Only save week_types if there are overrides (non-empty object)
+  const weekTypes = Object.keys(formWeekTypes.value).length > 0 ? formWeekTypes.value : undefined
+
   if (editingPhase.value) {
     // Update existing
     const index = localPhases.value.findIndex(p => p.id === editingPhase.value!.id)
@@ -235,6 +240,7 @@ const savePhase = () => {
         keywords: formData.value.keywords || undefined,
         volume_distribution: volumeDistribution,
         challenge: formData.value.challenge || undefined,
+        week_types: weekTypes,
       }
     }
   } else {
@@ -249,6 +255,7 @@ const savePhase = () => {
       keywords: formData.value.keywords || undefined,
       volume_distribution: volumeDistribution,
       challenge: formData.value.challenge || undefined,
+      week_types: weekTypes,
     })
   }
 
@@ -275,6 +282,44 @@ const getPhaseEmoji = (name: string) => {
   if (lower.includes('recovery') || lower.includes('récup')) return '🧘'
   if (lower.includes('race') || lower.includes('compet')) return '🏆'
   return '📊'
+}
+
+// Week type configuration (3:1 periodization)
+const weekTypeConfig: Record<WeekType, { label: string; emoji: string; color: string }> = {
+  charge: { label: 'Charge', emoji: '📈', color: 'bg-emerald-500' },
+  surcharge: { label: 'Surcharge', emoji: '🔥', color: 'bg-orange-500' },
+  recup: { label: 'Récup', emoji: '🧘', color: 'bg-sky-500' },
+}
+
+// Calculate default week type based on 3:1 pattern
+const getDefaultWeekType = (weekNumber: number): WeekType => {
+  const positionInCycle = ((weekNumber - 1) % 4) + 1
+  if (positionInCycle === 4) return 'recup'
+  if (positionInCycle === 3) return 'surcharge'
+  return 'charge'
+}
+
+// Get week type for a phase (with override support)
+const getWeekType = (phase: TrainingPhase, weekNumber: number) => {
+  const type = phase.week_types?.[weekNumber] ?? getDefaultWeekType(weekNumber)
+  return weekTypeConfig[type]
+}
+
+// Form week types (for editing)
+const formWeekTypes = ref<{ [weekNumber: number]: WeekType }>({})
+
+// Cycle week type on click
+const cycleWeekType = (weekNumber: number) => {
+  const types: WeekType[] = ['charge', 'surcharge', 'recup']
+  const current = formWeekTypes.value[weekNumber] ?? getDefaultWeekType(weekNumber)
+  const nextIndex = (types.indexOf(current) + 1) % types.length
+  formWeekTypes.value = { ...formWeekTypes.value, [weekNumber]: types[nextIndex]! }
+}
+
+// Get week type for form display
+const getFormWeekType = (weekNumber: number) => {
+  const type = formWeekTypes.value[weekNumber] ?? getDefaultWeekType(weekNumber)
+  return weekTypeConfig[type]
 }
 
 // Generate coach prompt for phases
@@ -553,6 +598,24 @@ const importCoachPhases = () => {
         />
       </div>
 
+      <!-- Week types editor -->
+      <div v-if="durationWeeks > 0">
+        <label class="text-sm text-base-content/70 mb-2 block">Types de semaines (clic pour changer)</label>
+        <div class="flex flex-wrap gap-1">
+          <button
+            v-for="week in durationWeeks"
+            :key="week"
+            type="button"
+            class="btn btn-xs text-white"
+            :class="getFormWeekType(week).color"
+            @click="cycleWeekType(week)"
+          >
+            S{{ week }} {{ getFormWeekType(week).emoji }}
+          </button>
+        </div>
+        <p class="text-xs text-base-content/50 mt-1">📈 Charge → 🔥 Surcharge → 🧘 Récup (pattern 3:1)</p>
+      </div>
+
       <div class="flex justify-end gap-2 pt-2">
         <button class="btn btn-sm btn-ghost" @click="cancelEdit">Annuler</button>
         <button
@@ -629,6 +692,13 @@ const importCoachPhases = () => {
                 <span class="badge badge-xs badge-neutral">{{ getPhaseDuration(phase) }} sem</span>
                 <span v-if="getPhaseStatus(phase) === 'current'" class="badge badge-xs bg-white text-black">
                   S{{ getCurrentWeek(phase) }}/{{ getPhaseDuration(phase) }}
+                </span>
+                <span
+                  v-if="getPhaseStatus(phase) === 'current'"
+                  class="badge badge-xs text-white"
+                  :class="getWeekType(phase, getCurrentWeek(phase)).color"
+                >
+                  {{ getWeekType(phase, getCurrentWeek(phase)).emoji }} {{ getWeekType(phase, getCurrentWeek(phase)).label }}
                 </span>
               </div>
               <div v-if="phase.objectives || phase.goals" class="text-sm mt-1 text-base-content/70">

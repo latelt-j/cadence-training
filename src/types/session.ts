@@ -1,6 +1,8 @@
 export type Sport = 'cycling' | 'mtb' | 'running' | 'strength' | 'hiking'
 
 // Training periodization phases
+export type WeekType = 'charge' | 'surcharge' | 'recup'
+
 export interface TrainingPhase {
   id: string
   number?: number // Phase number (calculated from order)
@@ -12,6 +14,7 @@ export interface TrainingPhase {
   keywords?: string // Keywords for AI coach (e.g., "Z2, volume, régularité")
   volume_distribution?: string // e.g., "90% Vélo / 10% Run (Maintenance)"
   challenge?: string // Optional challenge for the phase
+  week_types?: { [weekNumber: number]: WeekType } // Manual overrides for week types (default: 3:1 pattern)
   // Legacy fields (kept for backwards compatibility)
   description?: string
   goals?: string

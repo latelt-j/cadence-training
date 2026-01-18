@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, onUnmounted, watch } from 'vue'
-import type { ScheduledSession, TrainingPhase } from '../types/session'
+import type { ScheduledSession, TrainingPhase, WeekType } from '../types/session'
 import { SPORT_CONFIG } from '../types/session'
 import { useWeather } from '../composables/useWeather'
 
@@ -195,6 +195,28 @@ const getPhaseEmoji = (name: string) => {
   if (lower.includes('race') || lower.includes('compet')) return '🏆'
   return '📊'
 }
+
+// Week type configuration (3:1 periodization)
+const weekTypeConfig: Record<WeekType, { label: string; emoji: string; color: string }> = {
+  charge: { label: 'Charge', emoji: '📈', color: 'bg-emerald-500' },
+  surcharge: { label: 'Surcharge', emoji: '🔥', color: 'bg-orange-500' },
+  recup: { label: 'Récup', emoji: '🧘', color: 'bg-sky-500' },
+}
+
+// Calculate default week type based on 3:1 pattern
+const getDefaultWeekType = (weekNumber: number): WeekType => {
+  const positionInCycle = ((weekNumber - 1) % 4) + 1
+  if (positionInCycle === 4) return 'recup'
+  if (positionInCycle === 3) return 'surcharge'
+  return 'charge'
+}
+
+// Get week type for current phase (with override support)
+const currentWeekType = computed(() => {
+  if (!currentPhase.value || !phaseWeekNumber.value) return null
+  const type = currentPhase.value.week_types?.[phaseWeekNumber.value] ?? getDefaultWeekType(phaseWeekNumber.value)
+  return weekTypeConfig[type]
+})
 
 // Navigation
 const prevWeek = () => {
@@ -626,6 +648,13 @@ watch(forecast, () => {}, { deep: true })
       <span class="font-medium">{{ currentPhase.name }}</span>
       <span class="text-base-content/30">•</span>
       <span class="badge badge-xs bg-emerald-500 text-black border-0">S{{ phaseWeekNumber }}/{{ phaseTotalWeeks }}</span>
+      <span
+        v-if="currentWeekType"
+        class="badge badge-xs text-white border-0"
+        :class="currentWeekType.color"
+      >
+        {{ currentWeekType.emoji }} {{ currentWeekType.label }}
+      </span>
     </div>
   </div>
 </template>
