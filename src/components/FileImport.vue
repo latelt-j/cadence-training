@@ -262,13 +262,37 @@ const generateCoachPrompt = () => {
   if (props.athleteProfile?.max_hr || props.athleteProfile?.resting_hr) {
     prompt += `- FC Max : ${props.athleteProfile.max_hr ?? '?'} bpm / Repos : ${props.athleteProfile.resting_hr ?? '?'} bpm\n`
   }
+  // Add HR zones if we have max and resting HR
+  if (props.athleteProfile?.max_hr && props.athleteProfile?.resting_hr) {
+    const maxHr = props.athleteProfile.max_hr
+    const restingHr = props.athleteProfile.resting_hr
+    const reserve = maxHr - restingHr
+    const calcZone = (pct: number) => Math.round(reserve * pct + restingHr)
+    prompt += `- Zones FC :\n`
+    prompt += `  - Z1 (Récup) : < ${calcZone(0.60)} bpm\n`
+    prompt += `  - Z2 (Endurance) : ${calcZone(0.60)}-${calcZone(0.70)} bpm\n`
+    prompt += `  - Z3 (Tempo) : ${calcZone(0.70)}-${calcZone(0.80)} bpm\n`
+    prompt += `  - Z4 (Seuil) : ${calcZone(0.80)}-${calcZone(0.90)} bpm\n`
+    prompt += `  - Z5 (VO2max) : ${calcZone(0.90)}+ bpm\n`
+  }
   prompt += `- Fatigue actuelle (0-10) : ${fatigue.value}\n`
   if (props.athleteProfile?.environment) {
     prompt += `- Contexte : ${props.athleteProfile.environment}\n`
   }
 
+  // Training philosophy (static section)
+  prompt += `
+**2. PHILOSOPHIE D'ENTRAÎNEMENT**
+- Modèle : Polarisé (80% Z2 / 20% intensité)
+- Structure : 2 intensités/semaine + reste en Endurance Fondamentale
+- Intensité 1 : Mardi (vélo Zwift - sweet spot, seuil ou VO2max)
+- Intensité 2 : Vendredi (côtes CAP - pyramide, répétitions, tempo)
+- Reste : Z2 strict (FC < 150 bpm)
+- Exception : Sorties sociales avec les copains = tempo assumé (ça compte comme intensité)
+`
+
   // Objectives
-  prompt += `\n**2. OBJECTIFS**\n`
+  prompt += `\n**3. OBJECTIFS**\n`
   if (props.trainingObjectives && props.trainingObjectives.length > 0) {
     props.trainingObjectives.forEach(obj => {
       const daysLeft = Math.ceil((new Date(obj.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))
@@ -280,7 +304,7 @@ const generateCoachPrompt = () => {
   }
 
   // Current phase
-  prompt += `\n**3. BLOC ACTUEL**\n`
+  prompt += `\n**4. BLOC ACTUEL**\n`
   if (planPhase) {
     prompt += `- Bloc : ${planPhase.name}`
     if (planPhase.description) prompt += ` - ${planPhase.description}`
@@ -302,7 +326,7 @@ const generateCoachPrompt = () => {
   }
 
   // Bilan last week
-  prompt += `\n**4. BILAN SEMAINE PASSÉE** (${bilanWeekDates.value.start} au ${bilanWeekDates.value.end})\n\n`
+  prompt += `\n**5. BILAN SEMAINE PASSÉE** (${bilanWeekDates.value.start} au ${bilanWeekDates.value.end})\n\n`
 
   // Volume summary
   prompt += `Volume total : ${formatHours(weekStats.value.totalHours)} (${bilanStravaSessions.value.length} séances)\n`
@@ -342,10 +366,14 @@ const generateCoachPrompt = () => {
   prompt += `- Difficulté : ${difficulteLabel}\n`
 
   // Request for next week
-  prompt += `\n**5. DEMANDE POUR LA SEMAINE À VENIR** (${planStartDate.value} au ${planEndDate.value})\n\n`
+  prompt += `\n**6. DEMANDE POUR LA SEMAINE À VENIR** (${planStartDate.value} au ${planEndDate.value})\n\n`
   prompt += `Dates disponibles :\n${datesListStr}\n`
-  prompt += `\n- Contraintes : ${contraintes.value.trim() || 'Aucune'}\n`
-  prompt += `- Envies : ${envies.value.trim() || 'Aucune'}\n`
+  prompt += `\nContraintes : ${contraintes.value.trim() || ''}\n`
+  prompt += `\nEnvies/Demandes spécifiques :\n`
+  prompt += `- Séance avec les copains prévue ? (jour, type) : \n`
+  prompt += `- Spot particulier à intégrer ? : \n`
+  prompt += `- Zone du corps fatiguée/sensible ? : \n`
+  prompt += `- Autre demande ? : ${envies.value.trim() || ''}\n`
 
   // JSON instructions
   prompt += `
@@ -396,7 +424,10 @@ Ajoute un champ "guidelines" avec un texte markdown expliquant :
 - 7-8 : Seuil, Sweet Spot, dur
 - 9-10 : VO2max, intervalles intenses, très dur
 
-Types : "sweet_spot", "threshold", "vo2max", "anaerobic", "long_run", "long_ride", "hills", "fartlek", "recovery", "strength", "core"
+Types valides :
+- Vélo : "sweet_spot", "threshold", "vo2max", "z2_ride", "long_ride", "recovery"
+- CAP : "z2_run", "long_run", "trail", "hills", "fartlek", "tempo", "recovery"
+- Autre : "strength", "core", "hiking"
 
 ⚠️ SÉANCES VÉLO - INDOOR vs OUTDOOR :
 - Séances INDOOR (intervalles, sweet spot, threshold, VO2max, récup active) :
