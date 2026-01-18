@@ -238,14 +238,21 @@ N'inclus que les champs qui changent.`
 
 ---
 
-🎭 Propose 3 variantes de titre + description pour Strava (drôle, créatif, avec autodérision).
+🧘 Propose 3 variantes de titre + description pour Strava.
+
+Ton : minimaliste, moment présent, lâcher-prise. Pas de chiffres, pas de performance.
+Inspire-toi de : gratitude simple, connexion à l'instant, joie de bouger, nature.
+
+Exemples de style :
+- "Juste là" / "Ici et maintenant" / "Avec le vent"
+- "Merci les jambes" / "Cadeau du matin" / "Sourire aux lèvres"
 
 Réponds en JSON :
 {
   "suggestions": [
-    { "title": "Titre sobre mais malin", "description": "Description courte" },
-    { "title": "Titre fun et décalé", "description": "Description avec 1-2 emojis" },
-    { "title": "Titre full entertainment", "description": "Description assumée drôle" }
+    { "title": "Titre zen et simple", "description": "1-2 mots ou emoji" },
+    { "title": "Titre poétique court", "description": "Phrase minimaliste" },
+    { "title": "Titre gratitude", "description": "Focus sur le moment" }
   ]
 }`
 
