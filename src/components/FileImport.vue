@@ -285,9 +285,11 @@ const generateCoachPrompt = () => {
 **2. PHILOSOPHIE D'ENTRAÎNEMENT**
 - Modèle : Polarisé (80% Z2 / 20% intensité)
 - Structure : 2 intensités/semaine + reste en Endurance Fondamentale
+- Périodisation : 3:1 (3 semaines charge → 1 semaine récup)
 - Intensité 1 : Mardi (vélo Zwift - sweet spot, seuil ou VO2max)
 - Intensité 2 : Vendredi (côtes CAP - pyramide, répétitions, tempo)
 - Reste : Z2 strict (FC < 150 bpm)
+- Semaine récup : Volume -30-40%, 0-1 intensité courte, sorties longues réduites
 - Exception : Sorties sociales avec les copains = tempo assumé (ça compte comme intensité)
 `
 
