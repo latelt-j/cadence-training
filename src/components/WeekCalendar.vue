@@ -338,6 +338,40 @@ const onDragStart = (e: DragEvent, session: ScheduledSession) => {
 const onDragEnd = () => {
   draggedSession.value = null
   dragOverDate.value = null
+  dragOverEdge.value = null
+}
+
+// Edge zones for week navigation during drag
+const dragOverEdge = ref<'left' | 'right' | null>(null)
+let edgeNavigationTimeout: ReturnType<typeof setTimeout> | null = null
+
+const onDragOverEdge = (e: DragEvent, edge: 'left' | 'right') => {
+  e.preventDefault()
+  if (e.dataTransfer) {
+    e.dataTransfer.dropEffect = 'move'
+  }
+  dragOverEdge.value = edge
+  dragOverDate.value = null
+
+  // Auto-navigate after a short delay
+  if (!edgeNavigationTimeout) {
+    edgeNavigationTimeout = setTimeout(() => {
+      if (dragOverEdge.value === 'left') {
+        prevWeek()
+      } else if (dragOverEdge.value === 'right') {
+        nextWeek()
+      }
+      edgeNavigationTimeout = null
+    }, 500)
+  }
+}
+
+const onDragLeaveEdge = () => {
+  dragOverEdge.value = null
+  if (edgeNavigationTimeout) {
+    clearTimeout(edgeNavigationTimeout)
+    edgeNavigationTimeout = null
+  }
 }
 
 const onDragOver = (e: DragEvent, date: string) => {
@@ -346,6 +380,12 @@ const onDragOver = (e: DragEvent, date: string) => {
     e.dataTransfer.dropEffect = 'move'
   }
   dragOverDate.value = date
+  // Clear edge navigation when over a day
+  dragOverEdge.value = null
+  if (edgeNavigationTimeout) {
+    clearTimeout(edgeNavigationTimeout)
+    edgeNavigationTimeout = null
+  }
 }
 
 const onDragLeave = () => {
@@ -564,7 +604,27 @@ watch(forecast, () => {}, { deep: true })
     </div>
 
     <!-- Desktop View: Week Grid -->
-    <div v-else class="grid grid-cols-7 min-h-[280px] p-3 gap-2">
+    <div v-else class="relative grid grid-cols-7 min-h-[280px] p-3 gap-2">
+      <!-- Left edge drop zone for previous week -->
+      <div
+        v-if="draggedSession"
+        class="absolute left-0 top-0 bottom-0 w-8 z-10 flex items-center justify-center transition-all"
+        :class="dragOverEdge === 'left' ? 'bg-emerald-500/30' : 'bg-transparent hover:bg-emerald-500/10'"
+        @dragover="onDragOverEdge($event, 'left')"
+        @dragleave="onDragLeaveEdge"
+      >
+        <span v-if="dragOverEdge === 'left'" class="text-emerald-500 text-lg animate-pulse">◀</span>
+      </div>
+      <!-- Right edge drop zone for next week -->
+      <div
+        v-if="draggedSession"
+        class="absolute right-0 top-0 bottom-0 w-8 z-10 flex items-center justify-center transition-all"
+        :class="dragOverEdge === 'right' ? 'bg-emerald-500/30' : 'bg-transparent hover:bg-emerald-500/10'"
+        @dragover="onDragOverEdge($event, 'right')"
+        @dragleave="onDragLeaveEdge"
+      >
+        <span v-if="dragOverEdge === 'right'" class="text-emerald-500 text-lg animate-pulse">▶</span>
+      </div>
       <div
         v-for="day in weekDays"
         :key="day.date"
