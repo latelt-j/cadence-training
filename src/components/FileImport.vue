@@ -250,6 +250,46 @@ const formatHours = (hours: number) => {
   return `${h}h${m.toString().padStart(2, '0')}`
 }
 
+// Format duration in minutes to display string
+const formatDuration = (minutes: number) => {
+  const h = Math.floor(minutes / 60)
+  const m = minutes % 60
+  if (h === 0) return `${m}min`
+  if (m === 0) return `${h}h`
+  return `${h}h${m.toString().padStart(2, '0')}`
+}
+
+// Get sport emoji
+const sportEmoji = (sport: string) => {
+  const emojis: Record<string, string> = { cycling: '🚴', mtb: '🚵', running: '🏃', strength: '💪', hiking: '🥾' }
+  return emojis[sport] ?? '🏋️'
+}
+
+// Find planned session for same day
+const getPlannedForDate = (date: string) => {
+  return bilanPlannedSessions.value.find(p => p.date === date)
+}
+
+// Compare realized vs planned
+const getLoadComparison = (realized: ScheduledSession) => {
+  const planned = getPlannedForDate(realized.date)
+  if (!planned) return null
+
+  const durationDiff = realized.duration_min - planned.duration_min
+  const durationPct = Math.round((durationDiff / planned.duration_min) * 100)
+
+  if (durationPct > 15) return '⬆️ +' + durationPct + '%'
+  if (durationPct < -15) return '⬇️ ' + durationPct + '%'
+  return '✓'
+}
+
+const getLoadComparisonClass = (realized: ScheduledSession) => {
+  const comparison = getLoadComparison(realized)
+  if (comparison?.startsWith('⬆️')) return 'badge-warning'
+  if (comparison?.startsWith('⬇️')) return 'badge-info'
+  return 'badge-success'
+}
+
 // Generate coach prompt with new structured format
 const generateCoachPrompt = () => {
   const dates = planDatesRange.value
@@ -343,9 +383,11 @@ const generateCoachPrompt = () => {
   if (bilanPlannedSessions.value.length > 0) {
     prompt += `Séances prévues :\n`
     bilanPlannedSessions.value.forEach(s => {
-      const sportEmoji = s.sport === 'cycling' ? '🚴' : s.sport === 'mtb' ? '🚵' : s.sport === 'running' ? '🏃' : '💪'
+      const emoji = s.sport === 'cycling' ? '🚴' : s.sport === 'mtb' ? '🚵' : s.sport === 'running' ? '🏃' : '💪'
       const dateShort = new Date(s.date).toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: '2-digit' })
-      prompt += `- ${dateShort} : ${s.title} ${sportEmoji} - ${s.duration_min}min\n`
+      let line = `- ${dateShort} : ${s.title} ${emoji} - ${formatDuration(s.duration_min)}`
+      if (s.intensity) line += `, intensité ${s.intensity}/10`
+      prompt += line + '\n'
     })
     prompt += `\n`
   }
@@ -365,13 +407,26 @@ const generateCoachPrompt = () => {
     prompt += `- 💪 Renfo : ${formatHours(weekStats.value.strength.hours)} (${weekStats.value.strength.count} séances)\n`
   }
 
-  // Session details (actual)
+  // Session details (actual) with surcharge/sous-charge comparison
   if (bilanStravaSessions.value.length > 0) {
     prompt += `\nDétail réalisé :\n`
     bilanStravaSessions.value.forEach(s => {
-      const sportEmoji = s.sport === 'cycling' ? '🚴' : s.sport === 'mtb' ? '🚵' : s.sport === 'running' ? '🏃' : '💪'
+      const emoji = s.sport === 'cycling' ? '🚴' : s.sport === 'mtb' ? '🚵' : s.sport === 'running' ? '🏃' : '💪'
       const dateShort = new Date(s.date).toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: '2-digit' })
-      let line = `- ${dateShort} : ${s.title} ${sportEmoji} - ${formatHours(s.duration_min / 60)}`
+      let line = `- ${dateShort} : ${s.title} ${emoji} - ${formatHours(s.duration_min / 60)}`
+
+      // Compare with planned session if exists
+      const planned = bilanPlannedSessions.value.find(p => p.date === s.date)
+      if (planned) {
+        const durationDiff = s.duration_min - planned.duration_min
+        const durationPct = Math.round((durationDiff / planned.duration_min) * 100)
+        if (durationPct > 15) {
+          line += ` (prévu: ${formatDuration(planned.duration_min)}) ⬆️`
+        } else if (durationPct < -15) {
+          line += ` (prévu: ${formatDuration(planned.duration_min)}) ⬇️`
+        }
+      }
+
       if (s.actual_km) line += `, ${s.actual_km.toFixed(0)}km`
       if (s.actual_elevation) line += `, ${Math.round(s.actual_elevation)} D+`
       if (s.intensity_factor) line += `, IF ${s.intensity_factor.toFixed(2)}`
@@ -696,6 +751,38 @@ const saveCoachResponse = () => {
                   <input type="radio" v-model="difficulte" value="difficile" class="hidden" />
                   Dur
                 </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bilan séances (collapsible) -->
+        <div v-if="bilanStravaSessions.length > 0 || bilanPlannedSessions.length > 0" class="collapse collapse-arrow bg-base-200 rounded-lg">
+          <input type="checkbox" />
+          <div class="collapse-title text-sm font-medium py-2 min-h-0">
+            📊 Détail semaine passée ({{ bilanStravaSessions.length }} séances)
+          </div>
+          <div class="collapse-content text-xs space-y-2 pb-3">
+            <!-- Séances prévues -->
+            <div v-if="bilanPlannedSessions.length > 0" class="mb-2">
+              <div class="font-medium text-base-content/60 mb-1">📋 Prévu</div>
+              <div v-for="s in bilanPlannedSessions" :key="s.id" class="flex items-center gap-2 py-0.5">
+                <span>{{ sportEmoji(s.sport) }}</span>
+                <span class="flex-1 truncate">{{ s.title }}</span>
+                <span class="text-base-content/50">{{ formatDuration(s.duration_min) }}</span>
+                <span v-if="s.intensity" class="badge badge-xs badge-ghost">{{ s.intensity }}/10</span>
+              </div>
+            </div>
+            <!-- Séances réalisées -->
+            <div v-if="bilanStravaSessions.length > 0">
+              <div class="font-medium text-base-content/60 mb-1">✅ Réalisé</div>
+              <div v-for="s in bilanStravaSessions" :key="s.id" class="flex items-center gap-2 py-0.5">
+                <span>{{ sportEmoji(s.sport) }}</span>
+                <span class="flex-1 truncate">{{ s.title }}</span>
+                <span class="text-base-content/50">{{ formatDuration(s.duration_min) }}</span>
+                <span v-if="getLoadComparison(s)" class="badge badge-xs" :class="getLoadComparisonClass(s)">
+                  {{ getLoadComparison(s) }}
+                </span>
               </div>
             </div>
           </div>
