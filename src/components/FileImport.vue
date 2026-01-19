@@ -383,12 +383,11 @@ const generateCoachPrompt = () => {
     if (planPhase.description) prompt += ` - ${planPhase.description}`
     prompt += `\n`
     if (phaseWeekNumber.value && phaseTotalWeeks.value) {
-      prompt += `- Semaine : ${phaseWeekNumber.value}/${phaseTotalWeeks.value}`
+      prompt += `- Semaine : ${phaseWeekNumber.value}/${phaseTotalWeeks.value}\n`
       if (currentWeekType.value) {
-        prompt += ` - ${currentWeekType.value.emoji} ${currentWeekType.value.label}`
+        prompt += `- Type de semaine : ${currentWeekType.value.emoji} ${currentWeekType.value.label}\n`
+        prompt += `⚠️ Périodisation 3:1 : Charge = volume normal, Surcharge = pic de charge (semaine 3), Récup = décharge -30/40%\n`
       }
-      prompt += `\n`
-      prompt += `⚠️ Type de semaine (périodisation 3:1) : Charge = volume normal, Surcharge = pic de charge (semaine 3), Récup = décharge -30/40%\n`
     }
     if (planPhase.objectives) {
       prompt += `- Objectifs : ${planPhase.objectives}\n`
