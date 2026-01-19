@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import 'cally'
-import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective, ImportedPhase, AthleteProfile } from '../types/session'
+import type { SessionTemplate, ScheduledSession, TrainingPhase, TrainingObjective, ImportedPhase, AthleteProfile, WeekType } from '../types/session'
 import { useAI } from '../composables/useAI'
 
 const { isLoading: aiLoading, error: aiError, generateWeeklyPlan } = useAI()
@@ -199,6 +199,28 @@ const phaseTotalWeeks = computed(() => {
   return Math.ceil(diffDays / 7)
 })
 
+// Week type configuration (3:1 periodization)
+const weekTypeConfig: Record<WeekType, { label: string; emoji: string }> = {
+  charge: { label: 'Charge', emoji: '📈' },
+  surcharge: { label: 'Surcharge', emoji: '🔥' },
+  recup: { label: 'Récup', emoji: '🧘' },
+}
+
+// Calculate default week type based on 3:1 pattern
+const getDefaultWeekType = (weekNumber: number): WeekType => {
+  const positionInCycle = ((weekNumber - 1) % 4) + 1
+  if (positionInCycle === 4) return 'recup'
+  if (positionInCycle === 3) return 'surcharge'
+  return 'charge'
+}
+
+// Get current week type for the phase
+const currentWeekType = computed(() => {
+  if (!currentPhase.value || !phaseWeekNumber.value) return null
+  const type = currentPhase.value.week_types?.[phaseWeekNumber.value] ?? getDefaultWeekType(phaseWeekNumber.value)
+  return weekTypeConfig[type]
+})
+
 // Week stats
 const weekStats = computed(() => {
   const stats = {
@@ -361,7 +383,11 @@ const generateCoachPrompt = () => {
     if (planPhase.description) prompt += ` - ${planPhase.description}`
     prompt += `\n`
     if (phaseWeekNumber.value && phaseTotalWeeks.value) {
-      prompt += `- Semaine : ${phaseWeekNumber.value}/${phaseTotalWeeks.value}\n`
+      prompt += `- Semaine : ${phaseWeekNumber.value}/${phaseTotalWeeks.value}`
+      if (currentWeekType.value) {
+        prompt += ` - ${currentWeekType.value.emoji} ${currentWeekType.value.label}`
+      }
+      prompt += `\n`
     }
     if (planPhase.objectives) {
       prompt += `- Objectifs : ${planPhase.objectives}\n`
