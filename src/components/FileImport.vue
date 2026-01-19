@@ -388,6 +388,7 @@ const generateCoachPrompt = () => {
         prompt += ` - ${currentWeekType.value.emoji} ${currentWeekType.value.label}`
       }
       prompt += `\n`
+      prompt += `⚠️ Type de semaine (périodisation 3:1) : Charge = volume normal, Surcharge = pic de charge (semaine 3), Récup = décharge -30/40%\n`
     }
     if (planPhase.objectives) {
       prompt += `- Objectifs : ${planPhase.objectives}\n`
