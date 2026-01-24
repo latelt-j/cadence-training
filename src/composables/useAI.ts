@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import type { ScheduledSession, AthleteProfile, ImportedPhase } from '../types/session'
+import type { ScheduledSession, AthleteProfile, ImportedPhase, Sport } from '../types/session'
 import { generateAnalysisText } from '../utils/coach'
 
 // Response types
@@ -15,6 +15,8 @@ export interface TitleSuggestion {
 }
 
 export interface SessionModification {
+  sport?: Sport
+  type?: string
   title?: string
   description?: string
   duration_min?: number
@@ -184,6 +186,8 @@ ${instruction}
 
 Modifie la séance selon l'instruction. Réponds UNIQUEMENT avec le JSON des champs à modifier :
 {
+  "sport": "cycling/running/mtb/strength/hiking si changement de sport",
+  "type": "nouveau type si modifié",
   "title": "nouveau titre si modifié",
   "description": "nouvelle description si modifiée",
   "duration_min": nombre si modifié,

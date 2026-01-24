@@ -504,6 +504,8 @@ const applyModifiedSession = () => {
 
     // Emit update with the modified fields
     emit('update', props.session.id, {
+      sport: data.sport || props.session.sport,
+      type: data.type || props.session.type,
       title: data.title || props.session.title,
       description: data.description || props.session.description,
       duration_min: data.duration_min || props.session.duration_min,
