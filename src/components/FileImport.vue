@@ -538,8 +538,9 @@ Format attendu :
 ⚠️ GUIDELINES & PHILOSOPHIE (OBLIGATOIRE) :
 Ajoute un champ "guidelines" avec un texte markdown expliquant :
 - L'objectif principal de la semaine (pourquoi cette orientation)
-- La philosophie d'entraînement (pourquoi ces séances, dans cet ordre)
-- La répartition des sports et des intensités
+- L'analyse prévu vs réalisé de la semaine passée (surcharge/sous-charge, adaptation)
+- La philosophie d'entraînement (pourquoi ces séances, dans cet ordre, avec ces durées)
+- Le calcul du volume : additionner TOUTES les durées des séances créées, détailler par sport, comparer au volume demandé/attendu
 - Les points clés à retenir pour l'athlète
 
 ⚠️ SPORTS VALIDES : "cycling", "mtb", "running", "strength", "hiking"
