@@ -72,9 +72,14 @@ const planEndDate = ref(defaultDates.end)
 const showDatePicker = ref(false)
 
 const handleDateChange = (e: Event) => {
-  const range = (e.target as HTMLElement).getAttribute('value')
+  const target = e.target as HTMLElement & { value?: string }
+  console.log('handleDateChange event:', e)
+  console.log('target.value:', target.value)
+  console.log('e.detail:', (e as CustomEvent).detail)
+  const range = target.value
   if (range) {
     const [start, end] = range.split('/')
+    console.log('parsed start:', start, 'end:', end)
     if (start && end) {
       planStartDate.value = start
       planEndDate.value = end
@@ -377,7 +382,7 @@ const generateCoachPrompt = () => {
   }
 
   // Current phase
-  prompt += `\n**4. BLOC ACTUEL**\n`
+  prompt += `\n**4. BLOC EFFECTUÉ**\n`
   if (planPhase) {
     prompt += `- Bloc : ${planPhase.name}`
     if (planPhase.description) prompt += ` - ${planPhase.description}`
@@ -470,6 +475,21 @@ const generateCoachPrompt = () => {
 
   // Request for next week
   prompt += `\n**6. DEMANDE POUR LA SEMAINE À VENIR** (${planStartDate.value} au ${planEndDate.value})\n\n`
+
+  // Calculate week type for the plan week
+  if (planPhase) {
+    const phaseStart = parseLocalDate(planPhase.start_date)
+    phaseStart.setHours(0, 0, 0, 0)
+    const planStart = parseLocalDate(planStartDate.value)
+    planStart.setHours(0, 0, 0, 0)
+    const diffTime = planStart.getTime() - phaseStart.getTime()
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+    const planWeekNumber = Math.max(1, Math.floor(diffDays / 7) + 1)
+    const planWeekType = planPhase.week_types?.[planWeekNumber] ?? getDefaultWeekType(planWeekNumber)
+    const planWeekTypeInfo = weekTypeConfig[planWeekType]
+    prompt += `Type de semaine : ${planWeekTypeInfo.emoji} ${planWeekTypeInfo.label}\n\n`
+  }
+
   prompt += `Dates disponibles :\n${datesListStr}\n`
   prompt += `\nContraintes : ${contraintes.value.trim() || ''}\n`
   prompt += `\nEnvies/Demandes spécifiques :\n`

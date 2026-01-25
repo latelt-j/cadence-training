@@ -414,12 +414,15 @@ onMounted(async () => {
       await initAppData()
       await syncStrava()
     }
+    // Done checking auth - exit early since we already initialized
+    isCheckingAuth.value = false
+    return
   }
 
   // Done checking auth
   isCheckingAuth.value = false
 
-  // Initialize data if already authenticated
+  // Initialize data if already authenticated (not from callback)
   if (isAuthenticated.value) {
     await initAppData()
   }
