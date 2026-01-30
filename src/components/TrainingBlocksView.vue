@@ -221,10 +221,15 @@ ${todayStr}
 
   prompt += `
 
-## Étape 1 : Analyse de mon historique récent
-AVANT de générer les blocs, utilise le MCP Strava pour récupérer et analyser mes activités des 4 dernières semaines.
+## Étape 1 : Analyse de mon profil et historique
+AVANT de générer les blocs, utilise le MCP Strava pour :
+
+1. Récupérer mon profil athlète (stats globales, FTP si disponible, zones de fréquence cardiaque)
+2. Analyser mes activités des 4 dernières semaines
+
 Résume :
-- Volume total par sport (km vélo, km course, D+)
+- Mes stats globales (total km vélo/course all-time, ancienneté)
+- Volume des 4 dernières semaines par sport (km vélo, km course, D+)
 - Nombre de séances par semaine
 - Tendance (progression, stagnation, fatigue ?)
 
