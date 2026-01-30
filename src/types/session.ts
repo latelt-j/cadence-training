@@ -3,6 +3,13 @@ export type Sport = 'cycling' | 'mtb' | 'running' | 'strength' | 'hiking'
 // Training periodization phases
 export type WeekType = 'charge' | 'surcharge' | 'recup'
 
+// Weekly volume targets (average per week)
+export interface WeeklyVolume {
+  cycling_km: number    // km vélo / semaine
+  running_km: number    // km course / semaine
+  elevation_m: number   // D+ / semaine
+}
+
 export interface TrainingPhase {
   id: string
   number?: number // Phase number (calculated from order)
@@ -15,6 +22,7 @@ export interface TrainingPhase {
   volume_distribution?: string // e.g., "90% Vélo / 10% Run (Maintenance)"
   challenge?: string // Optional challenge for the phase
   week_types?: { [weekNumber: number]: WeekType } // Manual overrides for week types (default: 3:1 pattern)
+  weekly_volume?: WeeklyVolume // Target volume per week (average)
   // Legacy fields (kept for backwards compatibility)
   description?: string
   goals?: string

@@ -14,7 +14,7 @@ import WellnessWidget from './components/WellnessWidget.vue'
 import ObjectiveSettings from './components/ObjectiveSettings.vue'
 import AthleteProfileComponent from './components/AthleteProfile.vue'
 import ConfigModal from './components/ConfigModal.vue'
-import TrainingPhasesManager from './components/TrainingPhasesManager.vue'
+import TrainingBlocksView from './components/TrainingBlocksView.vue'
 import ShareWeekModal from './components/ShareWeekModal.vue'
 import { copySessionForCoach } from './utils/coach'
 import { marked } from 'marked'
@@ -1003,10 +1003,10 @@ const handleLogout = () => {
       </form>
     </dialog>
 
-    <!-- Training Phases Modal -->
+    <!-- Training Blocks Modal -->
     <dialog class="modal" :class="{ 'modal-open': showPhasesModal }">
       <div class="modal-box w-full h-full max-h-full md:max-w-2xl md:h-auto md:max-h-[90vh] rounded-none md:rounded-2xl">
-        <TrainingPhasesManager
+        <TrainingBlocksView
           :phases="trainingPhases"
           :objectives="trainingObjectives"
           :athlete-profile="athleteProfile"
