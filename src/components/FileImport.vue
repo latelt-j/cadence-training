@@ -169,6 +169,14 @@ const bilanPlannedSessions = computed(() => {
   }).sort((a, b) => a.date.localeCompare(b.date))
 })
 
+// Existing sessions for the week to plan (both planned and strava)
+const existingPlanWeekSessions = computed(() => {
+  if (!props.sessions) return []
+  return props.sessions.filter(s => {
+    return s.date >= planStartDate.value && s.date <= planEndDate.value
+  }).sort((a, b) => a.date.localeCompare(b.date))
+})
+
 // Current phase
 const currentPhase = computed(() => {
   if (!props.trainingPhases?.length) return null
@@ -382,7 +390,7 @@ const generateCoachPrompt = () => {
   }
 
   // Current phase
-  prompt += `\n**4. BLOC EFFECTUÉ**\n`
+  prompt += `\n**4. BLOC ACTUEL**\n`
   if (planPhase) {
     prompt += `- Bloc : ${planPhase.name}`
     if (planPhase.description) prompt += ` - ${planPhase.description}`
@@ -394,8 +402,15 @@ const generateCoachPrompt = () => {
         prompt += `⚠️ Périodisation 3:1 : Charge = volume normal, Surcharge = pic de charge (semaine 3), Récup = décharge -30/40%\n`
       }
     }
+    // Weekly volume targets
+    if (planPhase.weekly_volume) {
+      prompt += `\n📊 VOLUME CIBLE PAR SEMAINE (moyenne du bloc) :\n`
+      prompt += `- 🚴 Vélo : ${planPhase.weekly_volume.cycling_km} km, ${planPhase.weekly_volume.cycling_elevation_m} m D+\n`
+      prompt += `- 🏃 Course : ${planPhase.weekly_volume.running_km} km, ${planPhase.weekly_volume.running_elevation_m} m D+\n`
+      prompt += `⚠️ Adapter selon le type de semaine : Charge = 100%, Surcharge = 110-120%, Récup = 60-70%\n`
+    }
     if (planPhase.objectives) {
-      prompt += `- Objectifs : ${planPhase.objectives}\n`
+      prompt += `\n- Objectifs : ${planPhase.objectives}\n`
     }
     if (planPhase.keywords) {
       prompt += `- Mots-clés : ${planPhase.keywords}\n`
@@ -490,6 +505,25 @@ const generateCoachPrompt = () => {
     prompt += `Type de semaine : ${planWeekTypeInfo.emoji} ${planWeekTypeInfo.label}\n\n`
   }
 
+  // Existing sessions for this week
+  if (existingPlanWeekSessions.value.length > 0) {
+    prompt += `📋 SÉANCES DÉJÀ PRÉSENTES CETTE SEMAINE :\n`
+    existingPlanWeekSessions.value.forEach(s => {
+      const emoji = s.sport === 'cycling' ? '🚴' : s.sport === 'mtb' ? '🚵' : s.sport === 'running' ? '🏃' : '💪'
+      const dateShort = new Date(s.date).toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit', month: '2-digit' })
+      const status = s.type === 'strava' ? '✅ Réalisé' : '📝 Planifié'
+      let line = `- ${dateShort} : ${s.title} ${emoji} - ${formatDuration(s.duration_min)} [${status}]`
+      if (s.actual_km) line += `, ${s.actual_km.toFixed(0)}km`
+      if (s.actual_elevation) line += `, ${Math.round(s.actual_elevation)} D+`
+      prompt += line + '\n'
+    })
+    prompt += `\n⚠️ IMPORTANT : Analyse ces séances existantes et décide pour chacune :
+- GARDER : si la séance est OK pour le bloc actuel
+- MODIFIER : si elle doit être ajustée (durée, intensité, contenu)
+- SUPPRIMER : si elle ne correspond plus aux objectifs du bloc
+- AJOUTER : les séances manquantes pour atteindre le volume cible\n\n`
+  }
+
   prompt += `Dates disponibles :\n${datesListStr}\n`
   prompt += `\nContraintes : ${contraintes.value.trim() || ''}\n`
   prompt += `\nEnvies/Demandes spécifiques :\n`
@@ -504,11 +538,22 @@ const generateCoachPrompt = () => {
 
 En te basant sur le contexte ci-dessus, génère-moi un plan d'entraînement.
 
+⚠️ VOLUME CIBLE :
+- Utilise le VOLUME CIBLE PAR SEMAINE du bloc actuel comme référence
+- Adapte selon le type de semaine (Charge/Surcharge/Récup)
+- Le total des séances doit approcher ces volumes cibles
+
 ⚠️ ANALYSE PRÉVU VS RÉALISÉ :
 - Compare les séances prévues avec ce qui a été réellement fait
 - Si surcharge (plus fait que prévu) : réduire légèrement le volume/intensité de la semaine à venir
 - Si sous-charge (moins fait que prévu) : maintenir ou légèrement augmenter selon la raison
 - Mentionner cette analyse dans les guidelines
+
+⚠️ SÉANCES EXISTANTES :
+- Si des séances sont déjà présentes pour cette semaine, ANALYSE-LES
+- Décide si tu les gardes, modifies ou supprimes
+- Le JSON final doit contenir TOUTES les séances de la semaine (nouvelles + modifiées)
+- Les séances Strava (réalisées) ne doivent PAS être modifiées
 
 Réponds UNIQUEMENT avec le code JSON brut (pas de markdown, pas de \`\`\`). Je vais copier-coller directement.
 
