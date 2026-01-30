@@ -5,9 +5,10 @@ export type WeekType = 'charge' | 'surcharge' | 'recup'
 
 // Weekly volume targets (average per week)
 export interface WeeklyVolume {
-  cycling_km: number    // km vélo / semaine
-  running_km: number    // km course / semaine
-  elevation_m: number   // D+ / semaine
+  cycling_km: number       // km vélo / semaine
+  cycling_elevation_m: number  // D+ vélo / semaine
+  running_km: number       // km course / semaine
+  running_elevation_m: number  // D+ course / semaine
 }
 
 export interface TrainingPhase {

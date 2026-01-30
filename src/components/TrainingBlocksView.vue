@@ -54,8 +54,9 @@ const formData = ref({
   keywords: '',
   weekly_volume: {
     cycling_km: 100,
+    cycling_elevation_m: 1000,
     running_km: 20,
-    elevation_m: 1000,
+    running_elevation_m: 500,
   } as WeeklyVolume,
 })
 const formWeekTypes = ref<{ [weekNumber: number]: WeekType }>({})
@@ -112,8 +113,9 @@ const startEditNext = () => {
       keywords: nextBlock.value.keywords || '',
       weekly_volume: nextBlock.value.weekly_volume || {
         cycling_km: 100,
+        cycling_elevation_m: 1000,
         running_km: 20,
-        elevation_m: 1000,
+        running_elevation_m: 500,
       },
     }
     formWeekTypes.value = nextBlock.value.week_types ? { ...nextBlock.value.week_types } : {}
@@ -133,8 +135,9 @@ const startEditNext = () => {
       keywords: '',
       weekly_volume: {
         cycling_km: 100,
+        cycling_elevation_m: 1000,
         running_km: 20,
-        elevation_m: 1000,
+        running_elevation_m: 500,
       },
     }
     formWeekTypes.value = {}
@@ -254,8 +257,9 @@ Réponds UNIQUEMENT avec un JSON valide (pas de texte avant/après), au format:
     "keywords": "Z2, volume, régularité, endurance",
     "weekly_volume": {
       "cycling_km": 120,
+      "cycling_elevation_m": 1200,
       "running_km": 25,
-      "elevation_m": 1200
+      "running_elevation_m": 600
     }
   }
 ]
@@ -299,8 +303,9 @@ const importCoachPhases = () => {
       keywords: p.keywords,
       weekly_volume: p.weekly_volume || {
         cycling_km: 100,
+        cycling_elevation_m: 1000,
         running_km: 20,
-        elevation_m: 1000,
+        running_elevation_m: 500,
       },
     }))
 
@@ -316,15 +321,29 @@ const importCoachPhases = () => {
   }
 }
 
-// Migrate old phases without weekly_volume
+// Migrate old phases without weekly_volume or with old elevation_m format
 const migratePhase = (phase: TrainingPhase): TrainingPhase => {
   if (!phase.weekly_volume) {
     return {
       ...phase,
       weekly_volume: {
         cycling_km: 100,
+        cycling_elevation_m: 1000,
         running_km: 20,
-        elevation_m: 1000,
+        running_elevation_m: 500,
+      },
+    }
+  }
+  // Migrate old format with single elevation_m to new split format
+  const vol = phase.weekly_volume as any
+  if (vol.elevation_m !== undefined && vol.cycling_elevation_m === undefined) {
+    return {
+      ...phase,
+      weekly_volume: {
+        cycling_km: vol.cycling_km || 100,
+        cycling_elevation_m: vol.elevation_m || 1000,
+        running_km: vol.running_km || 20,
+        running_elevation_m: Math.round((vol.elevation_m || 1000) * 0.5),
       },
     }
   }
@@ -333,7 +352,11 @@ const migratePhase = (phase: TrainingPhase): TrainingPhase => {
 
 // Apply migration on load
 watch(localPhases, (phases) => {
-  const needsMigration = phases.some(p => !p.weekly_volume)
+  const needsMigration = phases.some(p => {
+    if (!p.weekly_volume) return true
+    const vol = p.weekly_volume as any
+    return vol.elevation_m !== undefined && vol.cycling_elevation_m === undefined
+  })
   if (needsMigration) {
     localPhases.value = phases.map(migratePhase)
     emit('save', localPhases.value)
@@ -453,21 +476,16 @@ watch(localPhases, (phases) => {
       </div>
 
       <!-- Weekly volume targets -->
-      <div v-if="currentBlock.weekly_volume" class="flex flex-wrap gap-3 text-sm">
+      <div v-if="currentBlock.weekly_volume" class="flex flex-wrap gap-x-4 gap-y-2 text-sm">
         <span class="flex items-center gap-1">
           <span class="text-lg">🚴</span>
           <span class="font-medium">{{ currentBlock.weekly_volume.cycling_km }}km</span>
-          <span class="text-base-content/50">/sem</span>
+          <span class="text-base-content/50">· {{ currentBlock.weekly_volume.cycling_elevation_m }}m D+</span>
         </span>
         <span class="flex items-center gap-1">
           <span class="text-lg">🏃</span>
           <span class="font-medium">{{ currentBlock.weekly_volume.running_km }}km</span>
-          <span class="text-base-content/50">/sem</span>
-        </span>
-        <span class="flex items-center gap-1">
-          <span class="text-lg">⛰️</span>
-          <span class="font-medium">{{ currentBlock.weekly_volume.elevation_m }}m</span>
-          <span class="text-base-content/50">D+/sem</span>
+          <span class="text-base-content/50">· {{ currentBlock.weekly_volume.running_elevation_m }}m D+</span>
         </span>
       </div>
 
@@ -504,9 +522,8 @@ watch(localPhases, (phases) => {
 
         <!-- Weekly volume preview -->
         <div v-if="nextBlock.weekly_volume" class="flex flex-wrap gap-3 text-sm text-base-content/70">
-          <span>🚴 {{ nextBlock.weekly_volume.cycling_km }}km/sem</span>
-          <span>🏃 {{ nextBlock.weekly_volume.running_km }}km/sem</span>
-          <span>⛰️ {{ nextBlock.weekly_volume.elevation_m }}m D+</span>
+          <span>🚴 {{ nextBlock.weekly_volume.cycling_km }}km · {{ nextBlock.weekly_volume.cycling_elevation_m }}m D+</span>
+          <span>🏃 {{ nextBlock.weekly_volume.running_km }}km · {{ nextBlock.weekly_volume.running_elevation_m }}m D+</span>
         </div>
       </template>
 
@@ -594,7 +611,7 @@ watch(localPhases, (phases) => {
       <!-- Weekly Volume Targets -->
       <div>
         <label class="text-sm text-base-content/70 mb-2 block">Volume cible par semaine</label>
-        <div class="grid grid-cols-3 gap-2">
+        <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="text-xs text-base-content/50 mb-1 block">🚴 Vélo (km)</label>
             <input
@@ -602,6 +619,16 @@ watch(localPhases, (phases) => {
               type="number"
               min="0"
               step="10"
+              class="input input-bordered input-sm w-full"
+            />
+          </div>
+          <div>
+            <label class="text-xs text-base-content/50 mb-1 block">🚴 D+ vélo (m)</label>
+            <input
+              v-model.number="formData.weekly_volume.cycling_elevation_m"
+              type="number"
+              min="0"
+              step="100"
               class="input input-bordered input-sm w-full"
             />
           </div>
@@ -616,9 +643,9 @@ watch(localPhases, (phases) => {
             />
           </div>
           <div>
-            <label class="text-xs text-base-content/50 mb-1 block">⛰️ D+ (m)</label>
+            <label class="text-xs text-base-content/50 mb-1 block">🏃 D+ course (m)</label>
             <input
-              v-model.number="formData.weekly_volume.elevation_m"
+              v-model.number="formData.weekly_volume.running_elevation_m"
               type="number"
               min="0"
               step="100"
