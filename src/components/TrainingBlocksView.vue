@@ -420,10 +420,10 @@ watch(localPhases, (phases) => {
     </div>
 
     <!-- Current Block (read-only) -->
-    <div v-if="currentBlock && !showCoachImport && !isEditingNext" class="bg-white/10 border-2 border-white rounded-lg p-4 space-y-3">
+    <div v-if="currentBlock && !showCoachImport && !isEditingNext" class="bg-emerald-500/20 border-2 border-emerald-500 rounded-lg p-4 space-y-3">
       <div class="flex items-center justify-between">
-        <span class="text-xs text-white/70 uppercase tracking-wide">📊 Bloc en cours</span>
-        <span class="badge badge-sm bg-white text-black">
+        <span class="text-xs text-emerald-400 uppercase tracking-wide font-medium">📊 Bloc en cours</span>
+        <span class="badge badge-sm bg-emerald-500 text-white">
           S{{ currentWeekInBlock }}/{{ totalWeeksInCurrentBlock }}
           <span v-if="currentWeekType" class="ml-1">{{ currentWeekType.emoji }}</span>
         </span>
@@ -433,7 +433,7 @@ watch(localPhases, (phases) => {
         <span class="text-3xl">{{ currentBlock.emoji || '📊' }}</span>
         <div>
           <h4 class="font-bold text-lg">{{ currentBlock.name.toUpperCase() }}</h4>
-          <p class="text-sm text-white/70">{{ formatDateRange(currentBlock.start_date, currentBlock.end_date) }}</p>
+          <p class="text-sm text-base-content/70">{{ formatDateRange(currentBlock.start_date, currentBlock.end_date) }}</p>
         </div>
       </div>
 
@@ -445,7 +445,7 @@ watch(localPhases, (phases) => {
           class="badge badge-xs text-white"
           :class="[
             week.color,
-            week.number === currentWeekInBlock ? 'ring-2 ring-white ring-offset-2 ring-offset-transparent' : 'opacity-60'
+            week.number === currentWeekInBlock ? 'ring-2 ring-emerald-400 ring-offset-2 ring-offset-transparent' : ''
           ]"
         >
           {{ week.emoji }} S{{ week.number }}
@@ -457,27 +457,27 @@ watch(localPhases, (phases) => {
         <span class="flex items-center gap-1">
           <span class="text-lg">🚴</span>
           <span class="font-medium">{{ currentBlock.weekly_volume.cycling_km }}km</span>
-          <span class="text-white/50">/sem</span>
+          <span class="text-base-content/50">/sem</span>
         </span>
         <span class="flex items-center gap-1">
           <span class="text-lg">🏃</span>
           <span class="font-medium">{{ currentBlock.weekly_volume.running_km }}km</span>
-          <span class="text-white/50">/sem</span>
+          <span class="text-base-content/50">/sem</span>
         </span>
         <span class="flex items-center gap-1">
           <span class="text-lg">⛰️</span>
           <span class="font-medium">{{ currentBlock.weekly_volume.elevation_m }}m</span>
-          <span class="text-white/50">D+/sem</span>
+          <span class="text-base-content/50">D+/sem</span>
         </span>
       </div>
 
       <!-- Objectives -->
-      <p v-if="currentBlock.objectives" class="text-sm text-white/80">
+      <p v-if="currentBlock.objectives" class="text-sm">
         {{ currentBlock.objectives }}
       </p>
 
       <!-- Keywords -->
-      <p v-if="currentBlock.keywords" class="text-xs text-white/50">
+      <p v-if="currentBlock.keywords" class="text-xs text-base-content/50">
         {{ currentBlock.keywords }}
       </p>
     </div>
