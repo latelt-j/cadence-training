@@ -198,7 +198,7 @@ const generateCoachPrompt = () => {
   const today = new Date()
   const todayStr = today.toISOString().split('T')[0]
 
-  let prompt = `Tu es un coach de course à pied (route / trail) et de vélo expert. Je veux que tu me génères un plan de blocs d'entraînement.
+  let prompt = `Tu es un coach de course à pied (route / trail) et de vélo expert. Je veux que tu me génères un bloc d'entraînement.
 
 ## Date d'aujourd'hui
 ${todayStr}
@@ -225,7 +225,7 @@ ${todayStr}
   prompt += `
 
 ## Étape 1 : Analyse de mon profil et historique
-AVANT de générer les blocs, utilise le MCP Strava pour :
+AVANT de générer le bloc, utilise le MCP Strava pour :
 
 1. Récupérer mon profil athlète (stats globales, FTP si disponible, zones de fréquence cardiaque)
 2. Analyser mes activités des 4 dernières semaines
@@ -236,10 +236,10 @@ Résume :
 - Nombre de séances par semaine
 - Tendance (progression, stagnation, fatigue ?)
 
-## Étape 2 : Génération des blocs
-En te basant sur mon historique ET mes objectifs, génère-moi un plan de 2 blocs d'entraînement (le bloc actuel + le prochain) qui mène à mes objectifs. Chaque bloc doit avoir:
+## Étape 2 : Génération du bloc
+En te basant sur mon historique ET mes objectifs, génère-moi UN SEUL bloc d'entraînement qui correspond à ma situation actuelle. Le bloc doit avoir:
 - Un nom clair (Base, Build, Peak, Taper, etc.)
-- Des dates de début et fin
+- Des dates de début (aujourd'hui ou lundi prochain) et fin
 - Un objectif principal
 - Des mots-clés pour guider les séances
 - Un volume cible PAR SEMAINE (moyenne) - adapté à ce que j'ai réellement fait
@@ -368,7 +368,7 @@ watch(localPhases, (phases) => {
   <div class="space-y-4">
     <!-- Header -->
     <div class="flex justify-between items-center mb-4">
-      <h3 class="font-bold text-lg">📊 Blocs d'entraînement</h3>
+      <h3 class="font-bold text-lg">📊 Bloc d'entraînement</h3>
       <div class="flex items-center gap-2">
         <button
           v-if="!showCoachImport && !isEditingNext"
@@ -383,7 +383,7 @@ watch(localPhases, (phases) => {
 
     <!-- Coach Import Section -->
     <div v-if="showCoachImport" class="bg-base-200 rounded-lg p-4 space-y-3">
-      <h4 class="font-medium">🤖 Générer les blocs avec l'IA</h4>
+      <h4 class="font-medium">🤖 Générer le bloc avec l'IA</h4>
       <p class="text-sm text-base-content/70">
         1. Copie le prompt ci-dessous et colle-le dans ton IA préférée (ChatGPT, Claude...)
       </p>
@@ -415,7 +415,7 @@ watch(localPhases, (phases) => {
           :disabled="!coachJsonInput.trim()"
           @click="importCoachPhases"
         >
-          🔄 Remplacer les blocs
+          🔄 Remplacer le bloc
         </button>
       </div>
     </div>
@@ -424,16 +424,16 @@ watch(localPhases, (phases) => {
     <div v-if="!currentBlock && !nextBlock && !showCoachImport && !isEditingNext" class="space-y-3">
       <!-- Alerts for missing info -->
       <div v-if="!athleteProfile?.ftp && !athleteProfile?.max_hr" class="alert alert-warning text-sm">
-        <span>⚠️ Configure ton <strong>profil athlète</strong> (FTP, FC) pour des blocs personnalisés</span>
+        <span>⚠️ Configure ton <strong>profil athlète</strong> (FTP, FC) pour un bloc personnalisé</span>
       </div>
       <div v-if="!objectives?.length" class="alert alert-warning text-sm">
-        <span>⚠️ Ajoute au moins un <strong>objectif</strong> (course cible) pour planifier tes blocs</span>
+        <span>⚠️ Ajoute au moins un <strong>objectif</strong> (course cible) pour planifier ton bloc</span>
       </div>
 
       <!-- Empty state -->
       <div class="text-center py-6 text-base-content/50">
         <p class="text-lg">Aucun bloc défini</p>
-        <p class="text-sm mt-1">Génère tes blocs avec l'IA coach</p>
+        <p class="text-sm mt-1">Génère ton bloc avec l'IA coach</p>
         <div class="flex justify-center gap-2 mt-4">
           <button class="btn btn-sm btn bg-emerald-500 text-white hover:bg-emerald-600 border-0" @click="showCoachImport = true">
             🤖 Générer avec l'IA
@@ -700,7 +700,7 @@ watch(localPhases, (phases) => {
         class="btn btn-sm btn-ghost w-full"
         @click="showCoachImport = true"
       >
-        🤖 Régénérer les blocs avec l'IA
+        🤖 Régénérer le bloc avec l'IA
       </button>
     </div>
   </div>

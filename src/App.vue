@@ -658,7 +658,7 @@ const handleSavePhases = async (phases: TrainingPhase[]) => {
   trainingPhases.value = phases
   try {
     await updateSettings({ training_phases: phases } as any)
-    showToast('Blocs sauvegardés')
+    showToast('Bloc sauvegardé')
   } catch (e) {
     console.error('Error saving phases:', e)
     showToast('Erreur de sauvegarde', 'error')
@@ -785,7 +785,7 @@ const handleLogout = () => {
               🎯 Objectifs
             </button>
             <button class="btn btn-sm btn-ghost gap-1 hover:bg-emerald-500/20 hover:text-emerald-400" @click="showPhasesModal = true">
-              📊 Blocs
+              📊 Bloc
             </button>
             <button class="btn btn-sm btn-ghost gap-1 hover:bg-emerald-500/20 hover:text-emerald-400" @click="showAthleteProfileModal = true">
               ⚡ Profil
@@ -891,7 +891,7 @@ const handleLogout = () => {
             <span class="text-[10px] text-base-content/70">Plus</span>
           </button>
           <ul tabindex="0" class="dropdown-content menu bg-base-100 rounded-box z-50 w-52 p-2 shadow-xl mb-2 border border-base-300">
-            <li><a @click="showPhasesModal = true" class="rounded-lg">📊 Blocs</a></li>
+            <li><a @click="showPhasesModal = true" class="rounded-lg">📊 Bloc</a></li>
           </ul>
         </div>
       </div>
