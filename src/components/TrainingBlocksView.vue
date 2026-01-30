@@ -221,13 +221,20 @@ ${todayStr}
 
   prompt += `
 
-## Ta mission
-Génère-moi un plan de 2 blocs d'entraînement (le bloc actuel + le prochain) qui mène à mes objectifs. Chaque bloc doit avoir:
+## Étape 1 : Analyse de mon historique récent
+AVANT de générer les blocs, utilise le MCP Strava pour récupérer et analyser mes activités des 4 dernières semaines.
+Résume :
+- Volume total par sport (km vélo, km course, D+)
+- Nombre de séances par semaine
+- Tendance (progression, stagnation, fatigue ?)
+
+## Étape 2 : Génération des blocs
+En te basant sur mon historique ET mes objectifs, génère-moi un plan de 2 blocs d'entraînement (le bloc actuel + le prochain) qui mène à mes objectifs. Chaque bloc doit avoir:
 - Un nom clair (Base, Build, Peak, Taper, etc.)
 - Des dates de début et fin
 - Un objectif principal
 - Des mots-clés pour guider les séances
-- Un volume cible PAR SEMAINE (moyenne)
+- Un volume cible PAR SEMAINE (moyenne) - adapté à ce que j'ai réellement fait
 
 ## Format de réponse OBLIGATOIRE
 Réponds UNIQUEMENT avec un JSON valide (pas de texte avant/après), au format:
