@@ -119,6 +119,10 @@ export interface SessionTemplate {
   variability_index?: number // NP / avg_watts
   aerobic_decoupling?: number // HR/power drift %
   average_vam?: number // Vertical ascent meters/hour
+  // User-provided context from Strava
+  perceived_exertion?: number // RPE 1-10 (ressenti)
+  private_note?: string // Note perso
+  strava_description?: string // Description publique Strava
 }
 
 export interface ScheduledSession extends SessionTemplate {

@@ -41,6 +41,10 @@ interface DbSession {
   // Planned session info (when replaced by Strava)
   planned_title: string | null
   planned_description: string | null
+  // User-provided context from Strava
+  perceived_exertion: number | null
+  private_note: string | null
+  strava_description: string | null
   created_at: string
   updated_at: string
 }
@@ -407,6 +411,10 @@ export function useSupabase() {
     // Planned session info
     ...(db.planned_title && { planned_title: db.planned_title }),
     ...(db.planned_description && { planned_description: db.planned_description }),
+    // User-provided context from Strava
+    ...(db.perceived_exertion !== null && { perceived_exertion: db.perceived_exertion }),
+    ...(db.private_note && { private_note: db.private_note }),
+    ...(db.strava_description && { strava_description: db.strava_description }),
   })
 
   const sessionToDb = (session: ScheduledSession): Omit<DbSession, 'created_at' | 'updated_at'> => ({
@@ -446,6 +454,10 @@ export function useSupabase() {
     // Planned session info
     planned_title: session.planned_title ?? null,
     planned_description: session.planned_description ?? null,
+    // User-provided context from Strava
+    perceived_exertion: session.perceived_exertion ?? null,
+    private_note: session.private_note ?? null,
+    strava_description: session.strava_description ?? null,
   })
 
   return {

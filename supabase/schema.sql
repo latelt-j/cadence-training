@@ -162,6 +162,14 @@ ALTER TABLE oauth_tokens DISABLE ROW LEVEL SECURITY;
 -- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS planned_description TEXT;
 
 -- =============================================
+-- MIGRATION: Add user-provided context from Strava (perceived effort, private note, description)
+-- Run this if you already have the sessions table
+-- =============================================
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS perceived_exertion DECIMAL(3,1);
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS private_note TEXT;
+-- ALTER TABLE sessions ADD COLUMN IF NOT EXISTS strava_description TEXT;
+
+-- =============================================
 -- Weekly Guidelines table
 -- Stores coach guidelines/directives per week
 -- =============================================

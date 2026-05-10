@@ -51,12 +51,26 @@ interface StravaDetailedActivity extends StravaActivity {
     average_cadence?: number
     total_elevation_gain?: number
   }[]
+  splits_metric?: {
+    distance: number
+    elapsed_time: number
+    moving_time: number
+    elevation_difference: number
+    split: number
+    average_speed: number
+    average_heartrate?: number
+    average_watts?: number // computed from streams
+  }[]
   // Cycling metrics from Strava API
   weighted_average_watts?: number // Normalized Power
   device_watts?: boolean // true if power from device
   suffer_score?: number // Relative Effort (0-500+)
   kilojoules?: number // Work done
   calories?: number // Estimated calories
+  // User-provided context
+  perceived_exertion?: number // RPE 1-10 manually rated by user
+  private_note?: string // Personal note (only visible to user)
+  description?: string // Public activity description
   // Calculated metrics (added by fetchActivitiesWithMetrics)
   intensity_factor?: number
   variability_index?: number
@@ -319,6 +333,40 @@ export function useStrava() {
     }
   }
 
+  // Compute average watts per split using watts + distance streams
+  const computeSplitsWatts = <T extends { distance: number; split: number; average_watts?: number }>(
+    splits: T[],
+    wattsStream: number[],
+    distanceStream: number[],
+  ): T[] => {
+    const n = Math.min(wattsStream.length, distanceStream.length)
+    let cursor = 0
+    let cumulative = 0
+
+    return splits.map(split => {
+      const startDist = cumulative
+      const endDist = cumulative + split.distance
+      cumulative = endDist
+
+      let sum = 0
+      let count = 0
+      while (cursor < n) {
+        const d = distanceStream[cursor]
+        const w = wattsStream[cursor]
+        if (d === undefined || w === undefined) break
+        if (d >= endDist) break
+        if (d >= startDist) {
+          sum += w
+          count++
+        }
+        cursor++
+      }
+
+      if (count === 0) return split
+      return { ...split, average_watts: Math.round(sum / count) }
+    })
+  }
+
   // Fetch activity streams (second-by-second data)
   const fetchActivityStreams = async (
     activityId: number,
@@ -360,20 +408,28 @@ export function useStrava() {
       const cyclingTypes = ['Ride', 'VirtualRide', 'MountainBikeRide', 'GravelRide', 'EBikeRide'] // includes MTB for metrics
 
       // For cycling/MTB activities, fetch streams and calculate metrics
+      // Also fetch streams for running activities with power data (e.g. Stryd) to compute per-km watts
       const enrichedActivities = await Promise.all(
         detailedActivities.map(async (activity) => {
           const type = activity.sport_type || activity.type
           const isCycling = cyclingTypes.includes(type)
+          const hasPower = (activity.average_watts ?? 0) > 0
+          const needsStreams = isCycling || hasPower
 
-          // Fetch streams for all cycling activities (not just those with NP)
-          if (!isCycling) {
+          if (!needsStreams) {
             return activity
           }
 
           // Fetch streams for this activity
           const streams = await fetchActivityStreams(activity.id)
 
-          if (streams) {
+          if (!streams) {
+            return activity
+          }
+
+          let enriched = { ...activity }
+
+          if (isCycling) {
             const streamData: StreamData = {
               heartrate: streams.heartrate?.data,
               watts: streams.watts?.data,
@@ -391,8 +447,8 @@ export function useStrava() {
               athleteProfile?.ftp
             )
 
-            return {
-              ...activity,
+            enriched = {
+              ...enriched,
               intensity_factor: metrics.intensity_factor,
               variability_index: metrics.variability_index,
               aerobic_decoupling: metrics.aerobic_decoupling,
@@ -400,7 +456,21 @@ export function useStrava() {
             }
           }
 
-          return activity
+          // Compute per-km average watts for splits when we have power + distance streams
+          if (
+            enriched.splits_metric &&
+            enriched.splits_metric.length > 0 &&
+            streams.watts?.data &&
+            streams.distance?.data
+          ) {
+            enriched.splits_metric = computeSplitsWatts(
+              enriched.splits_metric,
+              streams.watts.data,
+              streams.distance.data,
+            )
+          }
+
+          return enriched
         })
       )
 
@@ -444,7 +514,7 @@ export function useStrava() {
         const date = activity.start_date_local.split('T')[0]
 
         // Convert Strava laps to our format
-        const laps: StravaLap[] = activity.laps?.map(lap => ({
+        let laps: StravaLap[] = activity.laps?.map(lap => ({
           name: lap.name,
           elapsed_time: lap.elapsed_time,
           moving_time: lap.moving_time,
@@ -457,6 +527,21 @@ export function useStrava() {
           average_cadence: lap.average_cadence,
           total_elevation_gain: lap.total_elevation_gain,
         })) || []
+
+        // Fallback: if only 1 lap (or none) but Strava has km splits, use those instead
+        if (laps.length <= 1 && activity.splits_metric && activity.splits_metric.length > 1) {
+          laps = activity.splits_metric.map(split => ({
+            name: `Km ${split.split}`,
+            elapsed_time: split.elapsed_time,
+            moving_time: split.moving_time,
+            distance: split.distance,
+            average_speed: split.average_speed,
+            max_speed: split.average_speed,
+            average_heartrate: split.average_heartrate,
+            average_watts: split.average_watts,
+            total_elevation_gain: split.elevation_difference,
+          }))
+        }
 
         const session: SessionTemplate = {
           sport,
@@ -485,6 +570,10 @@ export function useStrava() {
           variability_index: activity.variability_index,
           aerobic_decoupling: activity.aerobic_decoupling,
           average_vam: activity.average_vam,
+          // User-provided context
+          perceived_exertion: activity.perceived_exertion,
+          private_note: activity.private_note,
+          strava_description: activity.description,
         }
 
         return { session, date }

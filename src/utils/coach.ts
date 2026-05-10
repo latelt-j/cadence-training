@@ -127,6 +127,18 @@ export const generateAnalysisText = (
     text += `\n\n**Description:**\n${s.description}`
   }
 
+  if (s.strava_description && s.strava_description !== s.description) {
+    text += `\n\n**Description Strava:**\n${s.strava_description}`
+  }
+
+  if (s.perceived_exertion !== undefined) {
+    text += `\n\n**Ressenti (RPE):** ${s.perceived_exertion}/10`
+  }
+
+  if (s.private_note) {
+    text += `\n\n**Note perso:**\n${s.private_note}`
+  }
+
   if (s.laps && s.laps.length > 0) {
     text += `\n\n**Intervalles/Tours (${s.laps.length}):**`
     s.laps.forEach((lap, i) => {
@@ -135,7 +147,10 @@ export const generateAnalysisText = (
       lapText += `, ${formatSpeed(lap.average_speed, s.sport)}`
       if (lap.average_heartrate) lapText += `, ${Math.round(lap.average_heartrate)} bpm`
       if (lap.average_watts) lapText += `, ${Math.round(lap.average_watts)} W`
-      if (lap.total_elevation_gain) lapText += `, ${Math.round(lap.total_elevation_gain)}m D+`
+      if (lap.total_elevation_gain) {
+        const elev = Math.round(lap.total_elevation_gain)
+        lapText += elev >= 0 ? `, ${elev}m D+` : `, ${Math.abs(elev)}m D-`
+      }
       text += lapText
     })
   }
